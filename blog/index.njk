@@ -1,0 +1,39 @@
+---
+layout: base.njk
+title: Blog
+description: Developer tutorials, homelab guides, and tools walkthroughs from devhandbook.io
+---
+<style>
+  .blog-header { margin-bottom: 48px; }
+  .blog-header h1 { font-size: 2.5rem; font-weight: 700; margin: 0 0 8px; }
+  .blog-header p { font-size: 17px; color: #6e6e73; margin: 0; }
+  .post-list { list-style: none; padding: 0; margin: 0; }
+  .post-item { border-bottom: 1px solid #e5e5ea; padding: 28px 0; }
+  .post-item:last-child { border-bottom: none; }
+  .post-item a { text-decoration: none; color: inherit; }
+  .post-item h2 { font-size: 1.25rem; font-weight: 600; margin: 0 0 8px; }
+  .post-item h2:hover { color: #0071e3; }
+  .post-item p { font-size: 15px; color: #6e6e73; margin: 0 0 8px; }
+  .post-date { font-size: 13px; color: #a1a1a6; }
+  @media (prefers-color-scheme: dark) {
+    .blog-header p, .post-item p { color: #a1a1a6; }
+    .post-item { border-bottom-color: #2d2d2f; }
+  }
+</style>
+
+<div class="blog-header">
+  <h1>Blog</h1>
+  <p>Dev tutorials, homelab guides, and tool walkthroughs.</p>
+</div>
+
+<ul class="post-list">
+  {% for post in collections.blog %}
+  <li class="post-item">
+    <a href="{{ post.url }}">
+      <h2>{{ post.data.title }}</h2>
+      <p>{{ post.data.description }}</p>
+      <span class="post-date">{{ post.data.date | dateFormat }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>

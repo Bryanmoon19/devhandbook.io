@@ -1,0 +1,25 @@
+{
+  "name": "devhandbook-io",
+  "version": "1.0.0",
+  "description": "Free developer tools and blog — devhandbook.io",
+  "main": "index.js",
+  "scripts": {
+    "build": "eleventy",
+    "start": "eleventy --serve",
+    "dev": "eleventy --serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bryanmoon19/devhandbook.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bryanmoon19/devhandbook.io/issues"
+  },
+  "homepage": "https://github.com/Bryanmoon19/devhandbook.io#readme",
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.5"
+  }
+}
