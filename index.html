@@ -138,7 +138,7 @@
             margin-bottom: 20px;
         }
         .hero h1 {
-            font-size: clamp(52px, 7vw, 72px);
+            font-size: clamp(2rem, 6vw, 3.2rem);
             font-weight: 200;
             letter-spacing: -0.03em;
             line-height: 1.05;
@@ -150,7 +150,7 @@
         .hero-sub {
             max-width: 600px;
             margin: 24px auto 0;
-            font-size: 19px;
+            font-size: clamp(16px, 3vw, 19px);
             line-height: 1.5;
             color: var(--text-2);
             font-weight: 400;
@@ -386,7 +386,10 @@
 <nav class="nav" role="banner">
     <div class="nav-inner">
         <span class="brand">devhandbook</span>
-        <a href="/blog/" style="font-size:14px;font-weight:500;color:var(--text-2);text-decoration:none;margin-right:8px;transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-2)'">Blog</a>
+        <div style="display:flex;align-items:center;gap:4px">
+          <a href="/" style="font-size:14px;font-weight:500;color:var(--text-2);text-decoration:none;margin-right:4px;transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-2)'">Tools</a>
+          <a href="/blog/" style="font-size:14px;font-weight:500;color:var(--text-2);text-decoration:none;margin-right:8px;transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-2)'">Blog</a>
+        </div>
         <button class="theme-btn" id="themeToggle" aria-label="Toggle dark mode">
             <svg id="sunIcon" style="display:none" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
@@ -408,6 +411,8 @@
 
     <!-- Tool Grid -->
     <section class="tools-section wrap">
+        <p style="color:var(--text-2);font-size:13px;margin-bottom:12px;">12 tools · all client-side</p>
+        <input id="toolSearch" type="search" placeholder="Search tools…" style="width:100%;border-radius:14px;height:44px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;padding:0 16px;font-size:15px;margin-bottom:20px;box-sizing:border-box;" onfocus="this.style.boxShadow='0 0 0 3px rgba(0,113,227,0.15)'" onblur="this.style.boxShadow='none'">
         <div class="tool-grid">
 
             <!-- JSON Formatter -->
@@ -650,9 +655,31 @@
                 observer.unobserve(e.target);
             }
         });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0, rootMargin: '0px' });
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Fallback: after 800ms, show any fade-up elements that haven't triggered
+    setTimeout(() => {
+        document.querySelectorAll('.fade-up:not(.visible)').forEach(el => el.classList.add('visible'));
+    }, 800);
+
+    // Search/filter
+    const searchInput = document.getElementById('toolSearch');
+    searchInput.addEventListener('input', () => {
+        const q = searchInput.value.toLowerCase();
+        document.querySelectorAll('.tool-card').forEach(card => {
+            const name = card.querySelector('.tool-name')?.textContent.toLowerCase() || '';
+            const desc = card.querySelector('.tool-desc')?.textContent.toLowerCase() || '';
+            card.style.display = (name.includes(q) || desc.includes(q)) ? '' : 'none';
+        });
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === '/' && document.activeElement !== searchInput) {
+            e.preventDefault();
+            searchInput.focus();
+        }
+    });
 </script>
 </body>
 </html>
