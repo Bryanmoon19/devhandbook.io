@@ -7,7 +7,6 @@ tags: ["plex", "cloudflare", "self-hosted", "telegram", "serverless", "homelab"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/plex-invite-cloudflare-workers"
 ---
-layout: post.njk
 
 If you run a Plex server, you've been through this. A friend asks for access. You log into the Plex dashboard, navigate to Settings → Users & Sharing, type their email, pick libraries, send the invite. Two minutes of clicking. Now multiply that by every new friend, every library change, every "can I get the kids' section too?" follow-up.
 
@@ -21,7 +20,7 @@ The whole thing runs on **Cloudflare Workers** with **KV storage** for state. Th
 
 Here's the flow:
 
-```
+```text
 Friend fills out your request form
            ↓
 Cloudflare Worker receives POST → validates → stores in KV
@@ -62,13 +61,13 @@ You need two things: your Plex auth token and your server's machine identifier.
 
 **Library section IDs:** This is the tricky part. Plex has *local* section IDs (the ones you see in URLs) and *global* section IDs (what the sharing API actually needs). Get the global ones by visiting:
 
-```
+```text
 https://plex.tv/api/servers/YOUR_MACHINE_ID/shared_servers
 ```
 
 Look for `sectionId` values in the response. These are the IDs you'll use, formatted as `"Library Name:sectionId"` pairs:
 
-```
+```text
 Movies:107518710,TV Shows:107518703,Music:107518712
 ```
 
@@ -143,7 +142,7 @@ The form collects name and email, includes a hidden honeypot field to catch bots
 
 The Telegram notification looks like this:
 
-```
+```text
 🎬 New Plex Request
 
 👤 Jane Smith (jane@example.com)
@@ -153,7 +152,7 @@ The Telegram notification looks like this:
 
 Tap ✅ and a second message appears with inline toggles for each library:
 
-```
+```text
 📚 Select Libraries for Jane Smith:
 
 [✅ Movies]  [☑️ TV Shows]  [✅ Music]
@@ -229,7 +228,6 @@ InvitArr currently supports Plex. Jellyfin and Emby support are on the roadmap �
 If you run a Jellyfin server and want to contribute or request priority support, [open an issue on GitHub](https://github.com/Bryanmoon19/invitarr/issues). Contributions welcome.
 
 ---
-layout: post.njk
 
 The source code is at [github.com/Bryanmoon19/invitarr](https://github.com/Bryanmoon19/invitarr). MIT licensed, no strings attached. If you build on it, I'd love to know.
 

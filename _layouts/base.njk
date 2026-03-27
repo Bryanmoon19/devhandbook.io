@@ -5,7 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }} — devhandbook.io</title>
   <meta name="description" content="{{ description }}">
+  {% if canonical %}
+  <link rel="canonical" href="{{ canonical }}">
+  {% else %}
   <link rel="canonical" href="https://devhandbook.io{{ page.url }}">
+  {% endif %}
+  <!-- Open Graph -->
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="https://devhandbook.io{{ page.url }}">
+  <meta property="og:type" content="{% if layout == 'post.njk' %}article{% else %}website{% endif %}">
+  <meta property="og:site_name" content="devhandbook.io">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{{ title }}">
+  <meta name="twitter:description" content="{{ description }}">
+  {% if author %}
+  <meta name="author" content="{{ author }}">
+  {% endif %}
+  {% if date %}
+  <meta property="article:published_time" content="{{ date }}">
+  {% endif %}
   <script>
     (function() {
       var d = document.documentElement;
@@ -16,6 +36,7 @@
   </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     :root {
       --bg: #fbfbfd;
       --text: #1d1d1f;

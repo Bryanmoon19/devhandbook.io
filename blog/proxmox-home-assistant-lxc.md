@@ -1,9 +1,11 @@
 ---
+layout: post.njk
 title: "Run Home Assistant in a Proxmox LXC Container"
 date: 2026-03-27
-description: "A step-by-step guide to running Home Assistant OS in a Proxmox LXC container — lighter than a full VM, easier to manage."
-tags: [homelab, proxmox, home-assistant]
-author: devhandbook
+description: "A step-by-step guide to running Home Assistant Container in a Proxmox LXC — lighter than a full VM, easier to manage, and just as capable."
+tags: ["homelab", "proxmox", "home-assistant", "self-hosted", "lxc"]
+author: "Bryan Moon"
+canonical: "https://devhandbook.io/blog/proxmox-home-assistant-lxc"
 ---
 
 If you're running a Proxmox homelab, you've probably already got a VM or two taking up RAM. Home Assistant is one of those services you want running 24/7, but dedicating a full virtual machine to it can feel wasteful — especially when a lightweight LXC container does the job just as well. This guide walks you through getting Home Assistant Container up and running inside a Proxmox LXC, from scratch.
@@ -32,7 +34,7 @@ By default, the container grabs a DHCP address. That's fine for testing, but you
 
 Alternatively, set it statically in the container itself. If it's a Debian-based container, edit `/etc/network/interfaces`:
 
-```
+```ini
 auto eth0
 iface eth0 inet static
   address 192.168.1.50
@@ -46,7 +48,7 @@ Then restart networking: `systemctl restart networking`. Confirm with `ip addr s
 
 Once the container is running, open a browser and navigate to:
 
-```
+```text
 http://<container-ip>:8123
 ```
 
@@ -72,7 +74,7 @@ nano /etc/pve/lxc/100.conf
 
 Add these lines:
 
-```
+```ini
 lxc.cgroup2.devices.allow: c 188:* rwm
 lxc.mount.entry: /dev/ttyUSB0 dev/ttyUSB0 none bind,optional,create=file
 ```

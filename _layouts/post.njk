@@ -31,6 +31,14 @@ layout: base.njk
     flex-wrap: wrap;
     align-items: center;
   }
+  .post-meta .meta-author {
+    font-weight: 500;
+    color: var(--text);
+  }
+  .post-meta .meta-sep {
+    color: var(--text-2);
+    opacity: 0.4;
+  }
   .post-tag {
     background: rgba(0,113,227,0.08);
     color: var(--accent);
@@ -50,13 +58,15 @@ layout: base.njk
     font-size: 1.35rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-    margin: 44px 0 12px;
+    margin: 48px 0 16px;
     color: var(--text);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
   }
   .post-body h3 {
     font-size: 1.1rem;
     font-weight: 600;
-    margin: 28px 0 8px;
+    margin: 32px 0 10px;
     color: var(--text);
   }
   .post-body p { margin-bottom: 20px; }
@@ -64,6 +74,9 @@ layout: base.njk
   .post-body a:hover { text-decoration: underline; }
   .post-body ul, .post-body ol { margin: 0 0 20px 24px; }
   .post-body li { margin-bottom: 6px; }
+  .post-body strong { font-weight: 600; }
+
+  /* Inline code */
   .post-body code {
     background: rgba(0,0,0,0.05);
     color: var(--text);
@@ -73,6 +86,8 @@ layout: base.njk
     font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
   }
   html.dark .post-body code { background: rgba(255,255,255,0.08); }
+
+  /* Code blocks */
   .post-body pre {
     background: #1d1d1f;
     color: #f5f5f7;
@@ -82,9 +97,16 @@ layout: base.njk
     margin-bottom: 24px;
     font-size: 14px;
     line-height: 1.6;
+    border: 1px solid rgba(255,255,255,0.06);
   }
   html.dark .post-body pre { background: rgba(28,28,30,0.9); border: 1px solid var(--border); }
   .post-body pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+  /* Text selection */
+  ::selection { background: rgba(0,113,227,0.2); color: inherit; }
+  html.dark ::selection { background: rgba(41,151,255,0.25); color: inherit; }
+
+  /* Blockquotes */
   .post-body blockquote {
     border-left: 3px solid var(--accent);
     padding: 4px 0 4px 20px;
@@ -93,24 +115,124 @@ layout: base.njk
     font-style: italic;
   }
 
+  /* Tables */
+  .post-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .post-body thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-2);
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .post-body tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .post-body tbody tr:last-child td { border-bottom: none; }
+  .post-body tbody tr:hover { background: rgba(0,0,0,0.02); }
+  html.dark .post-body tbody tr:hover { background: rgba(255,255,255,0.03); }
+  .post-body table code {
+    font-size: 13px;
+    padding: 1px 5px;
+  }
+
+  /* Horizontal rules */
+  .post-body hr {
+    border: none;
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  /* Images */
+  .post-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin: 24px 0;
+  }
+
+  /* Footnotes */
+  .post-body .footnotes {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+  .post-body .footnotes ol { margin-left: 20px; }
+  .post-body .footnotes li { margin-bottom: 8px; }
+  .post-body sup {
+    font-size: 0.75em;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+    top: -0.4em;
+  }
+  .post-body sup a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .post-body sup a:hover { text-decoration: underline; }
+  .post-body .footnote-backref { text-decoration: none; margin-left: 4px; }
+
+  /* Post footer */
+  .post-footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
   @media (max-width: 600px) {
     .post-header h1 { font-size: 1.5rem; }
     .post-body { font-size: 16px; }
+    .post-body table { font-size: 14px; }
+    .post-body thead th,
+    .post-body tbody td { padding: 8px 10px; }
+    .post-body pre { padding: 16px; border-radius: 10px; font-size: 13px; }
+  }
+
+  /* Overflow tables on mobile */
+  @media (max-width: 600px) {
+    .post-body table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
   }
 </style>
 
-<a href="/blog/" class="back-link">← All posts</a>
-<div class="post-header">
-  <h1>{{ title }}</h1>
-  <div class="post-meta">
-    <span>{{ date | dateFormat }}</span>
-    {% if tags and tags.length %}
-      {% for tag in tags %}
-        <span class="post-tag">{{ tag }}</span>
-      {% endfor %}
-    {% endif %}
+<a href="/blog/" class="back-link">&larr; All posts</a>
+<article>
+  <div class="post-header">
+    <h1>{{ title }}</h1>
+    <div class="post-meta">
+      {% if author %}<span class="meta-author">{{ author }}</span><span class="meta-sep">&middot;</span>{% endif %}
+      <span>{{ date | dateFormat }}</span>
+      {% if tags and tags.length %}
+        <span class="meta-sep">&middot;</span>
+        {% for tag in tags %}
+          <span class="post-tag">{{ tag }}</span>
+        {% endfor %}
+      {% endif %}
+    </div>
   </div>
-</div>
-<div class="post-body">
-  {{ content | safe }}
-</div>
+  <div class="post-body">
+    {{ content | safe }}
+  </div>
+</article>

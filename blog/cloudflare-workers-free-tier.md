@@ -1,9 +1,11 @@
 ---
+layout: post.njk
 title: "What You Can Build for Free with Cloudflare Workers"
 date: 2026-03-26
 description: "Cloudflare Workers' free tier is surprisingly powerful. Here's what you can actually ship without spending a dollar."
-tags: [cloudflare, serverless, devtools]
-author: devhandbook
+tags: ["cloudflare", "serverless", "devtools", "free-tier"]
+author: "Bryan Moon"
+canonical: "https://devhandbook.io/blog/cloudflare-workers-free-tier"
 ---
 
 Most developers hear "free tier" and immediately start looking for the catch. With Cloudflare Workers, the catch is almost embarrassingly small. The free plan gives you 100,000 requests per day, global edge deployment across 300+ cities, zero cold starts, and access to KV storage — and it costs exactly nothing. Here's what you can realistically build and ship on that budget.

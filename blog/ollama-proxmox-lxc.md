@@ -7,7 +7,6 @@ tags: ["ollama", "proxmox", "self-hosted", "llm", "homelab", "lxc", "ai"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/ollama-proxmox-lxc"
 ---
-layout: post.njk
 
 Your Proxmox server is probably sitting idle most of the day. It's got RAM you're not using, CPU headroom to spare, and if you have a dGPU in it, a graphics card that's doing absolutely nothing. Running Ollama inside an LXC container is one of the highest-value things you can do with that spare capacity — a private, always-on LLM that responds in under a second, never leaks your prompts to a third party, and costs $0/month beyond existing electricity.
 
@@ -207,15 +206,22 @@ ollama run llama3.1:8b "What's 2+2?"
 
 AMD is actually easier on Linux — use ROCm:
 
+Inside the container, install ROCm:
+
 ```bash
-# Inside container
 apt install -y rocm-hip-libraries
+```
 
-# Add device passes to LXC config
-# lxc.mount.entry: /dev/dri dev/dri none bind,optional,create=dir
-# lxc.mount.entry: /dev/kfd dev/kfd none bind,optional,create=file
+Add device passthrough to your LXC config (`/etc/pve/lxc/110.conf`):
 
-# Install Ollama (it auto-detects ROCm)
+```ini
+lxc.mount.entry: /dev/dri dev/dri none bind,optional,create=dir
+lxc.mount.entry: /dev/kfd dev/kfd none bind,optional,create=file
+```
+
+Then install Ollama (it auto-detects ROCm):
+
+```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
@@ -299,6 +305,5 @@ Once Ollama is running, the usual next steps are:
 The Ollama ecosystem is expanding fast. A Proxmox LXC is the right foundation: isolated, low-overhead, easy to snapshot before experiments, and trivial to clone if you want to test multiple model setups.
 
 ---
-layout: post.njk
 
 *Questions or improvements? The source for this post is on [GitHub](https://github.com/bryanmoon19/devhandbook.io). PRs welcome.*

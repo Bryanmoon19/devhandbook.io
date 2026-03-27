@@ -7,9 +7,8 @@ tags: ["ai", "llm", "infrastructure", "self-hosted", "risk-management"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/openai-sentiment-crisis"
 ---
-layout: post.njk
 
-In early 2025, OpenAI announced a deepening partnership with the Pentagon—providing AI tools for military operations. The response was immediate: ChatGPT uninstalls spiked **295%** in the following weeks[^1]. Users, concerned about their data being tied to defense contracts, voted with their feet.
+In early 2025, OpenAI announced a deepening partnership with the Pentagon — providing AI tools for military operations. The response was immediate: ChatGPT uninstalls spiked **295%** in the following weeks<sup>[1](#ref-1)</sup>. Users, concerned about their data being tied to defense contracts, voted with their feet.
 
 But this isn't a story about military ethics or corporate politics. It's a story about **infrastructure risk**.
 
@@ -17,7 +16,7 @@ When a single vendor decision can force you to migrate critical systems overnigh
 
 ## What Happened: The Defense Pivot
 
-OpenAI's pivot wasn't sudden. It followed a pattern: relaxed usage policies, defense-focused hiring, and quietly amended terms of service. When the Pentagon contract[^2] became public, two things became clear:
+OpenAI's pivot wasn't sudden. It followed a pattern: relaxed usage policies, defense-focused hiring, and quietly amended terms of service. When the Pentagon contract<sup>[2](#ref-2)</sup> became public, two things became clear:
 
 1. **Commercial and defense use cases are converging** at major AI providers
 2. **User trust is fragile** and evaporates quickly when incentives misalign
@@ -27,7 +26,7 @@ For developers and businesses, this created an immediate problem. Teams that had
 - **Data sovereignty concerns** about whether prompts were being used to train military-adjacent models
 - **Reputation risk** from association, regardless of actual data handling
 
-The 295% uninstall spike[^1] wasn't just consumers. It was businesses running compliance audits and realizing their AI stack had unpredictable externalities.
+The 295% uninstall spike<sup>[1](#ref-1)</sup> wasn't just consumers. It was businesses running compliance audits and realizing their AI stack had unpredictable externalities.
 
 ## The Real Risk: Single Points of Failure
 
@@ -37,9 +36,9 @@ This isn't theoretical. When API providers change:
 
 | Change Type | Recent Examples | Impact |
 |-------------|-----------------|--------|
-| **Pricing** | GPT-4 token costs fluctuated 3x in 18 months[^3] | Unpredictable unit economics |
-| **Rate limits** | Sudden reductions for "high-volume" users[^4] | Production outages |
-| **Model deprecation** | GPT-3.5 sunset with 3-month notice[^5] | Forced migrations |
+| **Pricing** | GPT-4 token costs fluctuated 3x in 18 months<sup>[3](#ref-3)</sup> | Unpredictable unit economics |
+| **Rate limits** | Sudden reductions for "high-volume" users<sup>[4](#ref-4)</sup> | Production outages |
+| **Model deprecation** | GPT-3.5 sunset with 3-month notice<sup>[5](#ref-5)</sup> | Forced migrations |
 | **Policy changes** | Content filters tightened without warning | Broken user experiences |
 | **Geographic restrictions** | API access blocked in certain regions | Market exclusion |
 
@@ -285,21 +284,19 @@ The teams that weathered the ChatGPT uninstall wave best weren't the ones that s
 Start with Ollama this week. Test a fallback path. Document your escape routes. The next disruption won't announce itself with a Pentagon press release.
 
 ---
-layout: post.njk
 
 ## References
 
-[^1]: TechCrunch, "ChatGPT uninstalls surged by 295% after DoD deal," March 2, 2026. Data from Sensor Tower showing U.S. app uninstalls jumped 295% day-over-day on Saturday, February 28, 2026. [https://techcrunch.com/2026/03/02/chatgpt-uninstalls-surged-by-295-after-dod-deal/](https://techcrunch.com/2026/03/02/chatgpt-uninstalls-surged-by-295-after-dod-deal/)
+<span id="ref-1">**[1]**</span> TechCrunch, "ChatGPT uninstalls surged by 295% after DoD deal," March 2, 2026. Data from Sensor Tower showing U.S. app uninstalls jumped 295% day-over-day on Saturday, February 28, 2026. [techcrunch.com](https://techcrunch.com/2026/03/02/chatgpt-uninstalls-surged-by-295-after-dod-deal/)
 
-[^2]: OpenAI, "Our agreement with the Department of War," February 2026. Official announcement of OpenAI's contract with the Pentagon for deploying AI systems in classified environments. [https://openai.com/index/our-agreement-with-the-department-of-war/](https://openai.com/index/our-agreement-with-the-department-of-war/)
+<span id="ref-2">**[2]**</span> OpenAI, "Our agreement with the Department of War," February 2026. Official announcement of OpenAI's contract with the Pentagon for deploying AI systems in classified environments. [openai.com](https://openai.com/index/our-agreement-with-the-department-of-war/)
 
-[^3]: OpenAI API Pricing History. Historical pricing data showing GPT-4 token cost fluctuations between 2023-2025.
+<span id="ref-3">**[3]**</span> OpenAI API Pricing History. Historical pricing data showing GPT-4 token cost fluctuations between 2023–2025.
 
-[^4]: OpenAI Platform Documentation. Rate limit policies for different API tiers.
+<span id="ref-4">**[4]**</span> OpenAI Platform Documentation. Rate limit policies for different API tiers.
 
-[^5]: OpenAI Model Deprecation Schedule. GPT-3.5 Turbo deprecation announced with 3-month migration window.
+<span id="ref-5">**[5]**</span> OpenAI Model Deprecation Schedule. GPT-3.5 Turbo deprecation announced with 3-month migration window.
 
 ---
-layout: post.njk
 
 *Want more infrastructure resilience patterns? Follow [Bryan on Twitter](https://twitter.com/bryanmoon) or check out our [GitHub](https://github.com/bryanmoon19/devhandbook.io).*
