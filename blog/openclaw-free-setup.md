@@ -8,6 +8,10 @@ author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/openclaw-free-setup"
 ---
 
+*This post is based on [a discussion by u/ShabzSparq on r/AskClaw](https://www.reddit.com/r/AskClaw/comments/1s55ubm/). We verified the configs against the actual OpenClaw schema, corrected some details, and added editorial context.*
+
+---
+
 Every week I see the same post. "Is $200/month normal?" "My API bill is $47 this week." "I'm on Haiku and still spending $22 a day."
 
 And every time, the top answer is "switch to Sonnet." That's fine advice. But nobody ever asks the real question: **do you need to pay anything at all?**
