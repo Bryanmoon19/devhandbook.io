@@ -4,7 +4,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("*.svg");
   eleventyConfig.addPassthroughCopy("*.ico");
   eleventyConfig.addPassthroughCopy("robots.txt");
-  eleventyConfig.addPassthroughCopy("sitemap.xml");
+  // sitemap.xml is now generated dynamically via sitemap.njk — not a passthrough
   eleventyConfig.addPassthroughCopy("apple-redesign.css");
 
   // Pass through tool directories (plain HTML tools)
@@ -31,6 +31,11 @@ module.exports = function(eleventyConfig) {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric", month: "long", day: "numeric"
     });
+  });
+
+  // ISO date filter for sitemap (YYYY-MM-DD)
+  eleventyConfig.addFilter("isoDate", function(date) {
+    return new Date(date).toISOString().split("T")[0];
   });
 
   return {
