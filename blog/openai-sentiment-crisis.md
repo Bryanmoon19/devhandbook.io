@@ -16,6 +16,8 @@ When a single vendor decision can force you to migrate critical systems overnigh
 
 ## What Happened: The Defense Pivot
 
+**OpenAI's Pentagon deal exposed how a single vendor policy shift can force overnight migrations.**
+
 OpenAI's pivot wasn't sudden. It followed a pattern: relaxed usage policies, defense-focused hiring, and quietly amended terms of service. When the Pentagon contract<sup>[2](#ref-2)</sup> became public, two things became clear:
 
 1. **Commercial and defense use cases are converging** at major AI providers
@@ -29,6 +31,8 @@ For developers and businesses, this created an immediate problem. Teams that had
 The 295% uninstall spike<sup>[1](#ref-1)</sup> wasn't just consumers. It was businesses running compliance audits and realizing their AI stack had unpredictable externalities.
 
 ## The Real Risk: Single Points of Failure
+
+**Pricing swings, rate limit cuts, and model deprecations show that any single AI vendor is a liability.**
 
 Every architecture review asks: "What's our single point of failure?" For an alarming number of AI-powered applications in 2025, the answer is: "OpenAI's API."
 
@@ -47,6 +51,8 @@ Each of these is manageable in isolation. Together, they represent **vendor lock
 The military pivot is just another category of unpredictable change. Tomorrow it could be a merger, a security breach, or a regional block. The lesson isn't "OpenAI is bad"—it's that **any single external dependency is a liability** you can't fully control.
 
 ## The Solution: Self-Hosted and Local Alternatives
+
+**Ollama, vLLM, and LiteLLM let you run capable open models locally or swap providers without rewrites.**
 
 The good news: viable alternatives exist. The open-source LLM ecosystem has matured rapidly. You can now run capable models locally or on your own infrastructure for most use cases.
 
@@ -115,6 +121,8 @@ model_list:
 LiteLLM handles rate limiting, retries, and failover automatically.
 
 ## Practical Implementation: Building Failover
+
+**Abstract your LLM calls, add a circuit breaker, and use shadow mode to validate local quality before cutting over.**
 
 Here's a practical architecture for resilient AI infrastructure:
 
@@ -270,6 +278,8 @@ async def shadow_compare(prompt: str, client: ResilientLLMClient):
 ```
 
 ## Conclusion: Resilience Over Convenience
+
+**Build escape routes now — abstract your LLM client, test fallbacks, and decouple before you need to.**
 
 The 295% uninstall spike is a wake-up call, not because military contracts are inherently problematic, but because they reveal **dependency fragility**. When your infrastructure can be disrupted by a vendor's business decision, you don't own your stack—you rent it at the whim of external incentives.
 

@@ -16,6 +16,8 @@ This post walks through building exactly that — the same system I built for my
 
 ## The Architecture
 
+**A Cloudflare Worker + KV + Telegram bot handles the full invite flow at zero cost, no server needed.**
+
 The whole thing runs on **Cloudflare Workers** with **KV storage** for state. There's no database to host, no VPS to maintain, and no Docker container to keep alive. The free tier handles this easily.
 
 Here's the flow:
@@ -36,12 +38,16 @@ The key detail: you control *which libraries* each person gets, per-invite, from
 
 ## Prerequisites
 
+**You need a Cloudflare account, a Plex server, a Telegram account, and Node.js — nothing else.**
+
 - A Cloudflare account (free tier is sufficient)
 - Plex Media Server running somewhere
 - A Telegram account (for notifications)
 - Node.js installed locally (for Wrangler CLI)
 
 ## Step 1 — Create a Telegram Bot
+
+**Message @BotFather to get a token, then @userinfobot for your Chat ID — takes 2 minutes.**
 
 You'll need a bot to send yourself approval notifications.
 
@@ -52,6 +58,8 @@ You'll need a bot to send yourself approval notifications.
 Next, find your own Telegram user ID. Send a message to [@userinfobot](https://t.me/userinfobot) — it'll reply with your ID. This is your `CHAT_ID` and acts as the owner allowlist. Only your Telegram account can approve requests.
 
 ## Step 2 — Get Your Plex Credentials
+
+**Grab your Plex token from dev tools and global section IDs from the plex.tv sharing API — not local IDs.**
 
 You need two things: your Plex auth token and your server's machine identifier.
 
@@ -72,6 +80,8 @@ Movies:107518710,TV Shows:107518703,Music:107518712
 ```
 
 ## Step 3 — Set Up the Worker
+
+**Clone InvitArr, create a KV namespace, and push your 5 secrets — no config files with credentials.**
 
 Clone InvitArr and install dependencies:
 
@@ -119,6 +129,8 @@ wrangler secret put ALLOWED_ORIGIN   # Your guide page domain
 
 ## Step 4 — Deploy
 
+**Run `wrangler deploy` then register the Telegram webhook — your system is live immediately after.**
+
 ```bash
 wrangler deploy
 ```
@@ -135,6 +147,8 @@ curl "https://api.telegram.org/bot${BOT_TOKEN}/setWebhook" \
 Your worker is now live.
 
 ## Step 5 — The Request Form
+
+**Friends submit name + email; you get a Telegram message with ✅/❌ buttons and per-library toggles.**
 
 The worker serves a built-in HTML request form at its root URL (`/`). You can link directly to it, or embed the form URL in a guide page for your friends.
 
@@ -164,6 +178,8 @@ Toggle the libraries, tap 📤 Send Invite, and Plex sends a restricted invitati
 
 ## The Security Details
 
+**Owner allowlist, rate limiting, honeypot, CORS lock, and encrypted secrets keep this safe to expose publicly.**
+
 This was designed to be safe to deploy publicly. A few things worth noting:
 
 **Owner allowlist:** Only Telegram users matching your `CHAT_ID` can approve requests. The library picker and Send Invite button are completely inert for anyone else.
@@ -177,6 +193,8 @@ This was designed to be safe to deploy publicly. A few things worth noting:
 **No stored credentials:** Your Plex token and bot token live as Cloudflare secrets, encrypted at rest. They're never in your codebase or logs.
 
 ## Hosting the Guide Page
+
+**Deploy the included guide page to Cloudflare Pages for free — gives friends better onboarding than a raw URL.**
 
 InvitArr includes a drop-in guide page (`/guide/index.html`) that walks your friends through getting the Plex app, creating an account, and what to expect after requesting access. It supports both English and Spanish, has a dark mode, and you configure it with a single JS block at the top:
 
@@ -201,6 +219,8 @@ npx wrangler pages deploy . --project-name invitarr-guide
 
 ## Costs
 
+**This entire system costs $0/month — Workers, KV, and Pages all stay well within Cloudflare's free limits.**
+
 **Cloudflare Workers free tier:** 100,000 requests/day. Your Plex invite volume will never touch this. Cost: $0.
 
 **Cloudflare KV free tier:** 100,000 reads/day, 1,000 writes/day. Each invite request is 2-3 writes. Cost: $0.
@@ -210,6 +230,8 @@ npx wrangler pages deploy . --project-name invitarr-guide
 **Total:** $0/month, forever, for a system with better UX than the Plex web dashboard.
 
 ## The Full Setup Script
+
+**Run `setup.sh` for an interactive guided setup that handles KV, secrets, deploy, and webhook in ~5 minutes.**
 
 If you'd rather not run commands manually, InvitArr includes a guided setup script that handles everything interactively:
 
@@ -222,6 +244,8 @@ chmod +x setup.sh && ./setup.sh
 It walks you through each secret, creates the KV namespace, deploys the worker, and registers the Telegram webhook. About 5 minutes end-to-end if you have your credentials ready.
 
 ## What's Next
+
+**Jellyfin and Emby support are on the roadmap — same architecture, different API calls for the invite step.**
 
 InvitArr currently supports Plex. Jellyfin and Emby support are on the roadmap — the architecture is the same, just different API calls for the invite step.
 

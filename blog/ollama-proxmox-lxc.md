@@ -14,6 +14,8 @@ This guide walks through the full setup: LXC creation, Ollama install, GPU passt
 
 ## Why LXC Instead of a VM
 
+**LXC shares the host kernel for near-native GPU performance and near-zero overhead vs a full VM.**
+
 You could run Ollama in a full VM, but LXC containers on Proxmox share the host kernel. That gives you:
 
 - **Lower overhead** — no hypervisor CPU/RAM tax per container
@@ -24,11 +26,15 @@ The tradeoff: LXC containers require `nesting=1` for Docker (if you want it), an
 
 ## Prerequisites
 
+**You need Proxmox 8.x, an Ubuntu LXC template, and optionally an NVIDIA or AMD GPU.**
+
 - Proxmox 8.x (7.x works with minor differences)
 - An LXC-compatible base template (Ubuntu 22.04 or 24.04 recommended)
 - Optional: NVIDIA or AMD GPU in your Proxmox host for hardware acceleration
 
 ## Step 1: Create the LXC Container
+
+**Create a container with 4+ cores, 16GB RAM, and 40GB disk — models are large and need room.**
 
 In the Proxmox web UI:
 
@@ -62,6 +68,8 @@ pct create 110 local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst \
 
 ## Step 2: Install Ollama
 
+**One curl command installs Ollama as a systemd service — it's running in under 60 seconds.**
+
 Start the container and SSH in (or use the Proxmox shell):
 
 ```bash
@@ -86,6 +94,8 @@ Ollama installs as a systemd service and starts automatically. The service liste
 
 ## Step 3: Pull Your First Model
 
+**`ollama pull llama3.2` gets you a capable model in minutes; test it immediately with `ollama run`.**
+
 ```bash
 # Small, fast — great for testing and Home Assistant
 ollama pull llama3.2
@@ -109,6 +119,8 @@ ollama run llama3.2 "What's the capital of France? Answer in one word."
 You should get a response in 1–3 seconds on a modern CPU. With a GPU, it's nearly instant.
 
 ## Step 4: Make Ollama Accessible on Your Network
+
+**Set `OLLAMA_HOST=0.0.0.0` via a systemd override to expose Ollama to your local network.**
 
 By default, Ollama only binds to `127.0.0.1`. To access it from other machines (Open WebUI, Home Assistant, your laptop), you need to change the bind address.
 
@@ -135,6 +147,8 @@ curl http://192.168.7.XXX:11434/api/generate \
 
 ## Step 5: Add Open WebUI (Optional but Recommended)
 
+**One Docker command gives you a full ChatGPT-style UI with multi-user and conversation history.**
+
 Open WebUI gives you a full ChatGPT-style interface connected to your local Ollama. It also handles multi-user sessions, model management, and conversation history.
 
 Install with Docker (requires `nesting=1` on the LXC):
@@ -158,6 +172,8 @@ Open WebUI will be at `http://<container-ip>:3000`. First visit creates an admin
 If you want Open WebUI and Ollama on separate ports and prefer not to use Docker inside LXC, you can run Open WebUI as a separate LXC and point it at the Ollama container's IP.
 
 ## Step 6: NVIDIA GPU Passthrough (If You Have a GPU)
+
+**A mid-range gaming GPU gives 5–10x inference speedup; requires a privileged LXC and device passthrough.**
 
 This is where it gets significantly faster. LLM inference is memory-bandwidth bound — a mid-range gaming GPU from 5 years ago will outrun a modern CPU by 5–10x on most models.
 
@@ -227,6 +243,8 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 ## Step 7: Wire Into Home Assistant
 
+**Point HA's Ollama integration at your container IP for a fully local, private voice AI assistant.**
+
 This is where it gets genuinely useful for a smart home. You can use Ollama as the AI backend for Home Assistant's conversation agent — completely local, no monthly subscription, no API keys.
 
 ### Via the Ollama Integration (HA 2024.3+)
@@ -261,6 +279,8 @@ You can now build automations that use an LLM to interpret sensor data, draft no
 
 ## Model Selection Guide
 
+**Use llama3.2 for general/HA, qwen2.5-coder for code, and nomic-embed-text for RAG pipelines.**
+
 Different tasks need different models. Here's a quick reference for home/lab use:
 
 | Use Case | Recommended Model | Size | Notes |
@@ -283,6 +303,8 @@ ln -s /mnt/nas/ollama-models /root/.ollama/models
 
 ## Keeping Ollama Updated
 
+**Re-run the install script to update in-place — it handles everything without losing your models.**
+
 Ollama updates frequently. The Proxmox community script handles this automatically if you used it to create the container, but for manual setups:
 
 ```bash
@@ -294,6 +316,8 @@ systemctl restart ollama
 Or pin to a specific version by downloading the binary directly from [github.com/ollama/ollama/releases](https://github.com/ollama/ollama/releases).
 
 ## What's Next
+
+**Open WebUI, AnythingLLM for RAG, and Whisper+Piper for a fully local voice assistant are the natural next steps.**
 
 Once Ollama is running, the usual next steps are:
 

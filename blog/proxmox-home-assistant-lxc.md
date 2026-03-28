@@ -12,11 +12,15 @@ If you're running a Proxmox homelab, you've probably already got a VM or two tak
 
 ## Why LXC instead of a VM?
 
+**LXC runs Home Assistant on ~180MB RAM vs 1.2GB for HAOS — you trade the add-on store for efficiency.**
+
 The short answer: resources. A Home Assistant VM using HAOS typically needs 2–4 GB of RAM just to breathe. An LXC container running Home Assistant Container can get by on 512 MB and uses significantly less disk I/O because it shares the host kernel. You lose a bit of the "official" HAOS experience — no Supervisor, no add-on store — but most power users find the tradeoff worth it.
 
 If you need add-ons like the Mosquitto broker or Zigbee2MQTT, you can run those separately in their own containers and integrate them via MQTT or the standard APIs.
 
 ## Step 1: Use the tteck Community Scripts
+
+**One curl command on the Proxmox host creates the LXC, installs Docker, and starts Home Assistant automatically.**
 
 The fastest way to get started is the [tteck Proxmox helper scripts](https://tteck.github.io/Proxmox/). These community-maintained scripts handle the LXC creation, Docker installation, and Home Assistant setup for you. On your Proxmox host shell, run:
 
@@ -29,6 +33,8 @@ The script will prompt you for a few choices — container ID, hostname, RAM, di
 The script installs an Alpine or Debian LXC, adds Docker, pulls the Home Assistant Container image, and starts it up. The whole process takes about 3–5 minutes on a decent internet connection.
 
 ## Step 2: Set a Static IP
+
+**Set a static IP via router DHCP reservation or directly in `/etc/network/interfaces` — pick one and stick with it.**
 
 By default, the container grabs a DHCP address. That's fine for testing, but you want a stable IP for bookmarks and integrations. The easiest approach: set a reservation in your router's DHCP table using the container's MAC address.
 
@@ -46,6 +52,8 @@ Then restart networking: `systemctl restart networking`. Confirm with `ip addr s
 
 ## Step 3: Access Home Assistant on Port 8123
 
+**Navigate to `http://<container-ip>:8123` — wait a couple minutes on first load while HA builds its config.**
+
 Once the container is running, open a browser and navigate to:
 
 ```text
@@ -55,6 +63,8 @@ http://<container-ip>:8123
 You'll be greeted with the Home Assistant onboarding screen — create your account, name your home, and set your location. From here it's standard HA setup. Give it a couple minutes on first load; it's building its initial configuration.
 
 ## Step 4: USB Passthrough for Zigbee/Z-Wave Sticks
+
+**Add the device to `/etc/pve/lxc/100.conf` with cgroup2 allow + mount entry, then restart the container.**
 
 This is where LXC gets a bit tricky compared to VMs. You need to pass the USB device through at the Proxmox host level and give the container access.
 
@@ -89,6 +99,8 @@ Inside HA, your Zigbee stick should now appear. If you're using Zigbee2MQTT, poi
 
 ## Step 5: Keeping Home Assistant Updated
 
+**Pull the new image, stop and remove the old container, then start fresh — or just run `docker compose pull && up -d`.**
+
 Without the Supervisor, you update HA manually — but it's simple. SSH into the container and run:
 
 ```bash
@@ -112,6 +124,8 @@ docker compose up -d
 Check the current running version from HA's Settings → About page.
 
 ## Resource Comparison: LXC vs VM
+
+**LXC idles at ~180MB RAM vs ~1.2GB for HAOS — 6x lighter, but no Supervisor or add-on store.**
 
 Here's what you can expect in real-world usage on a Proxmox node:
 

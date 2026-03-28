@@ -12,6 +12,8 @@ Most developers hear "free tier" and immediately start looking for the catch. Wi
 
 ## What the Free Tier Actually Includes
 
+**100k requests/day, global edge, KV storage, and zero cold starts — all genuinely free.**
+
 Let's be specific, because the marketing page buries the good stuff:
 
 - **100,000 requests/day** — resets daily, more than enough for most personal projects and small tools
@@ -25,6 +27,8 @@ What you don't get on free: Durable Objects, R2 storage, D1 (SQLite), Workers AI
 
 ## 1. A Plex Invite System
 
+**A passphrase-protected Worker + KV gives friends self-service Plex invites without touching the dashboard.**
+
 If you run a Plex server for friends and family, you know the invite process is clunky — you either hand out your email, use the web UI one at a time, or use third-party tools that require self-hosting. A Cloudflare Worker solves this cleanly.
 
 Build a simple Worker that:
@@ -36,6 +40,8 @@ Build a simple Worker that:
 The whole thing is under 80 lines of JavaScript. You get a clean URL like `invite.yourdomain.com` that you can share, and friends self-service their own Plex access without you doing anything manually. Rate limit by IP using the `CF-Connecting-IP` header to prevent abuse.
 
 ## 2. A Link Shortener
+
+**Store slugs in KV and redirect globally — no database, no server, under 10 lines of code.**
 
 This is the classic Workers demo for good reason — it's genuinely useful and demonstrates KV perfectly. The pattern:
 
@@ -56,6 +62,8 @@ Want a dashboard to manage links? Build a second Worker that serves an HTML admi
 
 ## 3. An API Proxy with Rate Limiting
 
+**Wrap any API with auth, CORS, and per-IP rate limiting using only KV — no Redis required.**
+
 Some third-party APIs don't support CORS, or you want to add auth, logging, or transformation before data hits your frontend. A Worker is perfect for this.
 
 More interesting: add rate limiting per user using KV. Store a counter with a TTL:
@@ -73,6 +81,8 @@ This pattern is especially useful for protecting expensive AI API calls — add 
 
 ## 4. Static Sites with Edge Logic
 
+**Combine Pages + a Worker to add A/B testing, geo-redirects, or auth walls to any static site.**
+
 Cloudflare Pages (also free, also excellent) handles static site hosting. But sometimes you need a Worker alongside a static site to add dynamic behavior — A/B testing, geolocation-based redirects, authentication walls, or personalized content.
 
 A Worker can intercept requests to your Pages site and modify the response before it reaches the user. Want to show a different hero image to visitors from Europe? Read `request.cf.country`. Want to A/B test a landing page? Read a cookie, set one if it doesn't exist, and route accordingly. Want to password-protect a staging site without setting up auth infrastructure? A Worker with Basic Auth takes about 20 lines.
@@ -80,6 +90,8 @@ A Worker can intercept requests to your Pages site and modify the response befor
 The combination of Pages + Workers gives you a static site with programmable edge logic, globally distributed, entirely free up to reasonable traffic volumes.
 
 ## When to Upgrade to Paid
+
+**$5/month unlocks Cron Triggers, Durable Objects, R2, and D1 — skip it until you exceed 100k req/day.**
 
 The Workers paid plan ($5/month) makes sense when:
 
@@ -93,11 +105,15 @@ At $5/month, the paid plan is one of the better deals in infrastructure. But the
 
 ## The Global Edge Advantage
 
+**Workers runs in 300+ cities automatically — low latency everywhere on Earth, no configuration needed.**
+
 What doesn't show up in the free tier feature list but matters enormously: Workers runs in 300+ cities. When a user in Tokyo hits your Worker, it runs in Tokyo. When someone in São Paulo makes a request, it runs in São Paulo. You don't configure this. You don't pay extra for it. It just happens.
 
 For a traditional server or even a typical serverless function, you pick a region and users far from that region get slower responses. With Workers, latency is consistently low everywhere on Earth. That's not a minor detail — it's a fundamental architectural advantage that normally costs significant money to replicate.
 
 ## Getting Started
+
+**Install Wrangler, run `wrangler dev` locally, then `wrangler deploy` — you're live in minutes.**
 
 Install Wrangler, Cloudflare's CLI:
 
