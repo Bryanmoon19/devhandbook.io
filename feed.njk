@@ -1,0 +1,29 @@
+---
+permalink: /feed.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>devhandbook.io</title>
+    <link>https://devhandbook.io</link>
+    <description>Developer tools, homelab guides, and self-hosted solutions. Practical tutorials for builders.</description>
+    <language>en-us</language>
+    <atom:link href="https://devhandbook.io/feed.xml" rel="self" type="application/rss+xml"/>
+    {%- for post in collections.blog %}
+    <item>
+      <title>{{ post.data.title }}</title>
+      <link>https://devhandbook.io{{ post.url }}</link>
+      <guid isPermaLink="true">https://devhandbook.io{{ post.url }}</guid>
+      <pubDate>{{ post.date | rfc2822 }}</pubDate>
+      <description>{{ post.data.description }}</description>
+      {%- if post.data.author %}
+      <author>{{ post.data.author }}</author>
+      {%- endif %}
+      {%- for tag in post.data.tags %}
+      <category>{{ tag }}</category>
+      {%- endfor %}
+    </item>
+    {%- endfor %}
+  </channel>
+</rss>

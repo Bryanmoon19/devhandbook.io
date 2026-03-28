@@ -38,6 +38,11 @@ module.exports = function(eleventyConfig) {
     return new Date(date).toISOString().split("T")[0];
   });
 
+  // RFC 2822 date filter for RSS feed
+  eleventyConfig.addFilter("rfc2822", function(date) {
+    return new Date(date).toUTCString();
+  });
+
   return {
     dir: {
       input: ".",
