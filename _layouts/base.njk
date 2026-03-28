@@ -26,6 +26,14 @@
   {% if date %}
   <meta property="article:published_time" content="{{ date }}">
   {% endif %}
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BQXTZYP8H4');
+  </script>
   <script>
     (function() {
       var d = document.documentElement;
