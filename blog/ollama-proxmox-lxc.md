@@ -315,6 +315,27 @@ systemctl restart ollama
 
 Or pin to a specific version by downloading the binary directly from [github.com/ollama/ollama/releases](https://github.com/ollama/ollama/releases).
 
+## Recommended Hardware
+
+<div class="affiliate-disclosure">Some links below are affiliate links — I earn a small commission at no extra cost to you. I only recommend hardware I've personally used or researched for homelab use.</div>
+
+If you're building or upgrading for local LLM inference, here's what I'd recommend:
+
+**For CPU-only (great starting point):**
+- [Intel N100 Mini PC](https://www.amazon.com/dp/B0CWJ3X2JH?tag=devhandbook26-20) — Fanless, low power, runs llama3.2 comfortably. Perfect dedicated Ollama box for ~$150.
+- [32GB DDR5 SO-DIMM Kit](https://www.amazon.com/dp/B0C9V3HD87?tag=devhandbook26-20) — More RAM = larger models. 32GB lets you run 13B parameter models.
+
+**For GPU acceleration (serious inference):**
+- [NVIDIA RTX 3060 12GB](https://www.amazon.com/dp/B08WR34RFY?tag=devhandbook26-20) — The sweet spot for home LLM use. 12GB VRAM handles most 7-13B models fully offloaded. Often found used for ~$200.
+- [NVIDIA RTX 4060 Ti 16GB](https://www.amazon.com/dp/B0C9KLS6BN?tag=devhandbook26-20) — If you want headroom for 30B+ models and future-proofing.
+
+**Storage (models are large):**
+- [Samsung 870 EVO 1TB SSD](https://www.amazon.com/dp/B08QBJ2YMG?tag=devhandbook26-20) — Fast SATA SSD for model storage. Ollama reads models sequentially, so even SATA is fine.
+- [Samsung 990 Pro 2TB NVMe](https://www.amazon.com/dp/B0BHJJ9Y77?tag=devhandbook26-20) — For Proxmox host storage if you're running multiple LXC workloads.
+
+**Full Proxmox server (if starting fresh):**
+- [Beelink SER7 (AMD 7840HS)](https://www.amazon.com/dp/B0CR1JNMXL?tag=devhandbook26-20) — Powerful mini PC with integrated Radeon 780M. Runs Proxmox beautifully, handles 7B models on the iGPU via ROCm.
+
 ## What's Next
 
 **Open WebUI, AnythingLLM for RAG, and Whisper+Piper for a fully local voice assistant are the natural next steps.**
