@@ -248,6 +248,23 @@ When your agent spawns a sub-agent for parallel work, that sub-agent uses whatev
 
 Don't overload a free model setup with skills and plugins. Skills inject instructions into your context window. On an 8K–32K context local model, skills can eat half your available context before you even say hello. Learn what your agent can do stock first. Add skills later when you move to a cloud model with bigger context.
 
+## Hardware for Local Models
+
+<div class="affiliate-disclosure">Some links below are affiliate links — I earn a small commission at no extra cost to you. I only recommend hardware I've personally used or researched for local LLM use.</div>
+
+If you're going the Ollama route, the hardware matters more than you think:
+
+**Budget ($100-200) — Run 3B-7B models:**
+- [Intel N100 Mini PC](https://www.amazon.com/dp/B0CWJ3X2JH?tag=devhandbook26-20) — Fanless, 16GB RAM, runs llama3.2 and gemma2 comfortably. The cheapest "always-on AI" box you can get.
+- [Raspberry Pi 5 (8GB)](https://www.amazon.com/dp/B0CTG3JZ6S?tag=devhandbook26-20) — Surprisingly capable for small models. Great if you already have one.
+
+**Mid-Range ($300-500) — Run 13B-30B models:**
+- [Beelink SER7 Mini PC](https://www.amazon.com/dp/B0CR1JNMXL?tag=devhandbook26-20) — AMD 7840HS with 32GB RAM. Runs Proxmox beautifully, handles larger models on CPU.
+- [32GB DDR5 SO-DIMM Kit](https://www.amazon.com/dp/B0C9V3HD87?tag=devhandbook26-20) — Max out your mini PC's RAM. More RAM = larger models = better responses.
+
+**GPU Upgrade (if you have a desktop/server):**
+- [NVIDIA RTX 3060 12GB](https://www.amazon.com/dp/B08WR34RFY?tag=devhandbook26-20) — 5-10x faster inference than CPU. Often found used for ~$200. The best bang-for-buck local LLM GPU.
+
 ## The Real Question
 
 Most people who ask "how do I reduce my OpenClaw costs" are actually asking the wrong question. The right question is: **"which of my tasks actually need a $15/million-token model and which ones don't?"**

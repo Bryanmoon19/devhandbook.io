@@ -140,6 +140,26 @@ Here's what you can expect in real-world usage on a Proxmox node:
 
 The tradeoff is clear: you give up the add-on ecosystem but gain dramatically better resource efficiency. For a homelab node that's also running other services, the LXC approach lets you do a lot more with the same hardware.
 
+## Recommended Hardware
+
+<div class="affiliate-disclosure">Some links below are affiliate links — I earn a small commission at no extra cost to you. I only recommend hardware I've personally used or researched for homelab use.</div>
+
+If you're setting up Home Assistant for the first time or upgrading your setup:
+
+**Zigbee/Z-Wave (local device control):**
+- [Home Assistant SkyConnect](https://www.amazon.com/dp/B0D6LCZNH9?tag=devhandbook26-20) — Official HA Zigbee/Thread dongle. Plug-and-play, no cloud required.
+- [Sonoff Zigbee 3.0 Dongle Plus](https://www.amazon.com/dp/B09KXTCMSC?tag=devhandbook26-20) — The community favorite. Cheap, reliable, works with ZHA and Zigbee2MQTT.
+- [USB Extension Cable](https://www.amazon.com/dp/B00NH11R3I?tag=devhandbook26-20) — Always use one with Zigbee dongles to avoid USB 3.0 interference. Trust me.
+
+**Sensors & Devices:**
+- [Aqara Door/Window Sensor](https://www.amazon.com/dp/B07D37VDM3?tag=devhandbook26-20) — Tiny, cheap, Zigbee. Great for automations.
+- [Aqara Temperature & Humidity Sensor](https://www.amazon.com/dp/B07D37FKBD?tag=devhandbook26-20) — Perfect for monitoring rooms, aquariums, server closets.
+- [Aqara Motion Sensor P1](https://www.amazon.com/dp/B09QKVMMTB?tag=devhandbook26-20) — Fast detection, adjustable sensitivity, Zigbee 3.0.
+
+**Proxmox Host (if building fresh):**
+- [Beelink SER7 Mini PC (AMD 7840HS)](https://www.amazon.com/dp/B0CR1JNMXL?tag=devhandbook26-20) — Runs Proxmox + multiple LXC containers effortlessly. Enough headroom for HA, Ollama, and more.
+- [Intel N100 Mini PC](https://www.amazon.com/dp/B0CWJ3X2JH?tag=devhandbook26-20) — Budget option. Low power, fanless, handles HA + a few lightweight containers.
+
 ## Final Thoughts
 
 Running Home Assistant in a Proxmox LXC container isn't officially supported by the HA team, but it's a battle-tested approach in the homelab community. The tteck scripts handle the heavy lifting, and once you're up and running, the day-to-day experience is identical to any other HA install. Just set your static IP, bookmark port 8123, and you're home.

@@ -293,6 +293,19 @@ The teams that weathered the ChatGPT uninstall wave best weren't the ones that s
 
 Start with Ollama this week. Test a fallback path. Document your escape routes. The next disruption won't announce itself with a Pentagon press release.
 
+## Hardware to Get Started
+
+<div class="affiliate-disclosure">Some links below are affiliate links — I earn a small commission at no extra cost to you. I only recommend hardware I've used or researched for self-hosted AI.</div>
+
+Ready to build your own fallback? Here's the minimum hardware to run local models:
+
+- [Intel N100 Mini PC](https://www.amazon.com/dp/B0CWJ3X2JH?tag=devhandbook26-20) — Under $150, runs Ollama with 7B models. Fanless, low power, always-on.
+- [Beelink SER7 (AMD 7840HS)](https://www.amazon.com/dp/B0CR1JNMXL?tag=devhandbook26-20) — Serious local inference. 32GB RAM handles 13B+ models on CPU.
+- [NVIDIA RTX 3060 12GB](https://www.amazon.com/dp/B08WR34RFY?tag=devhandbook26-20) — Add to any desktop for 5-10x faster inference. The self-hosting sweet spot.
+- [Samsung 870 EVO 1TB](https://www.amazon.com/dp/B08QBJ2YMG?tag=devhandbook26-20) — Model storage. LLMs are large — budget at least 500GB.
+
+For a full setup guide, see our [Ollama on Proxmox LXC tutorial](/blog/ollama-proxmox-lxc/).
+
 ---
 
 ## References
