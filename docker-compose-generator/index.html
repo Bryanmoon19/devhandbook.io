@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Compose Generator — Build Homelab Stacks Visually | devhandbook.io</title>
+    <meta name="description" content="Free Docker Compose YAML generator for homelab setups. Pick services, configure ports and volumes, and download a ready-to-use docker-compose.yml. 100% client-side.">
+    <meta name="keywords" content="docker compose, docker compose generator, homelab, self-hosted, docker yaml, container orchestration, docker stack">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Docker Compose Generator — devhandbook.io">
+    <meta property="og:description" content="Build Docker Compose stacks visually. Pick services, configure settings, and download a ready-to-use docker-compose.yml.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/docker-compose-generator/">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script>
+        (function() {
+            var d = document.documentElement;
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                d.classList.add('dark');
+            }
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#0071e3', dark: '#0077ed' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .mono { font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace; }
+
+        /* Service cards */
+        .service-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--surface, rgba(255,255,255,0.82));
+            border: 2px solid transparent;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .service-card:hover {
+            background: var(--surface-mid, rgba(255,255,255,0.6));
+        }
+        .service-card.selected {
+            border-color: var(--accent, #0071e3);
+            background: var(--accent-dim, rgba(0,113,227,0.1));
+        }
+        html.dark .service-card {
+            background: rgba(28,28,30,0.9);
+            border-color: rgba(255,255,255,0.08);
+        }
+        html.dark .service-card:hover {
+            background: rgba(44,44,46,0.9);
+        }
+        html.dark .service-card.selected {
+            border-color: var(--accent, #2997ff);
+            background: rgba(41,151,255,0.12);
+        }
+        .service-icon {
+            font-size: 24px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .service-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .service-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary, #1d1d1f);
+            letter-spacing: -0.01em;
+        }
+        html.dark .service-name {
+            color: #f5f5f7;
+        }
+        .service-desc {
+            font-size: 12px;
+            color: var(--text-secondary, #6e6e73);
+            margin-top: 2px;
+        }
+        html.dark .service-desc {
+            color: #98989d;
+        }
+
+        /* Category headers */
+        .category-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary, #6e6e73);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            margin-top: 24px;
+        }
+        .category-header:first-child {
+            margin-top: 0;
+        }
+
+        /* YAML output */
+        .yaml-output {
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre;
+            overflow-x: auto;
+            color: var(--text-primary, #1d1d1f);
+            tab-size: 2;
+        }
+        html.dark .yaml-output {
+            color: #f5f5f7;
+        }
+        .yaml-key { color: #0071e3; }
+        html.dark .yaml-key { color: #2997ff; }
+        .yaml-string { color: #30d158; }
+        html.dark .yaml-string { color: #30d158; }
+        .yaml-comment { color: #6e6e73; font-style: italic; }
+        html.dark .yaml-comment { color: #98989d; }
+        .yaml-number { color: #bf5af2; }
+        html.dark .yaml-number { color: #bf5af2; }
+
+        /* Preset buttons */
+        .preset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 980px;
+            border: 1px solid var(--border, rgba(0,0,0,0.07));
+            background: var(--surface, rgba(255,255,255,0.82));
+            color: var(--text-primary, #1d1d1f);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-btn:hover {
+            background: var(--accent-dim, rgba(0,113,227,0.1));
+            border-color: var(--accent, #0071e3);
+            color: var(--accent, #0071e3);
+        }
+        html.dark .preset-btn {
+            background: rgba(28,28,30,0.9);
+            border-color: rgba(255,255,255,0.1);
+            color: #f5f5f7;
+        }
+        html.dark .preset-btn:hover {
+            background: rgba(41,151,255,0.12);
+            border-color: var(--accent, #2997ff);
+            color: var(--accent, #2997ff);
+        }
+
+        /* Toggle switch */
+        .toggle-track {
+            width: 44px;
+            height: 26px;
+            background: rgba(0,0,0,0.12);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.28s cubic-bezier(0.25,0.1,0.25,1);
+            flex-shrink: 0;
+        }
+        .toggle-track.active {
+            background: #30d158;
+        }
+        .toggle-thumb {
+            width: 22px;
+            height: 22px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.28s cubic-bezier(0.25,0.1,0.25,1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .toggle-track.active .toggle-thumb {
+            transform: translateX(18px);
+        }
+        html.dark .toggle-track {
+            background: rgba(255,255,255,0.12);
+        }
+        html.dark .toggle-track.active {
+            background: #30d158;
+        }
+
+        /* Two-panel layout */
+        .two-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 1024px) {
+            .two-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sticky output panel */
+        .output-panel {
+            position: sticky;
+            top: 80px;
+            max-height: calc(100vh - 100px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        @media (max-width: 1024px) {
+            .output-panel {
+                position: static;
+                max-height: none;
+            }
+        }
+
+        /* Service grid */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        @media (max-width: 640px) {
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Radio group */
+        .radio-group {
+            display: flex;
+            gap: 8px;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border, rgba(0,0,0,0.07));
+            background: var(--surface, rgba(255,255,255,0.82));
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: var(--text-primary, #1d1d1f);
+        }
+        .radio-option:hover {
+            border-color: var(--accent, #0071e3);
+        }
+        .radio-option.selected {
+            border-color: var(--accent, #0071e3);
+            background: var(--accent-dim, rgba(0,113,227,0.1));
+        }
+        html.dark .radio-option {
+            background: rgba(28,28,30,0.9);
+            border-color: rgba(255,255,255,0.1);
+            color: #f5f5f7;
+        }
+        html.dark .radio-option.selected {
+            border-color: var(--accent, #2997ff);
+            background: rgba(41,151,255,0.12);
+        }
+
+        /* Related Tools */
+        .related-tool-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            background: var(--surface, rgba(255,255,255,0.82));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.45));
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            text-decoration: none;
+            transition: transform 0.28s cubic-bezier(0.25,0.1,0.25,1), box-shadow 0.28s cubic-bezier(0.25,0.1,0.25,1);
+        }
+        .related-tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.11), 0 2px 8px rgba(0,0,0,0.06);
+        }
+        html.dark .related-tool-card {
+            background: rgba(28,28,30,0.9);
+            border-color: rgba(255,255,255,0.1);
+        }
+        .related-tool-icon {
+            width: 48px; height: 48px;
+            background: rgba(0,113,227,0.1);
+            color: #0071e3;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 13px; letter-spacing: -0.01em; flex-shrink: 0;
+        }
+        html.dark .related-tool-icon { background: rgba(41,151,255,0.12); color: #2997ff; }
+        .related-tool-card h3 { font-size: 15px; font-weight: 600; color: var(--text-primary, #1d1d1f); letter-spacing: -0.01em; }
+        html.dark .related-tool-card h3 { color: #f5f5f7; }
+        .related-tool-card p { font-size: 13px; color: var(--text-secondary, #6e6e73); margin-top: 2px; }
+        html.dark .related-tool-card p { color: #98989d; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-black min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="../" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors flex items-center gap-1 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    Tools
+                </a>
+                <div class="border-r border-gray-200 dark:border-gray-700 h-6"></div>
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg" style="background:var(--accent-dim, rgba(0,113,227,0.1))">
+                        <span>&#128051;</span>
+                    </div>
+                    <div>
+                        <h1 class="text-base font-semibold text-gray-900 dark:text-white" style="letter-spacing:-0.02em">Docker Compose Generator</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Build homelab stacks visually</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full" style="background:var(--accent-dim, rgba(0,113,227,0.1)); color:var(--accent, #0071e3)">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    Client-side only
+                </span>
+                <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <svg id="sunIcon" class="w-4 h-4 hidden text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <svg id="moonIcon" class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="max-w-7xl mx-auto px-4 py-10">
+
+        <!-- Info notice -->
+        <div class="mb-8 rounded-2xl p-5 flex items-start gap-3" style="background:var(--accent-dim, rgba(0,113,227,0.1)); border:1px solid rgba(0,113,227,0.12)">
+            <svg class="w-5 h-5 mt-0.5 flex-shrink-0" style="color:var(--accent, #0071e3)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+                <p class="text-sm font-semibold" style="color:var(--text-primary, #1d1d1f)">Build your homelab stack in seconds</p>
+                <p class="text-sm mt-1" style="color:var(--text-secondary, #6e6e73)">Select services, configure global settings, and get a ready-to-use docker-compose.yml. Everything runs in your browser.</p>
+            </div>
+        </div>
+
+        <!-- Quick presets -->
+        <div class="mb-6">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Quick presets:</p>
+            <div class="flex flex-wrap gap-2">
+                <button class="preset-btn" onclick="applyPreset('media')">&#127909; Media Server</button>
+                <button class="preset-btn" onclick="applyPreset('monitoring')">&#128200; Monitoring Stack</button>
+                <button class="preset-btn" onclick="applyPreset('ai')">&#129302; AI Stack</button>
+                <button class="preset-btn" onclick="applyPreset('full')">&#127969; Full Homelab</button>
+                <button class="preset-btn" onclick="clearAll()">&#10060; Clear All</button>
+            </div>
+        </div>
+
+        <!-- Two-panel layout -->
+        <div class="two-panel">
+            <!-- Left Panel: Service Picker + Settings -->
+            <div>
+                <!-- Global Settings -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl mb-6 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white" style="letter-spacing:-0.02em">Global Settings</h2>
+                    </div>
+                    <div class="p-5 space-y-5">
+                        <!-- Volume base path -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Volume Base Path</label>
+                            <input type="text" id="volumeBasePath" value="/opt/docker" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm mono focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="/opt/docker" oninput="generateYaml()">
+                        </div>
+
+                        <!-- Network name -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Network Name</label>
+                            <input type="text" id="networkName" value="homelab" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm mono focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="homelab" oninput="generateYaml()">
+                        </div>
+
+                        <!-- Volume mode -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Volume Mode</label>
+                            <div class="radio-group">
+                                <div class="radio-option selected" data-value="named" onclick="setVolumeMode('named')">
+                                    <span>Named Volumes</span>
+                                </div>
+                                <div class="radio-option" data-value="bind" onclick="setVolumeMode('bind')">
+                                    <span>Bind Mounts</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Restart policy -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Restart Policy</label>
+                            <select id="restartPolicy" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="generateYaml()">
+                                <option value="unless-stopped" selected>unless-stopped</option>
+                                <option value="always">always</option>
+                                <option value="on-failure">on-failure</option>
+                                <option value="no">no</option>
+                            </select>
+                        </div>
+
+                        <!-- Healthchecks toggle -->
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Include Healthchecks</label>
+                            <div class="toggle-track" id="healthcheckToggle" onclick="toggleHealthcheck()"><div class="toggle-thumb"></div></div>
+                        </div>
+
+                        <!-- Ollama GPU toggle -->
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Enable GPU for Ollama</label>
+                            <div class="toggle-track" id="gpuToggle" onclick="toggleGpu()"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden">
+                    <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white" style="letter-spacing:-0.02em">Services</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Click to toggle services</p>
+                    </div>
+                    <div class="p-5" id="servicesList">
+                        <!-- Services will be rendered here by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: YAML Output -->
+            <div class="output-panel">
+                <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden flex flex-col h-full">
+                    <div class="px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+                        <div>
+                            <h2 class="text-sm font-semibold text-gray-900 dark:text-white">docker-compose.yml</h2>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" id="serviceCount">0 services selected</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="copyYaml()" class="px-3 py-1.5 text-xs font-medium rounded-full text-white" style="background:var(--accent)">
+                                <span id="copyLabel">Copy YAML</span>
+                            </button>
+                            <button onclick="downloadYaml()" class="px-3 py-1.5 text-xs font-medium rounded-full border" style="border-color:var(--border); color:var(--text-secondary)">
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-auto p-5">
+                        <div id="yamlOutput" class="yaml-output">
+# Select services to generate docker-compose.yml
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Tools -->
+        <section class="mt-12">
+            <h2 class="text-xl font-semibold mb-6" style="letter-spacing:-0.02em; color:var(--text-primary, #1d1d1f)">Related Tools</h2>
+            <div id="relatedTools" class="grid sm:grid-cols-2 gap-4"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-8">
+        <p>Docker Compose Generator — Build homelab stacks visually</p>
+        <p class="mt-1 text-xs">Free tool. No data collection. Part of the <a href="../" class="text-primary hover:underline">devhandbook.io</a> network.</p>
+    </footer>
+
+    <script>
+        // ─── Theme handling ───────────────────────────────────────────────
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        function updateThemeIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        updateThemeIcons();
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            updateThemeIcons();
+        }
+
+        // ─── Service definitions ──────────────────────────────────────────
+        const services = {
+            databases: {
+                label: 'Databases',
+                items: [
+                    {
+                        id: 'postgres',
+                        name: 'PostgreSQL',
+                        icon: '&#128024;',
+                        desc: 'postgres:16, port 5432',
+                        image: 'postgres:16',
+                        ports: ['5432:5432'],
+                        env: {
+                            POSTGRES_DB: 'mydb',
+                            POSTGRES_USER: 'postgres',
+                            POSTGRES_PASSWORD: 'changeme'
+                        },
+                        volumes: { config: 'postgres-data:/var/lib/postgresql/data' },
+                        healthcheck: {
+                            test: '["CMD-SHELL", "pg_isready -U postgres"]',
+                            interval: '10s',
+                            timeout: '5s',
+                            retries: 5
+                        }
+                    },
+                    {
+                        id: 'mariadb',
+                        name: 'MariaDB',
+                        icon: '&#128044;',
+                        desc: 'mariadb:11, port 3306',
+                        image: 'mariadb:11',
+                        ports: ['3306:3306'],
+                        env: {
+                            MYSQL_ROOT_PASSWORD: 'changeme',
+                            MYSQL_DATABASE: 'mydb',
+                            MYSQL_USER: 'user',
+                            MYSQL_PASSWORD: 'changeme'
+                        },
+                        volumes: { config: 'mariadb-data:/var/lib/mysql' },
+                        healthcheck: {
+                            test: '["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]',
+                            interval: '10s',
+                            timeout: '5s',
+                            retries: 5
+                        }
+                    },
+                    {
+                        id: 'redis',
+                        name: 'Redis',
+                        icon: '&#128997;',
+                        desc: 'redis:7-alpine, port 6379',
+                        image: 'redis:7-alpine',
+                        ports: ['6379:6379'],
+                        env: {},
+                        volumes: { config: 'redis-data:/data' },
+                        healthcheck: {
+                            test: '["CMD", "redis-cli", "ping"]',
+                            interval: '10s',
+                            timeout: '5s',
+                            retries: 5
+                        }
+                    },
+                    {
+                        id: 'mongodb',
+                        name: 'MongoDB',
+                        icon: '&#127811;',
+                        desc: 'mongo:7, port 27017',
+                        image: 'mongo:7',
+                        ports: ['27017:27017'],
+                        env: {
+                            MONGO_INITDB_ROOT_USERNAME: 'root',
+                            MONGO_INITDB_ROOT_PASSWORD: 'changeme'
+                        },
+                        volumes: { config: 'mongodb-data:/data/db' },
+                        healthcheck: {
+                            test: '["CMD", "mongosh", "--eval", "db.adminCommand(\'ping\')"]',
+                            interval: '10s',
+                            timeout: '5s',
+                            retries: 5
+                        }
+                    }
+                ]
+            },
+            media: {
+                label: 'Media',
+                items: [
+                    {
+                        id: 'jellyfin',
+                        name: 'Jellyfin',
+                        icon: '&#127916;',
+                        desc: 'jellyfin/jellyfin, port 8096',
+                        image: 'jellyfin/jellyfin',
+                        ports: ['8096:8096'],
+                        env: {},
+                        volumes: {
+                            config: 'jellyfin-config:/config',
+                            media: 'jellyfin-media:/media'
+                        }
+                    },
+                    {
+                        id: 'sonarr',
+                        name: 'Sonarr',
+                        icon: '&#128250;',
+                        desc: 'linuxserver/sonarr, port 8989',
+                        image: 'linuxserver/sonarr',
+                        ports: ['8989:8989'],
+                        env: {
+                            PUID: '1000',
+                            PGID: '1000',
+                            TZ: 'UTC'
+                        },
+                        volumes: {
+                            config: 'sonarr-config:/config',
+                            tv: 'sonarr-tv:/tv'
+                        }
+                    },
+                    {
+                        id: 'radarr',
+                        name: 'Radarr',
+                        icon: '&#127902;',
+                        desc: 'linuxserver/radarr, port 7878',
+                        image: 'linuxserver/radarr',
+                        ports: ['7878:7878'],
+                        env: {
+                            PUID: '1000',
+                            PGID: '1000',
+                            TZ: 'UTC'
+                        },
+                        volumes: {
+                            config: 'radarr-config:/config',
+                            movies: 'radarr-movies:/movies'
+                        }
+                    },
+                    {
+                        id: 'prowlarr',
+                        name: 'Prowlarr',
+                        icon: '&#128269;',
+                        desc: 'linuxserver/prowlarr, port 9696',
+                        image: 'linuxserver/prowlarr',
+                        ports: ['9696:9696'],
+                        env: {
+                            PUID: '1000',
+                            PGID: '1000',
+                            TZ: 'UTC'
+                        },
+                        volumes: {
+                            config: 'prowlarr-config:/config'
+                        }
+                    }
+                ]
+            },
+            monitoring: {
+                label: 'Monitoring',
+                items: [
+                    {
+                        id: 'grafana',
+                        name: 'Grafana',
+                        icon: '&#128200;',
+                        desc: 'grafana/grafana, port 3000',
+                        image: 'grafana/grafana',
+                        ports: ['3000:3000'],
+                        env: {
+                            GF_SECURITY_ADMIN_PASSWORD: 'changeme'
+                        },
+                        volumes: {
+                            config: 'grafana-data:/var/lib/grafana'
+                        },
+                        healthcheck: {
+                            test: '["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]',
+                            interval: '10s',
+                            timeout: '5s',
+                            retries: 5
+                        }
+                    },
+                    {
+                        id: 'prometheus',
+                        name: 'Prometheus',
+                        icon: '&#128293;',
+                        desc: 'prom/prometheus, port 9090',
+                        image: 'prom/prometheus',
+                        ports: ['9090:9090'],
+                        env: {},
+                        volumes: {
+                            config: 'prometheus-config:/etc/prometheus',
+                            data: 'prometheus-data:/prometheus'
+                        },
+                        healthcheck: {
+                            test: '["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]',
+                            interval: '10s',
+                            timeout: '5s',
+                            retries: 5
+                        }
+                    },
+                    {
+                        id: 'portainer',
+                        name: 'Portainer',
+                        icon: '&#128230;',
+                        desc: 'portainer/portainer-ce, port 9000',
+                        image: 'portainer/portainer-ce',
+                        ports: ['9000:9000'],
+                        env: {},
+                        volumes: {
+                            data: 'portainer-data:/data',
+                            docker: '/var/run/docker.sock:/var/run/docker.sock:ro'
+                        }
+                    },
+                    {
+                        id: 'uptime-kuma',
+                        name: 'Uptime Kuma',
+                        icon: '&#128154;',
+                        desc: 'louislam/uptime-kuma, port 3001',
+                        image: 'louislam/uptime-kuma',
+                        ports: ['3001:3001'],
+                        env: {},
+                        volumes: {
+                            data: 'uptime-kuma-data:/app/data'
+                        },
+                        healthcheck: {
+                            test: '["CMD-SHELL", "curl -f http://localhost:3001/api/status-page/health || exit 1"]',
+                            interval: '30s',
+                            timeout: '10s',
+                            retries: 3
+                        }
+                    }
+                ]
+            },
+            tools: {
+                label: 'Tools',
+                items: [
+                    {
+                        id: 'nginx-proxy-manager',
+                        name: 'Nginx Proxy Manager',
+                        icon: '&#127760;',
+                        desc: 'jc21/nginx-proxy-manager, ports 80/443/81',
+                        image: 'jc21/nginx-proxy-manager:latest',
+                        ports: ['80:80', '443:443', '81:81'],
+                        env: {},
+                        volumes: {
+                            data: 'npm-data:/data',
+                            letsencrypt: 'npm-letsencrypt:/etc/letsencrypt'
+                        }
+                    },
+                    {
+                        id: 'vaultwarden',
+                        name: 'Vaultwarden',
+                        icon: '&#128272;',
+                        desc: 'vaultwarden/server, port 8080',
+                        image: 'vaultwarden/server',
+                        ports: ['8080:80'],
+                        env: {},
+                        volumes: {
+                            data: 'vaultwarden-data:/data'
+                        }
+                    },
+                    {
+                        id: 'nextcloud',
+                        name: 'Nextcloud',
+                        icon: '&#9729;',
+                        desc: 'nextcloud:latest, port 8081',
+                        image: 'nextcloud:latest',
+                        ports: ['8081:80'],
+                        env: {},
+                        volumes: {
+                            data: 'nextcloud-data:/var/www/html'
+                        }
+                    },
+                    {
+                        id: 'heimdall',
+                        name: 'Heimdall',
+                        icon: '&#127968;',
+                        desc: 'linuxserver/heimdall, port 8082',
+                        image: 'linuxserver/heimdall',
+                        ports: ['8082:80', '8443:443'],
+                        env: {
+                            PUID: '1000',
+                            PGID: '1000',
+                            TZ: 'UTC'
+                        },
+                        volumes: {
+                            config: 'heimdall-config:/config'
+                        }
+                    }
+                ]
+            },
+            ai: {
+                label: 'AI / LLMs',
+                items: [
+                    {
+                        id: 'ollama',
+                        name: 'Ollama',
+                        icon: '&#129302;',
+                        desc: 'ollama/ollama, port 11434',
+                        image: 'ollama/ollama',
+                        ports: ['11434:11434'],
+                        env: {},
+                        volumes: {
+                            data: 'ollama-data:/root/.ollama'
+                        },
+                        gpu: true
+                    },
+                    {
+                        id: 'open-webui',
+                        name: 'Open WebUI',
+                        icon: '&#128172;',
+                        desc: 'ghcr.io/open-webui/open-webui, port 3002',
+                        image: 'ghcr.io/open-webui/open-webui:main',
+                        ports: ['3002:8080'],
+                        env: {
+                            OLLAMA_BASE_URL: 'http://ollama:11434'
+                        },
+                        volumes: {
+                            data: 'open-webui-data:/app/backend/data'
+                        }
+                    }
+                ]
+            }
+        };
+
+        // ─── State ────────────────────────────────────────────────────────
+        let selectedServices = new Set();
+        let volumeMode = 'named';
+        let includeHealthchecks = false;
+        let enableGpu = false;
+
+        // ─── Render services ──────────────────────────────────────────────
+        function renderServices() {
+            const container = document.getElementById('servicesList');
+            let html = '';
+
+            for (const [categoryKey, category] of Object.entries(services)) {
+                html += `<p class="category-header">${category.label}</p>`;
+                html += '<div class="service-grid">';
+                for (const service of category.items) {
+                    const isSelected = selectedServices.has(service.id);
+                    html += `
+                        <div class="service-card ${isSelected ? 'selected' : ''}" data-service="${service.id}" onclick="toggleService('${service.id}')">
+                            <span class="service-icon">${service.icon}</span>
+                            <div class="service-info">
+                                <div class="service-name">${service.name}</div>
+                                <div class="service-desc">${service.desc}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function toggleService(serviceId) {
+            if (selectedServices.has(serviceId)) {
+                selectedServices.delete(serviceId);
+            } else {
+                selectedServices.add(serviceId);
+            }
+            renderServices();
+            generateYaml();
+        }
+
+        // ─── Settings handlers ────────────────────────────────────────────
+        function setVolumeMode(mode) {
+            volumeMode = mode;
+            document.querySelectorAll('.radio-option').forEach(el => {
+                el.classList.toggle('selected', el.dataset.value === mode);
+            });
+            generateYaml();
+        }
+
+        function toggleHealthcheck() {
+            includeHealthchecks = !includeHealthchecks;
+            document.getElementById('healthcheckToggle').classList.toggle('active', includeHealthchecks);
+            generateYaml();
+        }
+
+        function toggleGpu() {
+            enableGpu = !enableGpu;
+            document.getElementById('gpuToggle').classList.toggle('active', enableGpu);
+            generateYaml();
+        }
+
+        // ─── Presets ──────────────────────────────────────────────────────
+        function applyPreset(preset) {
+            selectedServices.clear();
+
+            switch (preset) {
+                case 'media':
+                    ['jellyfin', 'sonarr', 'radarr', 'prowlarr', 'nginx-proxy-manager'].forEach(s => selectedServices.add(s));
+                    break;
+                case 'monitoring':
+                    ['grafana', 'prometheus', 'portainer', 'uptime-kuma'].forEach(s => selectedServices.add(s));
+                    break;
+                case 'ai':
+                    ['ollama', 'open-webui'].forEach(s => selectedServices.add(s));
+                    break;
+                case 'full':
+                    ['jellyfin', 'sonarr', 'radarr', 'prowlarr', 'nginx-proxy-manager',
+                     'grafana', 'prometheus', 'portainer', 'uptime-kuma',
+                     'ollama', 'open-webui'].forEach(s => selectedServices.add(s));
+                    break;
+            }
+
+            renderServices();
+            generateYaml();
+        }
+
+        function clearAll() {
+            selectedServices.clear();
+            renderServices();
+            generateYaml();
+        }
+
+        // ─── Find service by ID ───────────────────────────────────────────
+        function findService(id) {
+            for (const category of Object.values(services)) {
+                const found = category.items.find(s => s.id === id);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        // ─── Generate YAML ────────────────────────────────────────────────
+        function generateYaml() {
+            const basePath = document.getElementById('volumeBasePath').value || '/opt/docker';
+            const networkName = document.getElementById('networkName').value || 'homelab';
+            const restartPolicy = document.getElementById('restartPolicy').value;
+
+            if (selectedServices.size === 0) {
+                document.getElementById('yamlOutput').innerHTML = '# Select services to generate docker-compose.yml';
+                document.getElementById('serviceCount').textContent = '0 services selected';
+                return;
+            }
+
+            document.getElementById('serviceCount').textContent = `${selectedServices.size} service${selectedServices.size !== 1 ? 's' : ''} selected`;
+
+            let yaml = 'version: "3.8"\n\nservices:\n';
+            const allVolumes = new Set();
+
+            for (const serviceId of selectedServices) {
+                const service = findService(serviceId);
+                if (!service) continue;
+
+                yaml += `\n  # --- ${service.name} ---\n`;
+                yaml += `  ${serviceId}:\n`;
+                yaml += `    image: ${service.image}\n`;
+                yaml += `    container_name: ${serviceId}\n`;
+                yaml += `    restart: ${restartPolicy}\n`;
+
+                // Ports
+                if (service.ports && service.ports.length > 0) {
+                    yaml += '    ports:\n';
+                    for (const port of service.ports) {
+                        yaml += `      - "${port}"\n`;
+                    }
+                }
+
+                // Environment
+                if (service.env && Object.keys(service.env).length > 0) {
+                    yaml += '    environment:\n';
+                    for (const [key, value] of Object.entries(service.env)) {
+                        yaml += `      ${key}: ${value}\n`;
+                    }
+                }
+
+                // Volumes
+                if (service.volumes && Object.keys(service.volumes).length > 0) {
+                    yaml += '    volumes:\n';
+                    for (const [volKey, volValue] of Object.entries(service.volumes)) {
+                        // Handle docker socket specially
+                        if (volValue.includes('/var/run/docker.sock')) {
+                            yaml += `      - ${volValue}\n`;
+                        } else if (volumeMode === 'named') {
+                            // Named volumes
+                            const parts = volValue.split(':');
+                            const volName = parts[0];
+                            const mountPath = parts[1];
+                            allVolumes.add(volName);
+                            yaml += `      - ${volName}:${mountPath}\n`;
+                        } else {
+                            // Bind mounts
+                            const parts = volValue.split(':');
+                            const volName = parts[0];
+                            const mountPath = parts[1];
+                            const bindPath = `\${VOLUME_BASE:-${basePath}}/${serviceId}/${volKey}`;
+                            yaml += `      - ${bindPath}:${mountPath}\n`;
+                        }
+                    }
+                }
+
+                // Networks
+                yaml += '    networks:\n';
+                yaml += `      - ${networkName}\n`;
+
+                // Healthcheck
+                if (includeHealthchecks && service.healthcheck) {
+                    yaml += '    healthcheck:\n';
+                    yaml += `      test: ${service.healthcheck.test}\n`;
+                    yaml += `      interval: ${service.healthcheck.interval}\n`;
+                    yaml += `      timeout: ${service.healthcheck.timeout}\n`;
+                    yaml += `      retries: ${service.healthcheck.retries}\n`;
+                }
+
+                // GPU for Ollama
+                if (enableGpu && service.gpu && serviceId === 'ollama') {
+                    yaml += '    deploy:\n';
+                    yaml += '      resources:\n';
+                    yaml += '        reservations:\n';
+                    yaml += '          devices:\n';
+                    yaml += '            - driver: nvidia\n';
+                    yaml += '              count: all\n';
+                    yaml += '              capabilities: [gpu]\n';
+                }
+            }
+
+            // Networks section
+            yaml += '\nnetworks:\n';
+            yaml += `  ${networkName}:\n`;
+            yaml += '    driver: bridge\n';
+
+            // Volumes section (only for named volumes)
+            if (volumeMode === 'named' && allVolumes.size > 0) {
+                yaml += '\nvolumes:\n';
+                for (const vol of allVolumes) {
+                    yaml += `  ${vol}:\n`;
+                }
+            }
+
+            // Syntax highlighting
+            const highlighted = yaml
+                .replace(/^(\s*#.*$)/gm, '<span class="yaml-comment">$1</span>')
+                .replace(/^(\s*)([a-zA-Z_-]+):/gm, '$1<span class="yaml-key">$2</span>:')
+                .replace(/: (\d+[smh]?)/g, ': <span class="yaml-number">$1</span>')
+                .replace(/: "(.*?)"/g, ': <span class="yaml-string">"$1"</span>');
+
+            document.getElementById('yamlOutput').innerHTML = highlighted;
+        }
+
+        // ─── Copy / Download ──────────────────────────────────────────────
+        function getPlainYaml() {
+            const basePath = document.getElementById('volumeBasePath').value || '/opt/docker';
+            const networkName = document.getElementById('networkName').value || 'homelab';
+            const restartPolicy = document.getElementById('restartPolicy').value;
+
+            if (selectedServices.size === 0) {
+                return '# Select services to generate docker-compose.yml';
+            }
+
+            let yaml = 'version: "3.8"\n\nservices:\n';
+            const allVolumes = new Set();
+
+            for (const serviceId of selectedServices) {
+                const service = findService(serviceId);
+                if (!service) continue;
+
+                yaml += `\n  # --- ${service.name} ---\n`;
+                yaml += `  ${serviceId}:\n`;
+                yaml += `    image: ${service.image}\n`;
+                yaml += `    container_name: ${serviceId}\n`;
+                yaml += `    restart: ${restartPolicy}\n`;
+
+                if (service.ports && service.ports.length > 0) {
+                    yaml += '    ports:\n';
+                    for (const port of service.ports) {
+                        yaml += `      - "${port}"\n`;
+                    }
+                }
+
+                if (service.env && Object.keys(service.env).length > 0) {
+                    yaml += '    environment:\n';
+                    for (const [key, value] of Object.entries(service.env)) {
+                        yaml += `      ${key}: ${value}\n`;
+                    }
+                }
+
+                if (service.volumes && Object.keys(service.volumes).length > 0) {
+                    yaml += '    volumes:\n';
+                    for (const [volKey, volValue] of Object.entries(service.volumes)) {
+                        if (volValue.includes('/var/run/docker.sock')) {
+                            yaml += `      - ${volValue}\n`;
+                        } else if (volumeMode === 'named') {
+                            const parts = volValue.split(':');
+                            const volName = parts[0];
+                            const mountPath = parts[1];
+                            allVolumes.add(volName);
+                            yaml += `      - ${volName}:${mountPath}\n`;
+                        } else {
+                            const parts = volValue.split(':');
+                            const volKey2 = volKey;
+                            const mountPath = parts[1];
+                            const bindPath = `\${VOLUME_BASE:-${basePath}}/${serviceId}/${volKey2}`;
+                            yaml += `      - ${bindPath}:${mountPath}\n`;
+                        }
+                    }
+                }
+
+                yaml += '    networks:\n';
+                yaml += `      - ${networkName}\n`;
+
+                if (includeHealthchecks && service.healthcheck) {
+                    yaml += '    healthcheck:\n';
+                    yaml += `      test: ${service.healthcheck.test}\n`;
+                    yaml += `      interval: ${service.healthcheck.interval}\n`;
+                    yaml += `      timeout: ${service.healthcheck.timeout}\n`;
+                    yaml += `      retries: ${service.healthcheck.retries}\n`;
+                }
+
+                if (enableGpu && service.gpu && serviceId === 'ollama') {
+                    yaml += '    deploy:\n';
+                    yaml += '      resources:\n';
+                    yaml += '        reservations:\n';
+                    yaml += '          devices:\n';
+                    yaml += '            - driver: nvidia\n';
+                    yaml += '              count: all\n';
+                    yaml += '              capabilities: [gpu]\n';
+                }
+            }
+
+            yaml += '\nnetworks:\n';
+            yaml += `  ${networkName}:\n`;
+            yaml += '    driver: bridge\n';
+
+            if (volumeMode === 'named' && allVolumes.size > 0) {
+                yaml += '\nvolumes:\n';
+                for (const vol of allVolumes) {
+                    yaml += `  ${vol}:\n`;
+                }
+            }
+
+            return yaml;
+        }
+
+        function copyYaml() {
+            const yaml = getPlainYaml();
+            navigator.clipboard.writeText(yaml).then(() => {
+                const label = document.getElementById('copyLabel');
+                label.textContent = 'Copied! ✓';
+                setTimeout(() => label.textContent = 'Copy YAML', 2000);
+            });
+        }
+
+        function downloadYaml() {
+            const yaml = getPlainYaml();
+            const blob = new Blob([yaml], { type: 'text/yaml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'docker-compose.yml';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ─── Related Tools ────────────────────────────────────────────────
+        const allTools = [
+            { id: 'json-formatter', name: 'JSON Formatter', desc: 'Pretty print, validate, and inspect JSON', icon: '{ }' },
+            { id: 'cron-generator', name: 'Cron Generator', desc: 'Build cron expressions visually', icon: 'CRON' },
+            { id: 'password-generator', name: 'Password Generator', desc: 'Strong passwords with complexity controls', icon: 'PASS' },
+            { id: 'base64-converter', name: 'Base64 Converter', desc: 'Encode and decode with URL-safe support', icon: 'B64' }
+        ];
+
+        const relatedEl = document.getElementById('relatedTools');
+        if (relatedEl) {
+            relatedEl.innerHTML = allTools
+                .slice(0, 4)
+                .map(t => `
+                    <a href="../${t.id}/" class="related-tool-card">
+                        <div class="related-tool-icon">${t.icon}</div>
+                        <div>
+                            <h3>${t.name}</h3>
+                            <p>${t.desc}</p>
+                        </div>
+                    </a>
+                `).join('');
+        }
+
+        // ─── Init ─────────────────────────────────────────────────────────
+        renderServices();
+        generateYaml();
+    </script>
+</body>
+</html>

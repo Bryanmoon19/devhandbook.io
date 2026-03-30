@@ -34,7 +34,7 @@ From the Proxmox web UI, create a new container with these specs:
 - **Disk:** 20GB (TeslaMate's database grows slowly — a few hundred MB per year of driving)
 - **RAM:** 1024MB
 - **CPU:** 2 cores
-- **Network:** Static IP on your LAN (I use `192.168.7.201/24`)
+- **Network:** Static IP on your LAN (e.g. `192.168.1.100/24`)
 
 After creation, enable nesting before starting the container. In the Proxmox shell:
 
@@ -109,7 +109,7 @@ services:
       - DATABASE_PASS=your-db-password
       - DATABASE_NAME=teslamate
       - DATABASE_HOST=database
-      - MQTT_HOST=192.168.7.46
+      - MQTT_HOST=192.168.1.50
       - MQTT_PORT=1883
     ports:
       - "4000:4000"
@@ -179,8 +179,8 @@ You'll see the symptom as: `curl` from inside the LXC works fine, but browsing f
 The fix — run this on the **Proxmox host** (not inside the LXC):
 
 ```bash
-iptables -I FORWARD -s 192.168.7.201 -j ACCEPT
-iptables -I FORWARD -d 192.168.7.201 -j ACCEPT
+iptables -I FORWARD -s 192.168.1.100 -j ACCEPT
+iptables -I FORWARD -d 192.168.1.100 -j ACCEPT
 ```
 
 To make it persist across reboots, add those lines to `/etc/network/interfaces` under your bridge config, or drop them in a post-up script.
@@ -189,7 +189,7 @@ To make it persist across reboots, add those lines to `/etc/network/interfaces` 
 
 If you set `MQTT_HOST` in the compose file, TeslaMate will try to connect to that broker on startup. If the broker isn't reachable, TeslaMate still runs — but you won't get real-time data in Home Assistant.
 
-You do **not** need a standalone Mosquitto container. If you're already running Home Assistant with the Mosquitto add-on (like I am at `192.168.7.46:1883`), just point TeslaMate at that existing broker. One broker to rule them all.
+You do **not** need a standalone Mosquitto container. If you're already running Home Assistant with the Mosquitto add-on (e.g. at `192.168.1.50:1883`), just point TeslaMate at that existing broker. One broker to rule them all.
 
 ## Connecting to Home Assistant
 
