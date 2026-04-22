@@ -20,6 +20,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("regex-tester");
   eleventyConfig.addPassthroughCopy("pdf-tools");
   eleventyConfig.addPassthroughCopy("ai-sanitizer");
+  eleventyConfig.addPassthroughCopy("homelab-cost-calculator");
 
   // Blog collection sorted by date descending
   eleventyConfig.addCollection("blog", function(collectionApi) {

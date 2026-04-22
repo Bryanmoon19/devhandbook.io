@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Token Counter | Free Online Tool for LLMs (Client-Side)</title>
+    <meta name="description" content="Free AI token counter for ChatGPT, Claude, and local LLMs. Estimate tokens, characters, and words instantly. Check context limits for popular models. 100% client-side.">
+    <meta name="keywords" content="token counter, chatgpt token count, claude tokens, llm token estimator, openai token counter, ai token limit, context window calculator">
+    <meta name="author" content="devhandbook.io">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="AI Token Counter | Free Online Tool for LLMs">
+    <meta property="og:description" content="Estimate tokens for ChatGPT, Claude, and local LLMs. Instant, private, and client-side.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/token-counter/">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        primary: '#8b5cf6',
+                        'primary-dark': '#7c3aed',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        .mono { font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .limit-bar { transition: width 0.3s ease, background-color 0.3s ease; }
+        
+        /* Related Tools - Apple Style */
+        .related-tool-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            background: var(--surface, rgba(255,255,255,0.82));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.45));
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            text-decoration: none;
+            transition: transform 0.28s cubic-bezier(0.25,0.1,0.25,1), box-shadow 0.28s cubic-bezier(0.25,0.1,0.25,1);
+        }
+        .related-tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.11), 0 2px 8px rgba(0,0,0,0.06);
+        }
+        html.dark .related-tool-card {
+            background: rgba(28,28,30,0.9);
+            border-color: rgba(255,255,255,0.1);
+        }
+        .related-tool-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(0,113,227,0.1);
+            color: #0071e3;
+            border-radius: 12px;
+            display: flex;
+            align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: -0.01em;
+            flex-shrink: 0;
+        }
+        html.dark .related-tool-icon {
+            background: rgba(41,151,255,0.12);
+            color: #2997ff;
+        }
+        .related-tool-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary, #1d1d1f);
+            letter-spacing: -0.01em;
+        }
+        html.dark .related-tool-card h3 { color: #f5f5f7; }
+        .related-tool-card p {
+            font-size: 13px;
+            color: var(--text-secondary, #6e6e73);
+            margin-top: 2px;
+        }
+        html.dark .related-tool-card p { color: #98989d; }
+    </style>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen">
+    <!-- Nav -->
+    <nav class="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl">
+        <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="../" class="font-semibold text-lg tracking-tight">devhandbook</a>
+            <div class="flex items-center gap-4">
+                <a href="../" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Tools</a>
+                <a href="../blog/" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Blog</a>
+                <button id="themeToggle" class="w-9 h-9 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode">
+                    <svg id="sunIcon" class="hidden w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                    <svg id="moonIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-semibold tracking-tight mb-2">AI Token Counter</h1>
+            <p class="text-gray-500 dark:text-gray-400">Estimate tokens for ChatGPT, Claude, Gemini, and local LLMs. Counts update live as you type.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Input -->
+            <div class="lg:col-span-2 space-y-6">
+                <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="bg-gray-100 dark:bg-gray-700 px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Your Text
+                        </span>
+                        <div class="flex gap-2">
+                            <button onclick="pasteText()" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors">Paste</button>
+                            <button onclick="clearText()" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors">Clear</button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <textarea id="textInput" rows="12" placeholder="Paste your prompt, message, or document here..."
+                            class="w-full p-4 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:text-white resize-y mono leading-relaxed"></textarea>
+                    </div>
+                </section>
+
+                <!-- Model Limits -->
+                <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Context Window Usage
+                    </h3>
+                    <div id="modelLimits" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Stats Sidebar -->
+            <div class="space-y-6">
+                <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Counts</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Estimated Tokens</p>
+                            <p id="tokenCount" class="text-3xl font-bold text-primary mono mt-1">0</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">±5% for GPT / Claude</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Characters</p>
+                            <p id="charCount" class="text-2xl font-bold text-gray-900 dark:text-white mono mt-1">0</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Words</p>
+                            <p id="wordCount" class="text-2xl font-bold text-gray-900 dark:text-white mono mt-1">0</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Lines</p>
+                            <p id="lineCount" class="text-2xl font-bold text-gray-900 dark:text-white mono mt-1">0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quick Reference -->
+                <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Rule of Thumb</h3>
+                    <div class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div class="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+                            <span>English text</span>
+                            <span class="mono text-gray-900 dark:text-white">~4 chars / token</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+                            <span>Code</span>
+                            <span class="mono text-gray-900 dark:text-white">~3 chars / token</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+                            <span>1 page (~500 words)</span>
+                            <span class="mono text-gray-900 dark:text-white">~650 tokens</span>
+                        </div>
+                        <div class="flex justify-between py-2">
+                            <span>1 hour audio</span>
+                            <span class="mono text-gray-900 dark:text-white">~9,000 tokens</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Related Tools -->
+        <section class="mt-12">
+            <h2 class="text-xl font-semibold mb-6" style="letter-spacing:-0.02em; color:var(--text-primary, #1d1d1f)">Related Tools</h2>
+            <div id="relatedTools" class="grid sm:grid-cols-2 gap-4"></div>
+        </section>
+    </main>
+
+    <footer class="max-w-6xl mx-auto px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-8">
+        <p>AI Token Counter — Estimate LLM token counts instantly</p>
+        <p class="mt-1 text-xs">Part of the <a href="../" class="text-primary hover:underline">devhandbook.io</a> tool collection.</p>
+    </footer>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            sunIcon.classList.toggle('hidden');
+            moonIcon.classList.toggle('hidden');
+        });
+
+        // Token estimation: blended heuristic that's more accurate than chars/4 alone
+        function estimateTokens(text) {
+            if (!text) return 0;
+            const chars = text.length;
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            
+            // Code detection
+            const codePatterns = (text.match(/[{}[\];=+\-*/<>!&|]/g) || []).length;
+            const isCode = codePatterns > words * 0.15;
+            
+            // Base char estimate
+            const charFactor = isCode ? 3.2 : 3.8;
+            const charEstimate = chars / charFactor;
+            
+            // Word estimate accounts for multi-token words, contractions, punctuation
+            const wordFactor = isCode ? 1.15 : 1.35;
+            const wordEstimate = words * wordFactor;
+            
+            // Better accuracy for mixed text: weighted average
+            // For very short text, word estimate dominates; for long text, char estimate dominates
+            let estimate;
+            if (chars < 100) {
+                estimate = wordEstimate * 0.7 + charEstimate * 0.3;
+            } else {
+                estimate = charEstimate * 0.6 + wordEstimate * 0.4;
+            }
+            
+            // Asian characters (CJK) are roughly 1.5-2 chars per token in GPT tokenizers
+            const cjkChars = (text.match(/[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g) || []).length;
+            if (cjkChars > 0) {
+                const nonCjkChars = chars - cjkChars;
+                const cjkEstimate = cjkChars / 1.8;
+                const nonCjkEstimate = nonCjkChars / charFactor;
+                estimate = (cjkEstimate + nonCjkEstimate) * 0.6 + wordEstimate * 0.4;
+            }
+            
+            return Math.max(1, Math.round(estimate));
+        }
+
+        const models = [
+            { name: 'gpt-4o', label: 'GPT-4o', limit: 128000 },
+            { name: 'gpt-4o-mini', label: 'GPT-4o mini', limit: 128000 },
+            { name: 'claude-3-5-sonnet', label: 'Claude 3.5 Sonnet', limit: 200000 },
+            { name: 'gemini-1-5-pro', label: 'Gemini 1.5 Pro', limit: 2000000 },
+            { name: 'llama-3-1-8b', label: 'Llama 3.1 8B', limit: 128000 },
+            { name: 'qwen2-5-7b', label: 'Qwen2.5 7B', limit: 131072 },
+        ];
+
+        const textInput = document.getElementById('textInput');
+
+        function updateCounts() {
+            const text = textInput.value;
+            const chars = text.length;
+            const words = text.trim() ? text.trim().split(/\s+/).filter(w => w.length > 0).length : 0;
+            const lines = text ? text.split('\n').length : 0;
+            const tokens = estimateTokens(text);
+
+            document.getElementById('charCount').textContent = chars.toLocaleString();
+            document.getElementById('wordCount').textContent = words.toLocaleString();
+            document.getElementById('lineCount').textContent = lines.toLocaleString();
+            document.getElementById('tokenCount').textContent = tokens.toLocaleString();
+
+            updateModelLimits(tokens);
+        }
+
+        function updateModelLimits(tokens) {
+            const container = document.getElementById('modelLimits');
+            if (tokens === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Start typing to see how your text fits inside popular model context windows.</p>';
+                return;
+            }
+
+            container.innerHTML = models.map(m => {
+                const pct = Math.min(100, (tokens / m.limit) * 100);
+                const colorClass = pct < 25 ? 'bg-emerald-500' : pct < 50 ? 'bg-blue-500' : pct < 75 ? 'bg-amber-500' : 'bg-red-500';
+                const textClass = pct < 25 ? 'text-emerald-600 dark:text-emerald-400' : pct < 50 ? 'text-blue-600 dark:text-blue-400' : pct < 75 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400';
+                
+                return `
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${m.label}</span>
+                            <span class="text-xs ${textClass} font-medium">${tokens.toLocaleString()} / ${m.limit >= 1000000 ? (m.limit/1000000).toFixed(1) + 'M' : (m.limit/1000).toFixed(0) + 'k'} tokens (${pct.toFixed(pct < 1 ? 2 : 1)}%)</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full ${colorClass} limit-bar" style="width: ${Math.max(0.5, pct)}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function pasteText() {
+            navigator.clipboard.readText().then(text => {
+                textInput.value = text;
+                updateCounts();
+            }).catch(() => {
+                alert('Clipboard access denied. Please paste manually.');
+            });
+        }
+
+        function clearText() {
+            textInput.value = '';
+            updateCounts();
+        }
+
+        textInput.addEventListener('input', updateCounts);
+        updateCounts();
+
+        // Dynamic Related Tools
+        const allTools = [
+            { id: 'json-formatter', name: 'JSON Formatter', desc: 'Pretty print, validate, and inspect JSON', icon: '{ }' },
+            { id: 'jwt-debugger', name: 'JWT Debugger', desc: 'Decode headers and payloads instantly', icon: 'JWT' },
+            { id: 'base64-converter', name: 'Base64 Converter', desc: 'Encode and decode with URL-safe support', icon: 'B64' },
+            { id: 'timestamp-converter', name: 'Timestamp Converter', desc: 'Unix timestamps and human dates', icon: 'TIME' },
+            { id: 'password-generator', name: 'Password Generator', desc: 'Strong passwords with complexity controls', icon: 'PASS' },
+            { id: 'url-encoder', name: 'URL Encoder / Decoder', desc: 'Percent-encode and decode URLs', icon: 'URL' },
+            { id: 'regex-tester', name: 'Regex Tester', desc: 'Test patterns with group matching', icon: 'REGX' },
+            { id: 'html-entities', name: 'HTML Entities', desc: 'Convert and decode HTML entities', icon: 'HTML' },
+            { id: 'color-converter', name: 'Color Converter', desc: 'Switch between HEX, RGB, and HSL', icon: 'CLR' },
+            { id: 'cron-generator', name: 'Cron Generator', desc: 'Build and validate cron expressions', icon: 'CRON' },
+            { id: 'pdf-tools', name: 'PDF Tool Suite', desc: 'Merge, split, compress, and protect PDFs', icon: 'PDF' },
+            { id: 'ai-sanitizer', name: 'AI Text Sanitizer', desc: 'Strip PII before prompting AI tools', icon: 'PII' },
+            { id: 'token-counter', name: 'Token Counter', desc: 'Estimate LLM tokens before you prompt', icon: 'TOK' },
+            { id: 'docker-compose-generator', name: 'Docker Compose Gen', desc: 'Build homelab stacks visually', icon: 'DKR' }
+        ];
+        const pathParts = window.location.pathname.replace(/index\.html$/, '').split('/').filter(Boolean);
+        const currentTool = pathParts[pathParts.length - 1] || '';
+        const relatedEl = document.getElementById('relatedTools');
+        if (relatedEl) {
+            relatedEl.innerHTML = allTools
+                .filter(t => t.id !== currentTool)
+                .slice(0, 4)
+                .map(t => `
+                    <a href="../${t.id}/" class="related-tool-card">
+                        <div class="related-tool-icon">${t.icon}</div>
+                        <div>
+                            <h3>${t.name}</h3>
+                            <p>${t.desc}</p>
+                        </div>
+                    </a>
+                `).join('');
+        }
+    </script>
+</body>
+</html>

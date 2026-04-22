@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homelab Cost Calculator | devhandbook.io</title>
+    <meta name="description" content="Calculate your true homelab costs — hardware, power, internet — and compare vs cloud hosting. Free, private, instant.">
+    <meta name="keywords" content="homelab cost calculator, self hosting cost, home server calculator, proxmox cost, nas power consumption, homelab vs cloud">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devhandbook.io/homelab-cost-calculator/">
+    <meta property="og:title" content="Homelab Cost Calculator — devhandbook.io">
+    <meta property="og:description" content="Calculate your true homelab costs and compare vs cloud hosting. Free, private, instant.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devhandbook.io/homelab-cost-calculator/">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --border-color: #30363d;
+            --font-mono: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .panel h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel h2::before {
+            content: '>';
+            color: var(--accent-green);
+            font-family: var(--font-mono);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hardware-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .hardware-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .hardware-item-header h4 {
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: var(--font-sans);
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #79b8ff;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-danger:hover {
+            background: #ff6b6b;
+        }
+
+        .results-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .results-panel h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--accent-green);
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            font-family: var(--font-mono);
+        }
+
+        .metric-card .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1.5rem;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table th {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .comparison-table td {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+        }
+
+        .savings-positive {
+            color: var(--accent-green);
+        }
+
+        .savings-negative {
+            color: var(--accent-red);
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        .footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Homelab Cost Calculator</h1>
+            <p>Calculate your true infrastructure costs, compare against cloud alternatives, and optimize your setup. Built for homelabbers who care about the bottom line.</p>
+        </header>
+
+        <div class="calculator-grid">
+            <div class="panel">
+                <h2>Hardware Costs</h2>
+                <div id="hardware-list">
+                    <div class="hardware-item" data-id="1">
+                        <div class="hardware-item-header">
+                            <h4>Server / Workstation</h4>
+                            <button class="btn btn-danger" onclick="removeHardware(1)">Remove</button>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Item Name</label>
+                                <input type="text" class="hw-name" value="Primary Server" placeholder="e.g., Dell R720">
+                            </div>
+                            <div class="input-group">
+                                <label>Purchase Price ($)</label>
+                                <input type="number" class="hw-cost" value="800" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label>Watts</label>
+                                <input type="number" class="hw-watts" value="150" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="addHardware()" style="width: 100%; margin-top: 0.5rem;">+ Add Hardware</button>
+            </div>
+
+            <div class="panel">
+                <h2>Operating Costs</h2>
+                <div class="input-group">
+                    <label>Electricity Rate ($/kWh)</label>
+                    <input type="number" id="electricity-rate" value="0.12" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Internet Cost ($/month)</label>
+                    <input type="number" id="internet-cost" value="80" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Cloud Subscriptions Replaced ($/month)</label>
+                    <input type="number" id="cloud-replaced" value="50" min="0">
+                    <small style="color: var(--text-secondary); font-size: 0.75rem;">e.g., Dropbox, Netflix, VPS hosting</small>
+                </div>
+                <div class="input-group">
+                    <label>Analysis Period (years)</label>
+                    <input type="number" id="analysis-years" value="5" min="1" max="10">
+                </div>
+            </div>
+        </div>
+
+        <div class="results-panel">
+            <h2>Cost Analysis</h2>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="value" id="total-hardware">$0</div>
+                    <div class="label">Total Hardware</div>
+                </div>
+                <div class="metric-card">
+                    <div class="value" id="monthly-power">$0</div>
+                    <div class="label">Monthly Power</div>
+                </div>
+                <div class="metric-card">
+                    <div class="value" id="total-5year">$0</div>
+                    <div class="label">5-Year TCO</div>
+                </div>
+                <div class="metric-card">
+                    <div class="value" id="cost-per-vm">$0</div>
+                    <div class="label">Cost/VM/Month</div>
+                </div>
+                <div class="metric-card">
+                    <div class="value" id="cloud-savings">$0</div>
+                    <div class="label">Cloud Savings</div>
+                </div>
+                <div class="metric-card">
+                    <div class="value" id="break-even">0 mo</div>
+                    <div class="label">Break-Even</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="costChart"></canvas>
+            </div>
+
+            <h3 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--accent-orange);">Cloud Comparison (5-Year)</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Provider</th>
+                        <th>Equivalent Spec</th>
+                        <th>5-Year Cost</th>
+                        <th>vs Your Homelab</th>
+                    </tr>
+                </thead>
+                <tbody id="comparison-body">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="exportPDF()">Export PDF Report</button>
+            <button class="btn btn-secondary" onclick="shareResults()">Copy Shareable Link</button>
+        </div>
+
+        <div class="footer">
+            <p>Built by <a href="https://devhandbook.io">devhandbook.io</a> — Finance tools for technical people</p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem;">Want detailed business finance tracking? Check out our <a href="#">Small Business Finance Tracker</a></p>
+        </div>
+    </div>
+
+    <script>
+        let hardwareCount = 1;
+        let costChart = null;
+
+        function addHardware() {
+            hardwareCount++;
+            const list = document.getElementById('hardware-list');
+            const item = document.createElement('div');
+            item.className = 'hardware-item';
+            item.dataset.id = hardwareCount;
+            item.innerHTML = `
+                <div class="hardware-item-header">
+                    <h4>Hardware Item #${hardwareCount}</h4>
+                    <button class="btn btn-danger" onclick="removeHardware(${hardwareCount})">Remove</button>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Item Name</label>
+                        <input type="text" class="hw-name" value="" placeholder="e.g., NAS, Switch, UPS">
+                    </div>
+                    <div class="input-group">
+                        <label>Purchase Price ($)</label>
+                        <input type="number" class="hw-cost" value="0" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Watts</label>
+                        <input type="number" class="hw-watts" value="0" min="0">
+                    </div>
+                </div>
+            `;
+            list.appendChild(item);
+            calculate();
+        }
+
+        function removeHardware(id) {
+            const item = document.querySelector(`.hardware-item[data-id="${id}"]`);
+            if (item) {
+                item.remove();
+                calculate();
+            }
+        }
+
+        function getHardwareData() {
+            const items = document.querySelectorAll('.hardware-item');
+            const data = [];
+            items.forEach(item => {
+                data.push({
+                    name: item.querySelector('.hw-name').value || 'Unnamed',
+                    cost: parseFloat(item.querySelector('.hw-cost').value) || 0,
+                    watts: parseFloat(item.querySelector('.hw-watts').value) || 0
+                });
+            });
+            return data;
+        }
+
+        function calculate() {
+            const hardware = getHardwareData();
+            const electricityRate = parseFloat(document.getElementById('electricity-rate').value) || 0;
+            const internetCost = parseFloat(document.getElementById('internet-cost').value) || 0;
+            const cloudReplaced = parseFloat(document.getElementById('cloud-replaced').value) || 0;
+            const years = parseInt(document.getElementById('analysis-years').value) || 5;
+
+            const totalHardware = hardware.reduce((sum, h) => sum + h.cost, 0);
+            const totalWatts = hardware.reduce((sum, h) => sum + h.watts, 0);
+            const monthlyPower = (totalWatts * 24 * 30 / 1000) * electricityRate;
+            const monthlyTotal = monthlyPower + internetCost;
+            const total5Year = totalHardware + (monthlyTotal * 12 * years);
+            const totalCloud5Year = cloudReplaced * 12 * years;
+            const netSavings = totalCloud5Year - total5Year;
+            const breakEven = monthlyTotal > 0 ? Math.ceil(totalHardware / (cloudReplaced - monthlyTotal)) : 0;
+
+            // Assume 5 VMs for cost-per-VM calculation
+            const vmCount = 5;
+            const costPerVM = monthlyTotal / vmCount;
+
+            // Update metrics
+            document.getElementById('total-hardware').textContent = `$${totalHardware.toLocaleString()}`;
+            document.getElementById('monthly-power').textContent = `$${monthlyPower.toFixed(2)}`;
+            document.getElementById('total-5year').textContent = `$${total5Year.toLocaleString()}`;
+            document.getElementById('cost-per-vm').textContent = `$${costPerVM.toFixed(2)}`;
+            document.getElementById('cloud-savings').textContent = `$${netSavings.toLocaleString()}`;
+            document.getElementById('cloud-savings').className = netSavings >= 0 ? 'value savings-positive' : 'value savings-negative';
+            document.getElementById('break-even').textContent = breakEven > 0 && breakEven < 999 ? `${breakEven} mo` : 'N/A';
+
+            updateChart(hardware, monthlyPower, internetCost, years);
+            updateComparison(total5Year, years);
+        }
+
+        function updateChart(hardware, monthlyPower, internetCost, years) {
+            const ctx = document.getElementById('costChart').getContext('2d');
+            
+            const labels = [];
+            const homelabData = [];
+            const cloudData = [];
+            
+            for (let i = 0; i <= years; i++) {
+                labels.push(`Year ${i}`);
+                const hwDepreciation = hardware.reduce((sum, h) => sum + (h.cost * (1 - i/years)), 0);
+                homelabData.push(hwDepreciation + (monthlyPower + internetCost) * 12 * i);
+                cloudData.push(50 * 12 * i); // Assuming $50/month cloud equivalent
+            }
+
+            if (costChart) {
+                costChart.destroy();
+            }
+
+            costChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Your Homelab',
+                        data: homelabData,
+                        borderColor: '#58a6ff',
+                        backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Cloud Equivalent',
+                        data: cloudData,
+                        borderColor: '#f85149',
+                        backgroundColor: 'rgba(248, 81, 73, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#c9d1d9' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#30363d' }
+                        },
+                        x: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#30363d' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateComparison(homelabCost, years) {
+            const comparisons = [
+                { name: 'AWS EC2 (t3.medium)', spec: '2 vCPU, 4GB RAM', monthly: 30.37 },
+                { name: 'DigitalOcean', spec: '2 vCPU, 4GB RAM', monthly: 24 },
+                { name: 'Linode', spec: '2 vCPU, 4GB RAM', monthly: 24 },
+                { name: 'Hetzner CX21', spec: '2 vCPU, 4GB RAM', monthly: 8.20 }
+            ];
+
+            const tbody = document.getElementById('comparison-body');
+            tbody.innerHTML = '';
+
+            comparisons.forEach(cloud => {
+                const cloud5Year = cloud.monthly * 12 * years;
+                const savings = cloud5Year - homelabCost;
+                const savingsClass = savings > 0 ? 'savings-positive' : 'savings-negative';
+                const savingsText = savings > 0 ? `Save $${savings.toLocaleString()}` : `Lose $${Math.abs(savings).toLocaleString()}`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${cloud.name}</td>
+                        <td>${cloud.spec}</td>
+                        <td>$${cloud5Year.toLocaleString()}</td>
+                        <td class="${savingsClass}">${savingsText}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(20);
+            doc.text('Homelab Cost Analysis', 20, 20);
+            
+            doc.setFontSize(12);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 30);
+            
+            const hardware = getHardwareData();
+            let y = 50;
+            
+            doc.setFontSize(14);
+            doc.text('Hardware Inventory', 20, y);
+            y += 10;
+            
+            doc.setFontSize(10);
+            hardware.forEach(h => {
+                doc.text(`${h.name}: $${h.cost} (${h.watts}W)`, 20, y);
+                y += 6;
+            });
+            
+            doc.save('homelab-cost-analysis.pdf');
+        }
+
+        function shareResults() {
+            const data = {
+                hardware: getHardwareData(),
+                electricity: document.getElementById('electricity-rate').value,
+                internet: document.getElementById('internet-cost').value,
+                cloud: document.getElementById('cloud-replaced').value,
+                years: document.getElementById('analysis-years').value
+            };
+            
+            const encoded = btoa(JSON.stringify(data));
+            const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Shareable link copied to clipboard!');
+            });
+        }
+
+        // Event listeners
+        document.addEventListener('input', calculate);
+
+        // Initialize
+        calculate();
+    </script>
+</body>
+</html>
