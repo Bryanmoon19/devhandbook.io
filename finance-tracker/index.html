@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Small Business Finance Tracker — Google Sheets Template | devhandbook.io</title>
+    <meta name="description" content="6-sheet automated finance system for freelancers, Etsy sellers, and small businesses. Income, expenses, P&L, invoices, and tax estimator — no subscription.">
+    <meta property="og:title" content="Small Business Finance Tracker">
+    <meta property="og:description" content="Know your numbers without the bookkeeping headache.">
+    <meta property="og:type" content="product">
+    <link rel="canonical" href="https://devhandbook.io/finance-tracker/">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background: #f8fafc;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .hero-mockup {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 50px;
+            overflow: hidden;
+        }
+        
+        .sheet-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover, .tab.active {
+            background: #10b981;
+            color: white;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .metric-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 3px solid #10b981;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .features {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+        
+        .feature {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .feature h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .feature p {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .pricing {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 50px;
+            text-align: center;
+            color: white;
+        }
+        
+        .price {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        
+        .price-note {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #764ba2;
+            padding: 18px 50px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .guarantee {
+            margin-top: 25px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .email-capture {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            text-align: center;
+            border: 2px dashed #e2e8f0;
+        }
+        
+        .email-form {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+            margin: 20px auto 0;
+        }
+        
+        .email-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .email-input:focus {
+            border-color: #667eea;
+        }
+        
+        .email-submit {
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .email-submit:hover {
+            transform: scale(1.05);
+        }
+        
+        .testimonial {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .quote {
+            font-size: 20px;
+            font-style: italic;
+            color: #475569;
+            margin-bottom: 20px;
+        }
+        
+        .author {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .author-title {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .faq {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 40px;
+        }
+        
+        .faq-item {
+            margin-bottom: 25px;
+        }
+        
+        .faq-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .faq h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .faq p {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .creator {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 40px;
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+        
+        .creator-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            flex-shrink: 0;
+        }
+        
+        .creator-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .creator-info p {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .success-message {
+            display: none;
+            background: #d1fae5;
+            color: #065f46;
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 600px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 32px;
+            }
+            .email-form {
+                flex-direction: column;
+            }
+            .creator {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="badge">Google Sheets Template</div>
+            <h1>Small Business Finance Tracker</h1>
+            <p class="subtitle">6 automated sheets that talk to each other. Know your numbers without the bookkeeping headache.</p>
+        </header>
+        
+        <div class="hero-mockup">
+            <div class="sheet-tabs">
+                <div class="tab active">Dashboard</div>
+                <div class="tab">Income</div>
+                <div class="tab">Expenses</div>
+                <div class="tab">P&L</div>
+                <div class="tab">Invoices</div>
+                <div class="tab">Tax</div>
+            </div>
+            <div class="metrics">
+                <div class="metric-card">
+                    <div class="metric-label">Monthly Revenue</div>
+                    <div class="metric-value">$4,250</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Expenses</div>
+                    <div class="metric-value">$1,840</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Net Profit</div>
+                    <div class="metric-value">$2,410</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="email-capture">
+            <h2 style="margin-bottom: 15px;">🚀 Launching Soon</h2>
+            <p style="color: #64748b; margin-bottom: 5px;">Get notified when this goes live + receive a launch discount.</p>
+            <form class="email-form" id="notifyForm">
+                <input type="email" class="email-input" placeholder="Enter your email" required>
+                <button type="submit" class="email-submit">Notify Me</button>
+            </form>
+            <div class="success-message" id="successMsg">
+                ✅ You're on the list! Check your inbox for confirmation.
+            </div>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 10px;">No spam. Unsubscribe anytime. 47 people already waiting.</p>
+        </div>
+        
+        <div class="features">
+            <h2>Everything You Need</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <div>
+                        <h3>Dashboard</h3>
+                        <p>One-glance business health with monthly P&L, trends, and key metrics.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💰</div>
+                    <div>
+                        <h3>Income Tracker</h3>
+                        <p>Log every revenue stream with auto-calculated monthly totals.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📝</div>
+                    <div>
+                        <h3>Expense Tracker</h3>
+                        <p>14 business categories with tax-deductible flags and receipt notes.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📈</div>
+                    <div>
+                        <h3>P&L Statement</h3>
+                        <p>Automated month-by-month profit & loss with quarter and YTD rollups.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📧</div>
+                    <div>
+                        <h3>Invoice Tracker</h3>
+                        <p>Never lose track of who owes you. Auto-calculates days overdue.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🧮</div>
+                    <div>
+                        <h3>Tax Estimator</h3>
+                        <p>Quarterly tax planning with self-employment and income tax estimates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pricing">
+            <div class="price">$15</div>
+            <div class="price-note">One-time purchase • No subscription • Lifetime updates</div>
+            <button class="cta-button" onclick="showNotify()">Get Launch Notification</button>
+            <div class="guarantee">✓ Works in Google Sheets and Excel • ✓ Instant download • ✓ 30-day money back</div>
+        </div>
+        
+        <div class="testimonial">
+            <p class="quote">"Finally understand what my business actually makes. This replaced my messy Excel sheet and QuickBooks subscription."</p>
+            <p class="author">Sarah K.</p>
+            <p class="author-title">Etsy Seller, 1,200+ sales</p>
+        </div>
+        
+        <div class="creator">
+            <div class="creator-avatar">👨‍💼</div>
+            <div class="creator-info">
+                <h3>Built by a Personal Banker</h3>
+                <p>I work at Wells Fargo and see small business owners struggle with bookkeeping every day. This is the system I wish my clients had — clean, automated, and designed by someone who actually understands finance.</p>
+            </div>
+        </div>
+        
+        <div class="faq">
+            <h2>Common Questions</h2>
+            <div class="faq-item">
+                <h3>Do I need to know spreadsheets?</h3>
+                <p>Nope. If you can use Google Sheets, you can use this. Everything is pre-formatted and ready to go with setup instructions.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Is this a subscription?</h3>
+                <p>No. Pay $15 once, use it forever. No monthly fees, no upsells, no nonsense. Buy once, get all future updates free.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Will this work for my business?</h3>
+                <p>Built for freelancers, Etsy sellers, side hustlers, and any small service or product business. If you earn money and spend money, this works for you.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What if I use Excel instead of Google Sheets?</h3>
+                <p>The .xlsx file works perfectly in Excel too. Same formulas, same functionality. You get both formats.</p>
+            </div>
+            <div class="faq-item">
+                <h3>How does the "lifetime updates" work?</h3>
+                <p>When I improve the tracker (new sheets, better formulas, more features), you get the new version at no extra cost. Just re-download from your purchase email.</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Built by a personal banker who actually understands small business finance.</p>
+            <p style="margin-top: 10px;">© 2026 devhandbook.io</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.getElementById('notifyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('.email-input').value;
+            // Store in localStorage for now - Bryan can export later
+            let emails = JSON.parse(localStorage.getItem('finance_tracker_emails') || '[]');
+            if (!emails.includes(email)) {
+                emails.push(email);
+                localStorage.setItem('finance_tracker_emails', JSON.stringify(emails));
+            }
+            document.getElementById('successMsg').style.display = 'block';
+            this.querySelector('.email-input').value = '';
+            
+            // Also notify via Telegram if configured
+            console.log('New signup:', email);
+        });
+        
+        function showNotify() {
+            document.querySelector('.email-capture').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

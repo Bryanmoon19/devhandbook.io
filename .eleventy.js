@@ -21,6 +21,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("pdf-tools");
   eleventyConfig.addPassthroughCopy("ai-sanitizer");
   eleventyConfig.addPassthroughCopy("homelab-cost-calculator");
+  eleventyConfig.addPassthroughCopy("finance-tracker");
 
   // Blog collection sorted by date descending
   eleventyConfig.addCollection("blog", function(collectionApi) {
