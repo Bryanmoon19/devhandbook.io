@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelance Hourly Rate Calculator | devhandbook.io</title>
+    <meta name="description" content="Calculate your true freelance hourly rate — accounting for taxes, benefits, business expenses, and profit margin. Free, private, instant.">
+    <meta name="keywords" content="freelance hourly rate calculator, freelancer pricing, contract rate calculator, self employed rate, freelance tax calculator">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devhandbook.io/freelance-rate-calculator/">
+    <meta property="og:title" content="Freelance Hourly Rate Calculator — devhandbook.io">
+    <meta property="og:description" content="Calculate your true freelance rate including taxes, benefits, and expenses. Free, private, instant.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devhandbook.io/freelance-rate-calculator/">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <style>
+        :root {
+            --bg: #fbfbfd;
+            --surface: rgba(255,255,255,0.78);
+            --surface-mid: rgba(255,255,255,0.6);
+            --text: #1d1d1f;
+            --text-2: #6e6e73;
+            --accent: #0071e3;
+            --accent-hover: #0077ed;
+            --accent-green: #34c759;
+            --accent-orange: #ff9500;
+            --accent-red: #ff3b30;
+            --border: rgba(0,0,0,0.07);
+            --glass-border: rgba(255,255,255,0.5);
+            --shadow: 0 2px 16px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-hover: 0 12px 40px rgba(0,0,0,0.11), 0 2px 8px rgba(0,0,0,0.06);
+            --r-card: 20px;
+            --r-pill: 980px;
+            --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        html.dark {
+            --bg: #000;
+            --surface: rgba(28,28,30,0.78);
+            --surface-mid: rgba(44,44,46,0.6);
+            --text: #f5f5f7;
+            --text-2: #98989d;
+            --border: rgba(255,255,255,0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+        }
+
+        .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── Header ── */
+        .header {
+            text-align: center;
+            padding: 60px 0 40px;
+        }
+        .header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p {
+            font-size: 21px;
+            color: var(--text-2);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* ── Result Card ── */
+        .result-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--r-card);
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .result-label {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-2);
+            margin-bottom: 8px;
+        }
+        .result-value {
+            font-size: 56px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--accent);
+            line-height: 1.1;
+        }
+        .result-sub {
+            font-size: 15px;
+            color: var(--text-2);
+            margin-top: 8px;
+        }
+        .result-breakdown {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        .breakdown-item {
+            text-align: center;
+        }
+        .breakdown-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .breakdown-label {
+            font-size: 12px;
+            color: var(--text-2);
+            margin-top: 4px;
+        }
+
+        /* ── Form Sections ── */
+        .section {
+            background: var(--surface);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--r-card);
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+        .section-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* ── Inputs ── */
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-group:last-child { margin-bottom: 0; }
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .input-hint {
+            font-size: 12px;
+            color: var(--text-2);
+            margin-top: 4px;
+        }
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-family: var(--font);
+            background: var(--surface-mid);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0,113,227,0.15);
+        }
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* ── Toggle Switch ── */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .toggle-row:last-child { border-bottom: none; }
+        .toggle-info {
+            flex: 1;
+        }
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 500;
+            display: block;
+        }
+        .toggle-hint {
+            font-size: 12px;
+            color: var(--text-2);
+            margin-top: 2px;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            background: var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        /* ── Slider ── */
+        .slider-group {
+            margin-bottom: 16px;
+        }
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .slider-value {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+
+        /* ── Expense Item ── */
+        .expense-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 12px;
+        }
+        .expense-item input[type="text"] {
+            flex: 1;
+        }
+        .expense-item input[type="number"] {
+            width: 120px;
+        }
+        .btn-remove {
+            padding: 12px;
+            background: var(--surface-mid);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-2);
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+        .btn-remove:hover {
+            background: var(--accent-red);
+            color: white;
+            border-color: var(--accent-red);
+        }
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: var(--surface-mid);
+            border: 1px solid var(--border);
+            border-radius: var(--r-pill);
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-add:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 40px 0 60px;
+            color: var(--text-2);
+            font-size: 13px;
+        }
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* ── Back Link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-2);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent); }
+
+        /* ── Tooltip ── */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            color: var(--text-2);
+            font-size: 14px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .header h1 { font-size: 36px; }
+            .header p { font-size: 17px; }
+            .result-value { font-size: 40px; }
+            .result-breakdown { grid-template-columns: 1fr; }
+            .input-row { grid-template-columns: 1fr; }
+            .expense-item { flex-wrap: wrap; }
+            .expense-item input[type="number"] { width: 100px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="padding-top: 24px;">
+            <a href="/" class="back-link">← Back to devhandbook.io</a>
+        </div>
+
+        <div class="header">
+            <h1>Freelance Rate Calculator</h1>
+            <p>Find your true hourly rate — taxes, benefits, expenses, and profit included</p>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-label">Your Minimum Hourly Rate</div>
+            <div class="result-value" id="hourlyRate">$0.00</div>
+            <div class="result-sub">Based on your inputs below</div>
+            <div class="result-breakdown">
+                <div class="breakdown-item">
+                    <div class="breakdown-value" id="yearlyNeed">$0</div>
+                    <div class="breakdown-label">Annual Need</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-value" id="monthlyNeed">$0</div>
+                    <div class="breakdown-label">Monthly Need</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-value" id="billableHours">0</div>
+                    <div class="breakdown-label">Billable Hrs/Year</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Income Goal -->
+        <div class="section">
+            <div class="section-title">
+                <div class="section-icon" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">💰</div>
+                Income Goal
+            </div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label class="input-label">Desired Annual Salary</label>
+                    <input type="number" id="desiredSalary" value="85000" min="0" step="1000">
+                    <div class="input-hint">What you want to take home (like a full-time salary)</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Profit Margin</label>
+                    <input type="number" id="profitMargin" value="20" min="0" max="100" step="5">
+                    <div class="input-hint">Buffer for growth, savings, investments (%)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tax & Benefits -->
+        <div class="section">
+            <div class="section-title">
+                <div class="section-icon" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">🏛️</div>
+                Taxes & Benefits
+            </div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label class="input-label">Effective Tax Rate (%)</label>
+                    <input type="number" id="taxRate" value="25" min="0" max="50" step="1">
+                    <div class="input-hint">Federal + state + self-employment tax</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Monthly Benefits Cost</label>
+                    <input type="number" id="benefitsCost" value="400" min="0" step="50">
+                    <div class="input-hint">Health insurance, retirement, etc.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Expenses -->
+        <div class="section">
+            <div class="section-title">
+                <div class="section-icon" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">💼</div>
+                Business Expenses (Monthly)
+            </div>
+            <div id="expenseList">
+                <div class="expense-item">
+                    <input type="text" placeholder="Expense name" value="Software/Tools">
+                    <input type="number" placeholder="$/mo" value="50" min="0" step="10">
+                    <button class="btn-remove" onclick="removeExpense(this)">×</button>
+                </div>
+                <div class="expense-item">
+                    <input type="text" placeholder="Expense name" value="Coworking/Office">
+                    <input type="number" placeholder="$/mo" value="200" min="0" step="10">
+                    <button class="btn-remove" onclick="removeExpense(this)">×</button>
+                </div>
+            </div>
+            <button class="btn-add" onclick="addExpense()">+ Add Expense</button>
+        </div>
+
+        <!-- Work Schedule -->
+        <div class="section">
+            <div class="section-title">
+                <div class="section-icon" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">📅</div>
+                Work Schedule
+            </div>
+            <div class="slider-group">
+                <div class="slider-header">
+                    <label class="input-label">Billable Hours per Week</label>
+                    <span class="slider-value" id="hoursPerWeekValue">25</span>
+                </div>
+                <input type="range" id="hoursPerWeek" min="5" max="60" value="25" step="1">
+                <div class="input-hint">Realistic billable time (not admin, sales, etc.)</div>
+            </div>
+            <div class="slider-group">
+                <div class="slider-header">
+                    <label class="input-label">Weeks Off per Year</label>
+                    <span class="slider-value" id="weeksOffValue">4</span>
+                </div>
+                <input type="range" id="weeksOff" min="0" max="12" value="4" step="1">
+                <div class="input-hint">Vacation, holidays, sick days</div>
+            </div>
+        </div>
+
+        <!-- Toggles -->
+        <div class="section">
+            <div class="section-title">
+                <div class="section-icon" style="background: linear-gradient(135deg, #f3e5f5, #e1bee7);">⚙️</div>
+                Advanced Options
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">Include Self-Employment Tax (15.3%)</span>
+                    <span class="toggle-hint">Automatically add to tax rate</span>
+                </div>
+                <div class="toggle-switch" id="seTaxToggle" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">Account for Unbillable Time (30%)</span>
+                    <span class="toggle-hint">Admin, sales, learning, etc.</span>
+                </div>
+                <div class="toggle-switch active" id="unbillableToggle" onclick="toggleSwitch(this)"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>💡 <strong>Tip:</strong> Many freelancers undercharge because they forget taxes and downtime.</p>
+            <p style="margin-top: 8px;">This tool is 100% private — no data leaves your browser.</p>
+            <p style="margin-top: 16px;">Built by <a href="https://devhandbook.io">devhandbook.io</a></p>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const state = {
+            desiredSalary: 85000,
+            profitMargin: 20,
+            taxRate: 25,
+            benefitsCost: 400,
+            hoursPerWeek: 25,
+            weeksOff: 4,
+            seTax: false,
+            unbillable: true,
+            expenses: [
+                { name: 'Software/Tools', amount: 50 },
+                { name: 'Coworking/Office', amount: 200 }
+            ]
+        };
+
+        // DOM refs
+        const els = {
+            desiredSalary: document.getElementById('desiredSalary'),
+            profitMargin: document.getElementById('profitMargin'),
+            taxRate: document.getElementById('taxRate'),
+            benefitsCost: document.getElementById('benefitsCost'),
+            hoursPerWeek: document.getElementById('hoursPerWeek'),
+            hoursPerWeekValue: document.getElementById('hoursPerWeekValue'),
+            weeksOff: document.getElementById('weeksOff'),
+            weeksOffValue: document.getElementById('weeksOffValue'),
+            seTaxToggle: document.getElementById('seTaxToggle'),
+            unbillableToggle: document.getElementById('unbillableToggle'),
+            expenseList: document.getElementById('expenseList'),
+            hourlyRate: document.getElementById('hourlyRate'),
+            yearlyNeed: document.getElementById('yearlyNeed'),
+            monthlyNeed: document.getElementById('monthlyNeed'),
+            billableHours: document.getElementById('billableHours')
+        };
+
+        // Format currency
+        function fmtCurrency(n) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0
+            }).format(n);
+        }
+
+        function fmtNumber(n) {
+            return new Intl.NumberFormat('en-US').format(n);
+        }
+
+        // Calculate
+        function calculate() {
+            // Working weeks per year
+            const workingWeeks = 52 - state.weeksOff;
+
+            // Gross hours per year
+            let grossHours = state.hoursPerWeek * workingWeeks;
+
+            // Account for unbillable time (admin, sales, etc.)
+            if (state.unbillable) {
+                grossHours = grossHours * 0.7; // 30% unbillable
+            }
+
+            const billableHours = Math.round(grossHours);
+
+            // Annual expenses
+            const annualExpenses = state.expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0) * 12, 0);
+            const annualBenefits = state.benefitsCost * 12;
+
+            // Total annual need (salary + benefits + expenses)
+            let totalNeed = state.desiredSalary + annualBenefits + annualExpenses;
+
+            // Add profit margin
+            const targetRevenue = totalNeed / (1 - state.profitMargin / 100);
+
+            // Apply tax rate
+            let effectiveTaxRate = state.taxRate;
+            if (state.seTax) {
+                effectiveTaxRate = Math.min(effectiveTaxRate + 15.3, 50);
+            }
+            const preTaxRevenue = targetRevenue / (1 - effectiveTaxRate / 100);
+
+            // Hourly rate
+            const hourlyRate = billableHours > 0 ? preTaxRevenue / billableHours : 0;
+
+            // Update UI
+            els.hourlyRate.textContent = fmtCurrency(hourlyRate) + '/hr';
+            els.yearlyNeed.textContent = fmtCurrency(preTaxRevenue);
+            els.monthlyNeed.textContent = fmtCurrency(preTaxRevenue / 12);
+            els.billableHours.textContent = fmtNumber(billableHours);
+        }
+
+        // Toggle switch
+        function toggleSwitch(el) {
+            el.classList.toggle('active');
+            if (el.id === 'seTaxToggle') {
+                state.seTax = el.classList.contains('active');
+            } else if (el.id === 'unbillableToggle') {
+                state.unbillable = el.classList.contains('active');
+            }
+            calculate();
+        }
+
+        // Add expense
+        function addExpense() {
+            const item = document.createElement('div');
+            item.className = 'expense-item';
+            item.innerHTML = `
+                <input type="text" placeholder="Expense name" value="">
+                <input type="number" placeholder="$/mo" value="0" min="0" step="10">
+                <button class="btn-remove" onclick="removeExpense(this)">×</button>
+            `;
+            els.expenseList.appendChild(item);
+            attachExpenseListeners(item);
+        }
+
+        // Remove expense
+        function removeExpense(btn) {
+            const items = els.expenseList.querySelectorAll('.expense-item');
+            if (items.length > 1) {
+                btn.closest('.expense-item').remove();
+                updateExpenses();
+                calculate();
+            }
+        }
+
+        // Update expenses from DOM
+        function updateExpenses() {
+            state.expenses = [];
+            els.expenseList.querySelectorAll('.expense-item').forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                state.expenses.push({
+                    name: inputs[0].value,
+                    amount: parseFloat(inputs[1].value) || 0
+                });
+            });
+        }
+
+        // Attach listeners to expense inputs
+        function attachExpenseListeners(item) {
+            item.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => {
+                    updateExpenses();
+                    calculate();
+                });
+            });
+        }
+
+        // Event listeners
+        els.desiredSalary.addEventListener('input', (e) => {
+            state.desiredSalary = parseFloat(e.target.value) || 0;
+            calculate();
+        });
+
+        els.profitMargin.addEventListener('input', (e) => {
+            state.profitMargin = parseFloat(e.target.value) || 0;
+            calculate();
+        });
+
+        els.taxRate.addEventListener('input', (e) => {
+            state.taxRate = parseFloat(e.target.value) || 0;
+            calculate();
+        });
+
+        els.benefitsCost.addEventListener('input', (e) => {
+            state.benefitsCost = parseFloat(e.target.value) || 0;
+            calculate();
+        });
+
+        els.hoursPerWeek.addEventListener('input', (e) => {
+            state.hoursPerWeek = parseInt(e.target.value);
+            els.hoursPerWeekValue.textContent = state.hoursPerWeek;
+            calculate();
+        });
+
+        els.weeksOff.addEventListener('input', (e) => {
+            state.weeksOff = parseInt(e.target.value);
+            els.weeksOffValue.textContent = state.weeksOff;
+            calculate();
+        });
+
+        // Attach listeners to initial expenses
+        els.expenseList.querySelectorAll('.expense-item').forEach(attachExpenseListeners);
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>

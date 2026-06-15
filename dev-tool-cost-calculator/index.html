@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Tool Cost Calculator — devhandbook.io</title>
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --bg-2: #11131a;
+      --bg-3: #161822;
+      --text: #e8eaf0;
+      --text-dim: #8b91a7;
+      --accent: #7c5cff;
+      --accent-2: #4f8cff;
+      --accent-3: #00d4aa;
+      --border: #1e2230;
+      --card: #141720;
+      --danger: #ff5c5c;
+      --warning: #ffb74d;
+      --success: #00d4aa;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.35);
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11,13,16,0.85);
+      backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    nav { display: flex; gap: 6px; }
+
+    nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+
+    nav a:hover { color: var(--text); background: var(--bg-3); }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 64px 24px 40px;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,92,255,0.12), transparent);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      background: linear-gradient(90deg, var(--text), #b8bdd1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-dim);
+      font-size: 1.15rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.45); }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card h2 .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    /* Inputs */
+    .field { margin-bottom: 18px; }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,92,255,0.15);
+    }
+
+    input[type="number"] { -moz-appearance: textfield; }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: var(--bg-3);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-switch.active { background: var(--accent); }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--text);
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle-switch.active::after { transform: translateX(20px); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(124,92,255,0.3);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,92,255,0.4); }
+
+    .btn-secondary {
+      background: var(--bg-3);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: var(--bg-2); }
+
+    /* Results */
+    .results-grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .metric {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .metric.danger::before { background: var(--danger); }
+    .metric.warning::before { background: var(--warning); }
+    .metric.success::before { background: var(--success); }
+
+    .metric-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    /* Chart */
+    .chart-wrap {
+      margin-top: 8px;
+    }
+
+    .chart-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .chart-label {
+      width: 90px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .chart-track {
+      flex: 1;
+      height: 32px;
+      background: var(--bg-2);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chart-fill {
+      height: 100%;
+      border-radius: var(--radius-sm);
+      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .chart-fill.saas { background: linear-gradient(90deg, #ff5c5c, #ff8a5c); }
+    .chart-fill.self { background: linear-gradient(90deg, #00d4aa, #4f8cff); }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: var(--bg-2);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .num { font-variant-numeric: tabular-nums; }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .badge.green { background: rgba(0,212,170,0.12); color: var(--success); border: 1px solid rgba(0,212,170,0.25); }
+    .badge.yellow { background: rgba(255,183,77,0.12); color: var(--warning); border: 1px solid rgba(255,183,77,0.25); }
+    .badge.red { background: rgba(255,92,92,0.12); color: var(--danger); border: 1px solid rgba(255,92,92,0.25); }
+
+    .decision-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--accent-2); text-decoration: none; }
+
+    /* Utility */
+    .hidden { display: none !important; }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 24px 0;
+    }
+
+    /* Custom tool modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 480px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal h3 {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">dh</div>
+      <span>devhandbook.io</span>
+    </a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/guides">Guides</a>
+      <a href="/tools">Tools</a>
+      <a href="/about">About</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Dev Tool Cost Calculator</h1>
+  <p>Compare SaaS subscriptions vs self-hosting alternatives. See the true total cost of ownership before you commit.</p>
+</section>
+
+<div class="container">
+  <!-- Sidebar: Inputs -->
+  <aside class="inputs-column">
+    <div class="card">
+      <h2><span class="dot"></span> Your Context</h2>
+      <div class="field">
+        <label for="hourlyRate">Hourly Rate</label>
+        <input type="number" id="hourlyRate" value="75" min="1">
+        <div class="hint">Your time cost per hour (USD)</div>
+      </div>
+      <div class="field">
+        <label for="teamSize">Team Size</label>
+        <input type="number" id="teamSize" value="5" min="1">
+        <div class="hint">Number of people using the tool</div>
+      </div>
+      <div class="field">
+        <label for="electricity">Electricity Cost</label>
+        <input type="number" id="electricity" value="0.15" min="0" step="0.01">
+        <div class="hint">$/kWh (US average ≈ $0.15)</div>
+      </div>
+      <div class="field">
+        <label for="timeHorizon">Time Horizon</label>
+        <select id="timeHorizon">
+          <option value="1">1 Year</option>
+          <option value="2">2 Years</option>
+          <option value="3" selected>3 Years</option>
+          <option value="5">5 Years</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> Select Tool</h2>
+      <div class="field">
+        <label for="toolSelect">Preset Tool</label>
+        <select id="toolSelect"></select>
+      </div>
+      <div class="field">
+        <button class="btn btn-secondary" id="btnAddCustom" style="width:100%;justify-content:center">+ Add Custom Tool</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> Tool Details</h2>
+      <div class="field">
+        <label for="tName">Tool Name</label>
+        <input type="text" id="tName" value="GitHub Copilot">
+      </div>
+      <div class="field">
+        <label for="tSaaSPrice">SaaS Price / User / Month</label>
+        <input type="number" id="tSaaSPrice" value="19" min="0" step="0.01">
+      </div>
+      <div class="field">
+        <label for="tHardwareCost">Self-Host Hardware Monthly</label>
+        <input type="number" id="tHardwareCost" value="0" min="0" step="0.01">
+        <div class="hint">Server/VPS cost per month</div>
+      </div>
+      <div class="field">
+        <label for="tLicenseCost">Self-Host License / Year</label>
+        <input type="number" id="tLicenseCost" value="0" min="0" step="0.01">
+      </div>
+      <div class="field">
+        <label for="tSetupHours">Setup Time (hours)</label>
+        <input type="number" id="tSetupHours" value="4" min="0" step="0.5">
+      </div>
+      <div class="field">
+        <label for="tMaintHours">Annual Maintenance (hours)</label>
+        <input type="number" id="tMaintHours" value="12" min="0" step="0.5">
+      </div>
+      <div class="field">
+        <label for="tPowerWatts">Server Power Draw (W)</label>
+        <input type="number" id="tPowerWatts" value="15" min="0" step="1">
+        <div class="hint">Raspberry Pi ≈ 7W, NUC ≈ 15-25W</div>
+      </div>
+      <div class="field">
+        <label for="tAltName">Self-Host Alternative</label>
+        <input type="text" id="tAltName" value="Continue.dev + Ollama">
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main: Results -->
+  <main class="results-column">
+    <div class="card results-card">
+      <h2><span class="dot"></span> Cost Comparison</h2>
+      <div class="metric-row">
+        <div class="metric" id="mSaaS">
+          <div class="metric-label">SaaS TCO</div>
+          <div class="metric-value" id="vSaaS">—</div>
+        </div>
+        <div class="metric" id="mSelf">
+          <div class="metric-label">Self-Host TCO</div>
+          <div class="metric-value" id="vSelf">—</div>
+        </div>
+        <div class="metric" id="mDiff">
+          <div class="metric-label">Difference</div>
+          <div class="metric-value" id="vDiff">—</div>
+        </div>
+        <div class="metric" id="mBreakEven">
+          <div class="metric-label">Break-Even Team Size</div>
+          <div class="metric-value" id="vBreakEven">—</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 style="font-size:1rem;margin-bottom:14px">Visual Breakdown</h3>
+      <div class="chart-wrap" id="chartWrap">
+        <div class="chart-bar">
+          <div class="chart-label">SaaS</div>
+          <div class="chart-track"><div class="chart-fill saas" id="barSaaS" style="width:0%">—</div></div>
+        </div>
+        <div class="chart-bar">
+          <div class="chart-label">Self-Host</div>
+          <div class="chart-track"><div class="chart-fill self" id="barSelf" style="width:0%">—</div></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 style="font-size:1rem;margin-bottom:14px">Detailed Breakdown</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th style="text-align:right">SaaS</th>
+              <th style="text-align:right">Self-Host</th>
+            </tr>
+          </thead>
+          <tbody id="breakdownBody">
+            <!-- JS fills -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="decision-area">
+        <span style="font-weight:700">Recommendation:</span>
+        <span class="badge" id="decisionBadge">—</span>
+        <span id="decisionText" style="color:var(--text-dim);font-size:0.9rem"></span>
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn btn-secondary" id="btnCopy">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Results
+        </button>
+      </div>
+    </div>
+
+    <!-- Scenario table -->
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> Scenario Analysis</h2>
+      <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px">See how costs scale with team size over your time horizon.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Team Size</th>
+              <th style="text-align:right">SaaS Total</th>
+              <th style="text-align:right">Self-Host Total</th>
+              <th style="text-align:right">Winner</th>
+              <th style="text-align:right">Savings</th>
+            </tr>
+          </thead>
+          <tbody id="scenarioBody">
+            <!-- JS fills -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <p>Built for <a href="https://devhandbook.io">devhandbook.io</a> — Open source, no trackers.</p>
+</footer>
+
+<!-- Modal -->
+<div class="modal-overlay" id="customModal">
+  <div class="modal">
+    <h3>Add Custom Tool</h3>
+    <div class="field">
+      <label>Tool Name</label>
+      <input type="text" id="cName" placeholder="e.g. My Custom Tool">
+    </div>
+    <div class="field">
+      <label>SaaS Price / User / Month</label>
+      <input type="number" id="cSaaSPrice" value="0" min="0" step="0.01">
+    </div>
+    <div class="field">
+      <label>Self-Host Alternative Name</label>
+      <input type="text" id="cAltName" placeholder="e.g. Self-hosted version">
+    </div>
+    <div class="field">
+      <label>Hardware Monthly Cost</label>
+      <input type="number" id="cHardwareCost" value="0" min="0" step="0.01">
+    </div>
+    <div class="field">
+      <label>Setup Time (hours)</label>
+      <input type="number" id="cSetupHours" value="4" min="0" step="0.5">
+    </div>
+    <div class="field">
+      <label>Annual Maintenance (hours)</label>
+      <input type="number" id="cMaintHours" value="8" min="0" step="0.5">
+    </div>
+    <div class="field">
+      <label>Server Power Draw (W)</label>
+      <input type="number" id="cPowerWatts" value="15" min="0" step="1">
+    </div>
+    <div class="field">
+      <label>License Cost / Year</label>
+      <input type="number" id="cLicenseCost" value="0" min="0" step="0.01">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btnCancelCustom">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveCustom">Add Tool</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ========== PRESETS ==========
+  const PRESETS = [
+    {
+      name: "GitHub Copilot",
+      saasPrice: 19,
+      altName: "Continue.dev + Ollama",
+      hardwareCost: 0,
+      licenseCost: 0,
+      setupHours: 3,
+      maintHours: 6,
+      powerWatts: 50 // local GPU or Mac
+    },
+    {
+      name: "n8n (Cloud)",
+      saasPrice: 24,
+      altName: "Self-hosted n8n",
+      hardwareCost: 6, // VPS
+      licenseCost: 0,
+      setupHours: 2,
+      maintHours: 8,
+      powerWatts: 20
+    },
+    {
+      name: "Zapier",
+      saasPrice: 20,
+      altName: "Self-hosted n8n or ActivePieces",
+      hardwareCost: 6,
+      licenseCost: 0,
+      setupHours: 4,
+      maintHours: 10,
+      powerWatts: 20
+    },
+    {
+      name: "Figma",
+      saasPrice: 15,
+      altName: "Penpot (self-hosted)",
+      hardwareCost: 8,
+      licenseCost: 0,
+      setupHours: 3,
+      maintHours: 10,
+      powerWatts: 25
+    },
+    {
+      name: "Notion",
+      saasPrice: 10,
+      altName: "Outline or AppFlowy",
+      hardwareCost: 6,
+      licenseCost: 0,
+      setupHours: 2,
+      maintHours: 8,
+      powerWatts: 20
+    },
+    {
+      name: "Linear",
+      saasPrice: 12,
+      altName: "Plane (self-hosted)",
+      hardwareCost: 6,
+      licenseCost: 0,
+      setupHours: 2,
+      maintHours: 8,
+      powerWatts: 20
+    },
+    {
+      name: "GitHub Actions",
+      saasPrice: 0.008, // per minute
+      altName: "Gitea Actions or Jenkins",
+      hardwareCost: 12,
+      licenseCost: 0,
+      setupHours: 6,
+      maintHours: 20,
+      powerWatts: 45,
+      isPerUsage: true,
+      usageUnit: "min",
+      usagePerUserMonth: 2400 // ~80 min/day
+    },
+    {
+      name: "Cloudflare Workers",
+      saasPrice: 5, // base + usage
+      altName: "Self-hosted Deno or Node.js",
+      hardwareCost: 6,
+      licenseCost: 0,
+      setupHours: 5,
+      maintHours: 16,
+      powerWatts: 20
+    },
+    {
+      name: "Datadog",
+      saasPrice: 15,
+      altName: "Uptime Kuma + Grafana",
+      hardwareCost: 8,
+      licenseCost: 0,
+      setupHours: 6,
+      maintHours: 20,
+      powerWatts: 25
+    },
+    {
+      name: "Vercel",
+      saasPrice: 20,
+      altName: "Coolify or Dokploy",
+      hardwareCost: 8,
+      licenseCost: 0,
+      setupHours: 5,
+      maintHours: 16,
+      powerWatts: 25
+    },
+    {
+      name: "Slack",
+      saasPrice: 8.75,
+      altName: "Mattermost or Zulip",
+      hardwareCost: 8,
+      licenseCost: 0,
+      setupHours: 3,
+      maintHours: 12,
+      powerWatts: 25
+    },
+    {
+      name: "Sentry",
+      saasPrice: 26,
+      altName: "Self-hosted Sentry",
+      hardwareCost: 12,
+      licenseCost: 0,
+      setupHours: 4,
+      maintHours: 14,
+      powerWatts: 35
+    }
+  ];
+
+  let customTools = [];
+  let currentTool = PRESETS[0];
+
+  // ========== DOM ==========
+  const $ = id => document.getElementById(id);
+  const fmtMoney = n => '$' + Math.round(n).toLocaleString();
+  const fmtMoneyCents = n => '$' + n.toLocaleString(undefined, {maximumFractionDigits:0});
+
+  // ========== INIT ==========
+  function init() {
+    populateSelect();
+    bindEvents();
+    calculate();
+  }
+
+  function populateSelect() {
+    const sel = $('toolSelect');
+    sel.innerHTML = '';
+    [...PRESETS, ...customTools].forEach((t, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = t.name;
+      sel.appendChild(opt);
+    });
+    const customOpt = document.createElement('option');
+    customOpt.value = 'custom';
+    customOpt.textContent = '— Custom —';
+    sel.appendChild(customOpt);
+  }
+
+  function loadTool(tool) {
+    currentTool = tool;
+    $('tName').value = tool.name || '';
+    $('tSaaSPrice').value = tool.saasPrice || 0;
+    $('tAltName').value = tool.altName || '';
+    $('tHardwareCost').value = tool.hardwareCost || 0;
+    $('tLicenseCost').value = tool.licenseCost || 0;
+    $('tSetupHours').value = tool.setupHours || 0;
+    $('tMaintHours').value = tool.maintHours || 0;
+    $('tPowerWatts').value = tool.powerWatts || 0;
+    calculate();
+  }
+
+  function getInputs() {
+    return {
+      hourlyRate: parseFloat($('hourlyRate').value) || 0,
+      teamSize: parseInt($('teamSize').value) || 1,
+      electricity: parseFloat($('electricity').value) || 0,
+      years: parseInt($('timeHorizon').value) || 1,
+      tool: {
+        name: $('tName').value,
+        saasPrice: parseFloat($('tSaaSPrice').value) || 0,
+        altName: $('tAltName').value,
+        hardwareCost: parseFloat($('tHardwareCost').value) || 0,
+        licenseCost: parseFloat($('tLicenseCost').value) || 0,
+        setupHours: parseFloat($('tSetupHours').value) || 0,
+        maintHours: parseFloat($('tMaintHours').value) || 0,
+        powerWatts: parseFloat($('tPowerWatts').value) || 0,
+        isPerUsage: currentTool.isPerUsage || false,
+        usagePerUserMonth: currentTool.usagePerUserMonth || 0
+      }
+    };
+  }
+
+  function calculate() {
+    const ctx = getInputs();
+    const t = ctx.tool;
+    const months = ctx.years * 12;
+
+    // SaaS cost
+    let saasTotal = 0;
+    if (t.isPerUsage) {
+      saasTotal = t.saasPrice * t.usagePerUserMonth * ctx.teamSize * months;
+    } else {
+      saasTotal = t.saasPrice * ctx.teamSize * months;
+    }
+
+    // Self-host cost
+    const electricityCostYear = (t.powerWatts / 1000) * 24 * 365 * ctx.electricity;
+    const electricityTotal = electricityCostYear * ctx.years;
+    const hardwareTotal = t.hardwareCost * months;
+    const licenseTotal = t.licenseCost * ctx.years;
+    const setupCost = t.setupHours * ctx.hourlyRate;
+    const maintCost = t.maintHours * ctx.years * ctx.hourlyRate;
+    const selfTotal = electricityTotal + hardwareTotal + licenseTotal + setupCost + maintCost;
+
+    // Metrics
+    const diff = saasTotal - selfTotal;
+    const isSaaSCheaper = saasTotal < selfTotal;
+
+    // Break-even team size (approx)
+    let breakEven = null;
+    if (t.isPerUsage) {
+      const perUserMonth = t.saasPrice * t.usagePerUserMonth;
+      const fixedSelf = electricityTotal + hardwareTotal + licenseTotal + setupCost + maintCost;
+      // This is wrong for per-usage — simplified:
+      breakEven = fixedSelf / (perUserMonth * months);
+    } else {
+      const fixedSelf = electricityTotal + hardwareTotal + licenseTotal + setupCost + maintCost;
+      breakEven = fixedSelf / (t.saasPrice * months);
+    }
+    breakEven = Math.ceil(breakEven * 10) / 10;
+    if (breakEven < 0 || !isFinite(breakEven)) breakEven = 1;
+
+    // Update metrics
+    $('vSaaS').textContent = fmtMoney(saasTotal);
+    $('vSelf').textContent = fmtMoney(selfTotal);
+    $('vDiff').textContent = (diff >= 0 ? '+' : '') + fmtMoney(diff);
+    $('vDiff').style.color = diff > 0 ? 'var(--success)' : (diff < 0 ? 'var(--danger)' : 'var(--text)');
+    $('vBreakEven').textContent = breakEven.toFixed(1);
+
+    $('mSaaS').className = 'metric ' + (saasTotal < selfTotal ? 'danger' : 'success');
+    $('mSelf').className = 'metric ' + (selfTotal < saasTotal ? 'success' : 'danger');
+    $('mDiff').className = 'metric ' + (diff > 0 ? 'success' : 'danger');
+
+    // Chart
+    const max = Math.max(saasTotal, selfTotal, 1);
+    const saasPct = Math.max(4, (saasTotal / max) * 100);
+    const selfPct = Math.max(4, (selfTotal / max) * 100);
+    $('barSaaS').style.width = saasPct + '%';
+    $('barSaaS').textContent = fmtMoney(saasTotal);
+    $('barSelf').style.width = selfPct + '%';
+    $('barSelf').textContent = fmtMoney(selfTotal);
+
+    // Breakdown table
+    const rows = [
+      ['Subscription', saasTotal, 0],
+      ['Hardware / VPS', 0, hardwareTotal],
+      ['Electricity', 0, electricityTotal],
+      ['License', 0, licenseTotal],
+      ['Setup (time)', 0, setupCost],
+      ['Maintenance (time)', 0, maintCost],
+    ];
+    $('breakdownBody').innerHTML = rows.map(r => `
+      <tr>
+        <td>${r[0]}</td>
+        <td class="num" style="text-align:right;color:${r[1] ? 'var(--text)' : 'var(--text-dim)'}">${r[1] ? fmtMoney(r[1]) : '—'}</td>
+        <td class="num" style="text-align:right;color:${r[2] ? 'var(--text)' : 'var(--text-dim)'}">${r[2] ? fmtMoney(r[2]) : '—'}</td>
+      </tr>
+    `).join('') + `
+      <tr style="font-weight:700">
+        <td>Total (${ctx.years}Y)</td>
+        <td class="num" style="text-align:right">${fmtMoney(saasTotal)}</td>
+        <td class="num" style="text-align:right">${fmtMoney(selfTotal)}</td>
+      </tr>
+    `;
+
+    // Decision badge
+    const badge = $('decisionBadge');
+    const dText = $('decisionText');
+    const pctDiff = Math.abs(diff) / Math.max(saasTotal, selfTotal, 1) * 100;
+    if (diff > 0 && pctDiff > 15) {
+      badge.className = 'badge green';
+      badge.textContent = 'Self-Host Wins';
+      dText.textContent = `Self-hosting saves ${fmtMoney(diff)} over ${ctx.years} year(s). Worth it if you have ops capacity.`;
+    } else if (diff < 0 && pctDiff > 15) {
+      badge.className = 'badge red';
+      badge.textContent = 'SaaS Wins';
+      dText.textContent = `SaaS is cheaper by ${fmtMoney(-diff)}. Self-hosting only makes sense for control/privacy reasons.`;
+    } else {
+      badge.className = 'badge yellow';
+      badge.textContent = 'Roughly Equal';
+      dText.textContent = `Costs are within ~15%. Decision should be based on features, control, and team preference.`;
+    }
+
+    // Scenario table
+    const scenarios = [1, 3, 5, 10, 20, 50];
+    $('scenarioBody').innerHTML = scenarios.map(ts => {
+      let sTotal = t.isPerUsage
+        ? t.saasPrice * t.usagePerUserMonth * ts * months
+        : t.saasPrice * ts * months;
+      // self cost doesn't scale with team for most tools (same server)
+      const selfFixed = electricityTotal + hardwareTotal + licenseTotal + setupCost + maintCost;
+      const winner = sTotal < selfFixed ? 'SaaS' : 'Self-Host';
+      const savings = Math.abs(sTotal - selfFixed);
+      return `
+        <tr>
+          <td>${ts}</td>
+          <td class="num" style="text-align:right">${fmtMoney(sTotal)}</td>
+          <td class="num" style="text-align:right">${fmtMoney(selfFixed)}</td>
+          <td class="num" style="text-align:right;font-weight:700;color:${winner==='SaaS'?'var(--danger)':'var(--success)'}">${winner}</td>
+          <td class="num" style="text-align:right">${fmtMoney(savings)}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function bindEvents() {
+    const ids = ['hourlyRate','teamSize','electricity','timeHorizon','tName','tSaaSPrice','tHardwareCost','tLicenseCost','tSetupHours','tMaintHours','tPowerWatts','tAltName'];
+    ids.forEach(id => {
+      $(id).addEventListener('input', calculate);
+    });
+
+    $('toolSelect').addEventListener('change', e => {
+      const val = e.target.value;
+      if (val === 'custom') {
+        openModal();
+        e.target.value = '0';
+        return;
+      }
+      const idx = parseInt(val);
+      const all = [...PRESETS, ...customTools];
+      if (all[idx]) loadTool(all[idx]);
+    });
+
+    $('btnAddCustom').addEventListener('click', openModal);
+    $('btnCancelCustom').addEventListener('click', closeModal);
+    $('btnSaveCustom').addEventListener('click', saveCustom);
+    $('btnCopy').addEventListener('click', copyResults);
+
+    // Close modal on overlay click
+    $('customModal').addEventListener('click', e => {
+      if (e.target === $('customModal')) closeModal();
+    });
+  }
+
+  function openModal() {
+    $('customModal').classList.add('show');
+  }
+
+  function closeModal() {
+    $('customModal').classList.remove('show');
+  }
+
+  function saveCustom() {
+    const tool = {
+      name: $('cName').value || 'Custom Tool',
+      saasPrice: parseFloat($('cSaaSPrice').value) || 0,
+      altName: $('cAltName').value || 'Self-hosted',
+      hardwareCost: parseFloat($('cHardwareCost').value) || 0,
+      licenseCost: parseFloat($('cLicenseCost').value) || 0,
+      setupHours: parseFloat($('cSetupHours').value) || 0,
+      maintHours: parseFloat($('cMaintHours').value) || 0,
+      powerWatts: parseFloat($('cPowerWatts').value) || 0
+    };
+    customTools.push(tool);
+    populateSelect();
+    $('toolSelect').value = (PRESETS.length + customTools.length - 1).toString();
+    loadTool(tool);
+    closeModal();
+    // Clear inputs
+    ['cName','cAltName'].forEach(id => $(id).value = '');
+    ['cSaaSPrice','cHardwareCost','cLicenseCost','cSetupHours','cMaintHours','cPowerWatts'].forEach(id => $(id).value = '0');
+  }
+
+  function copyResults() {
+    const ctx = getInputs();
+    const t = ctx.tool;
+    const saas = $('vSaaS').textContent;
+    const self = $('vSelf').textContent;
+    const diff = $('vDiff').textContent;
+    const badge = $('decisionBadge').textContent;
+    const text = `Dev Tool Cost Comparison — ${t.name}\n\n` +
+      `SaaS TCO: ${saas}\n` +
+      `Self-Host TCO: ${self}\n` +
+      `Difference: ${diff}\n` +
+      `Recommendation: ${badge}\n\n` +
+      `— devhandbook.io/calculator`;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = $('btnCopy');
+      const original = btn.innerHTML;
+      btn.innerHTML = 'Copied!';
+      setTimeout(() => btn.innerHTML = original, 1500);
+    });
+  }
+
+  // Run
+  init();
+</script>
+</body>
+</html>
