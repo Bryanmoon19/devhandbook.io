@@ -1,9 +1,9 @@
 ---
 title: "Self-Hosted Audiobookshelf: The Complete 2026 Guide to Owning Your Audiobooks"
 description: "A comprehensive guide to setting up Audiobookshelf — the open-source audiobook and podcast server that replaces Audible. Docker Compose, Proxmox LXC, mobile apps, reverse proxy, and VPN setup."
-date: 2026-04-23
+date: 2026-07-01
 author: Bryan Moon
-draft: true
+draft: false
 tags:
   - self-hosting
   - audiobooks
