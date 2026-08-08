@@ -23,6 +23,12 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("homelab-cost-calculator");
   eleventyConfig.addPassthroughCopy("finance-tracker");
   eleventyConfig.addPassthroughCopy("freelance-rate-calculator");
+  eleventyConfig.addPassthroughCopy("ai-model-picker");
+  eleventyConfig.addPassthroughCopy("dev-tool-cost-calculator");
+  eleventyConfig.addPassthroughCopy("diff-checker");
+  eleventyConfig.addPassthroughCopy("docker-compose-generator");
+  eleventyConfig.addPassthroughCopy("freelancer-tax-estimator");
+  eleventyConfig.addPassthroughCopy("token-counter");
   eleventyConfig.addPassthroughCopy("og-images");
 
   // Blog collection sorted by date descending

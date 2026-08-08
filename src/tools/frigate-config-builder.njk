@@ -1,0 +1,946 @@
+---
+title: "Frigate Config Builder"
+description: "Generate a ready-to-use Frigate NVR configuration file. Pick your cameras, Coral TPU, and recording preferences."
+layout: base.njk
+tool:
+  name: "Frigate Config Builder"
+  description: "Build a production-ready Frigate config.yml for your security camera setup"
+  icon: "📹"
+  category: "Homelab"
+  keywords:
+    - frigate
+    - nvr
+    - security camera
+    - coral tpu
+    - home assistant
+    - config generator
+---
+
+{% block toolStyles %}
+<style>
+  .frigate-builder {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .frigate-builder .step {
+    background: var(--bg-card, #1e1e2e);
+    border: 1px solid var(--border, #313244);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .frigate-builder .step h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    color: var(--text-primary, #cdd6f4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .frigate-builder .step h3 .step-num {
+    background: var(--accent, #89b4fa);
+    color: #1e1e2e;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .frigate-builder .step p.desc {
+    color: var(--text-secondary, #a6adc8);
+    font-size: 0.9rem;
+    margin: 0 0 16px 0;
+  }
+  .frigate-builder .form-group {
+    margin-bottom: 16px;
+  }
+  .frigate-builder label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-primary, #cdd6f4);
+    font-size: 0.9rem;
+  }
+  .frigate-builder select,
+  .frigate-builder input[type="text"],
+  .frigate-builder input[type="number"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border, #313244);
+    border-radius: 8px;
+    background: var(--bg-input, #181825);
+    color: var(--text-primary, #cdd6f4);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .frigate-builder select:focus,
+  .frigate-builder input:focus {
+    outline: none;
+    border-color: var(--accent, #89b4fa);
+    box-shadow: 0 0 0 3px rgba(137, 180, 250, 0.15);
+  }
+  .frigate-builder .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .frigate-builder .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 400;
+    padding: 8px 14px;
+    border: 1px solid var(--border, #313244);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+  .frigate-builder .checkbox-group label:hover {
+    border-color: var(--accent, #89b4fa);
+  }
+  .frigate-builder .checkbox-group input:checked + span {
+    color: var(--accent, #89b4fa);
+  }
+  .frigate-builder .checkbox-group label:has(input:checked) {
+    border-color: var(--accent, #89b4fa);
+    background: rgba(137, 180, 250, 0.08);
+  }
+  .frigate-builder .camera-card {
+    background: var(--bg-input, #181825);
+    border: 1px solid var(--border, #313244);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .frigate-builder .camera-card .remove-cam {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-secondary, #a6adc8);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .frigate-builder .camera-card .remove-cam:hover {
+    color: #f38ba8;
+    background: rgba(243, 139, 168, 0.1);
+  }
+  .frigate-builder .camera-card .cam-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .frigate-builder .camera-card .cam-name {
+    font-weight: 600;
+    color: var(--text-primary, #cdd6f4);
+  }
+  .frigate-builder .cam-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .frigate-builder .cam-row.three {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .frigate-builder .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .frigate-builder .btn-primary {
+    background: var(--accent, #89b4fa);
+    color: #1e1e2e;
+  }
+  .frigate-builder .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+  .frigate-builder .btn-secondary {
+    background: var(--bg-input, #181825);
+    color: var(--text-primary, #cdd6f4);
+    border: 1px solid var(--border, #313244);
+  }
+  .frigate-builder .btn-secondary:hover {
+    border-color: var(--accent, #89b4fa);
+  }
+  .frigate-builder .btn-danger {
+    background: rgba(243, 139, 168, 0.15);
+    color: #f38ba8;
+    border: 1px solid rgba(243, 139, 168, 0.3);
+  }
+  .frigate-builder .btn-sm {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+  }
+  .frigate-builder .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .frigate-builder .output-area {
+    background: var(--bg-input, #181825);
+    border: 1px solid var(--border, #313244);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    position: relative;
+  }
+  .frigate-builder .output-area pre {
+    margin: 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text-primary, #cdd6f4);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .frigate-builder .output-area .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+  .frigate-builder .output-area .yaml-comment {
+    color: #6c7086;
+  }
+  .frigate-builder .output-area .yaml-key {
+    color: #89b4fa;
+  }
+  .frigate-builder .output-area .yaml-string {
+    color: #a6e3a1;
+  }
+  .frigate-builder .output-area .yaml-number {
+    color: #fab387;
+  }
+  .frigate-builder .output-area .yaml-bool {
+    color: #cba6f7;
+  }
+  .frigate-builder .preset-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(137, 180, 250, 0.15);
+    color: #89b4fa;
+  }
+  .frigate-builder .info-callout {
+    background: rgba(137, 180, 250, 0.08);
+    border-left: 3px solid var(--accent, #89b4fa);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary, #a6adc8);
+  }
+  .frigate-builder .detection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
+  .frigate-builder .detection-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border, #313244);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+  .frigate-builder .detection-item:hover {
+    border-color: var(--accent, #89b4fa);
+  }
+  .frigate-builder .detection-item.selected {
+    border-color: var(--accent, #89b4fa);
+    background: rgba(137, 180, 250, 0.08);
+  }
+  .frigate-builder .detection-item .emoji {
+    font-size: 1.2rem;
+  }
+  .frigate-builder .mqtt-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-top: 8px;
+  }
+  .frigate-builder .mqtt-status.required {
+    background: rgba(249, 226, 175, 0.1);
+    color: #f9e2af;
+    border: 1px solid rgba(249, 226, 175, 0.2);
+  }
+  @media (max-width: 640px) {
+    .frigate-builder .cam-row {
+      grid-template-columns: 1fr;
+    }
+    .frigate-builder .cam-row.three {
+      grid-template-columns: 1fr;
+    }
+    .frigate-builder .detection-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+{% endblock %}
+
+{% block toolContent %}
+<div class="frigate-builder">
+  <div class="info-callout">
+    <strong>🔧 What this does:</strong> Answer a few questions about your camera setup and we'll generate a production-ready <code>config.yml</code> for Frigate NVR. Copy, paste, and you're running.
+  </div>
+
+  <!-- Step 1: MQTT -->
+  <div class="step">
+    <h3><span class="step-num">1</span> MQTT Broker</h3>
+    <p class="desc">Frigate requires MQTT for events and Home Assistant integration.</p>
+    <div class="form-group">
+      <label for="mqtt-host">MQTT Host</label>
+      <input type="text" id="mqtt-host" value="192.168.1.10" placeholder="e.g. 192.168.1.10 or mosquitto.local">
+    </div>
+    <div class="cam-row">
+      <div class="form-group">
+        <label for="mqtt-port">MQTT Port</label>
+        <input type="number" id="mqtt-port" value="1883">
+      </div>
+      <div class="form-group">
+        <label for="mqtt-user">Username (optional)</label>
+        <input type="text" id="mqtt-user" placeholder="mqtt-user">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="mqtt-pass">Password (optional)</label>
+      <input type="text" id="mqtt-pass" placeholder="mqtt-password" autocomplete="off">
+    </div>
+    <div class="mqtt-status required">
+      ⚠️ <strong>Required:</strong> Frigate won't start without a working MQTT broker. If you use Home Assistant, the Mosquitto addon works great.
+    </div>
+  </div>
+
+  <!-- Step 2: Coral TPU -->
+  <div class="step">
+    <h3><span class="step-num">2</span> Coral TPU / Detector</h3>
+    <p class="desc">Frigate uses a Google Coral TPU for real-time object detection. Pick your hardware.</p>
+    <div class="form-group">
+      <label for="detector-type">Detector Type</label>
+      <select id="detector-type">
+        <option value="coral-usb">Coral USB Accelerator</option>
+        <option value="coral-pcie">Coral M.2 / PCIe (Dual TPU)</option>
+        <option value="coral-pcie-single">Coral M.2 / PCIe (Single TPU)</option>
+        <option value="openvino">OpenVINO (Intel iGPU/CPU — no Coral needed)</option>
+        <option value="cpu">CPU Only (slow, dev/testing only)</option>
+      </select>
+    </div>
+    <div class="form-group" id="coral-device-group">
+      <label for="coral-device">Device Path</label>
+      <input type="text" id="coral-device" value="/dev/bus/usb/001/002" placeholder="Device path">
+      <p class="desc" style="margin-top:4px;">USB default: <code>/dev/bus/usb/001/002</code> | PCIe: <code>/dev/apex_0</code> | Run <code>ls /dev/apex_*</code> or <code>lsusb</code> to find yours.</p>
+    </div>
+  </div>
+
+  <!-- Step 3: Cameras -->
+  <div class="step">
+    <h3><span class="step-num">3</span> Cameras</h3>
+    <p class="desc">Add your cameras. Use the presets for common models, or enter custom RTSP URLs.</p>
+    <div id="cameras-container">
+      <!-- Camera cards inserted by JS -->
+    </div>
+    <div class="btn-row" style="margin-top: 12px;">
+      <button class="btn btn-secondary btn-sm" onclick="addCamera()">+ Add Camera</button>
+      <button class="btn btn-secondary btn-sm" onclick="addPresetCamera('reolink')">+ Reolink Preset</button>
+      <button class="btn btn-secondary btn-sm" onclick="addPresetCamera('amcrest')">+ Amcrest Preset</button>
+      <button class="btn btn-secondary btn-sm" onclick="addPresetCamera('hikvision')">+ Hikvision Preset</button>
+      <button class="btn btn-secondary btn-sm" onclick="addPresetCamera('dahua')">+ Dahua Preset</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Recording -->
+  <div class="step">
+    <h3><span class="step-num">4</span> Recording & Storage</h3>
+    <p class="desc">Configure how Frigate records and retains footage.</p>
+    <div class="cam-row three">
+      <div class="form-group">
+        <label for="retain-days">Retain Days (all footage)</label>
+        <input type="number" id="retain-days" value="7" min="1" max="365">
+      </div>
+      <div class="form-group">
+        <label for="retain-events">Retain Events (detections)</label>
+        <input type="number" id="retain-events" value="30" min="1" max="365">
+      </div>
+      <div class="form-group">
+        <label for="pre-capture">Pre-Capture (seconds)</label>
+        <input type="number" id="pre-capture" value="5" min="0" max="30">
+      </div>
+    </div>
+    <div class="cam-row three">
+      <div class="form-group">
+        <label for="post-capture">Post-Capture (seconds)</label>
+        <input type="number" id="post-capture" value="5" min="0" max="60">
+      </div>
+      <div class="form-group">
+        <label for="storage-path">Storage Path</label>
+        <input type="text" id="storage-path" value="/media/frigate" placeholder="/media/frigate">
+      </div>
+      <div class="form-group">
+        <label for="storage-size">Storage Size (GB)</label>
+        <input type="number" id="storage-size" value="500" min="10">
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5: Detection Objects -->
+  <div class="step">
+    <h3><span class="step-num">5</span> Objects to Detect</h3>
+    <p class="desc">Select which objects Frigate should track. Click to toggle.</p>
+    <div class="detection-grid" id="detection-grid">
+      <div class="detection-item selected" data-object="person"><span class="emoji">🧑</span> Person</div>
+      <div class="detection-item selected" data-object="car"><span class="emoji">🚗</span> Car</div>
+      <div class="detection-item" data-object="cat"><span class="emoji">🐱</span> Cat</div>
+      <div class="detection-item" data-object="dog"><span class="emoji">🐕</span> Dog</div>
+      <div class="detection-item" data-object="bicycle"><span class="emoji">🚲</span> Bicycle</div>
+      <div class="detection-item" data-object="motorcycle"><span class="emoji">🏍️</span> Motorcycle</div>
+      <div class="detection-item" data-object="bird"><span class="emoji">🐦</span> Bird</div>
+      <div class="detection-item" data-object="truck"><span class="emoji">🚛</span> Truck</div>
+      <div class="detection-item" data-object="bus"><span class="emoji">🚌</span> Bus</div>
+      <div class="detection-item" data-object="boat"><span class="emoji">⛵</span> Boat</div>
+      <div class="detection-item" data-object="horse"><span class="emoji">🐴</span> Horse</div>
+      <div class="detection-item" data-object="sheep"><span class="emoji">🐑</span> Sheep</div>
+      <div class="detection-item" data-object="cow"><span class="emoji">🐄</span> Cow</div>
+      <div class="detection-item" data-object="bear"><span class="emoji">🐻</span> Bear</div>
+      <div class="detection-item" data-object="deer"><span class="emoji">🦌</span> Deer</div>
+      <div class="detection-item" data-object="package"><span class="emoji">📦</span> Package</div>
+      <div class="detection-item" data-object="license_plate"><span class="emoji">🪪</span> License Plate</div>
+      <div class="detection-item" data-object="amazon"><span class="emoji">📬</span> Amazon</div>
+      <div class="detection-item" data-object="ups"><span class="emoji">🚚</span> UPS</div>
+      <div class="detection-item" data-object="fedex"><span class="emoji">📮</span> FedEx</div>
+    </div>
+  </div>
+
+  <!-- Step 6: Advanced -->
+  <div class="step">
+    <h3><span class="step-num">6</span> Advanced Options</h3>
+    <p class="desc">Optional settings for fine-tuning.</p>
+    <div class="cam-row">
+      <div class="form-group">
+        <label for="snapshots-enabled">Snapshots</label>
+        <select id="snapshots-enabled">
+          <option value="true">Enabled</option>
+          <option value="false">Disabled</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="rtmp-enabled">RTMP Restream</label>
+        <select id="rtmp-enabled">
+          <option value="false">Disabled (recommended)</option>
+          <option value="true">Enabled</option>
+        </select>
+      </div>
+    </div>
+    <div class="cam-row">
+      <div class="form-group">
+        <label for="birdseye-enabled">Birdseye View</label>
+        <select id="birdseye-enabled">
+          <option value="true">Enabled</option>
+          <option value="false">Disabled</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="birdseye-mode">Birdseye Mode</label>
+        <select id="birdseye-mode">
+          <option value="objects">Objects</option>
+          <option value="motion">Motion</option>
+          <option value="continuous">Continuous</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="ffmpeg-input-args">Custom FFmpeg Input Args (optional)</label>
+      <input type="text" id="ffmpeg-input-args" placeholder="e.g. -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1">
+    </div>
+  </div>
+
+  <!-- Generate Button -->
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="generateConfig()">🔧 Generate config.yml</button>
+    <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset</button>
+  </div>
+
+  <!-- Output -->
+  <div class="output-area" id="output-area" style="display:none;">
+    <button class="btn btn-secondary btn-sm copy-btn" onclick="copyConfig()">📋 Copy</button>
+    <pre id="config-output"></pre>
+  </div>
+</div>
+{% endblock %}
+
+{% block toolScripts %}
+<script>
+  // Camera presets
+  const CAMERA_PRESETS = {
+    reolink: {
+      name: 'Reolink',
+      subStream: 'rtsp://USER:PASS@CAM_IP:554/h264Preview_01_sub',
+      mainStream: 'rtsp://USER:PASS@CAM_IP:554/h264Preview_01_main',
+      width: 2560, height: 1920,
+      fps: 5,
+      detectWidth: 640, detectHeight: 480,
+      detectFps: 5
+    },
+    amcrest: {
+      name: 'Amcrest',
+      subStream: 'rtsp://USER:PASS@CAM_IP:554/cam/realmonitor?channel=1&subtype=1',
+      mainStream: 'rtsp://USER:PASS@CAM_IP:554/cam/realmonitor?channel=1&subtype=0',
+      width: 2688, height: 1520,
+      fps: 5,
+      detectWidth: 704, detectHeight: 480,
+      detectFps: 5
+    },
+    hikvision: {
+      name: 'Hikvision',
+      subStream: 'rtsp://USER:PASS@CAM_IP:554/Streaming/Channels/102',
+      mainStream: 'rtsp://USER:PASS@CAM_IP:554/Streaming/Channels/101',
+      width: 2688, height: 1520,
+      fps: 5,
+      detectWidth: 704, detectHeight: 480,
+      detectFps: 5
+    },
+    dahua: {
+      name: 'Dahua',
+      subStream: 'rtsp://USER:PASS@CAM_IP:554/cam/realmonitor?channel=1&subtype=1',
+      mainStream: 'rtsp://USER:PASS@CAM_IP:554/cam/realmonitor?channel=1&subtype=0',
+      width: 2688, height: 1520,
+      fps: 5,
+      detectWidth: 704, detectHeight: 480,
+      detectFps: 5
+    }
+  };
+
+  let cameraCount = 0;
+  let cameras = [];
+
+  function addCamera(preset = null) {
+    cameraCount++;
+    const id = cameraCount;
+    const cam = preset ? { ...preset, id } : {
+      id,
+      name: `Camera ${id}`,
+      subStream: '',
+      mainStream: '',
+      width: 1920, height: 1080,
+      fps: 5,
+      detectWidth: 640, detectHeight: 480,
+      detectFps: 5
+    };
+    cameras.push(cam);
+    renderCameras();
+  }
+
+  function addPresetCamera(presetName) {
+    const preset = CAMERA_PRESETS[presetName];
+    if (!preset) return;
+    cameraCount++;
+    const cam = { ...preset, id: cameraCount, name: `${preset.name} ${cameraCount}` };
+    cameras.push(cam);
+    renderCameras();
+  }
+
+  function removeCamera(id) {
+    cameras = cameras.filter(c => c.id !== id);
+    renderCameras();
+  }
+
+  function updateCamera(id, field, value) {
+    const cam = cameras.find(c => c.id === id);
+    if (cam) {
+      if (field === 'width' || field === 'height' || field === 'fps' || field === 'detectWidth' || field === 'detectHeight' || field === 'detectFps') {
+        cam[field] = parseInt(value) || 0;
+      } else {
+        cam[field] = value;
+      }
+    }
+  }
+
+  function renderCameras() {
+    const container = document.getElementById('cameras-container');
+    if (cameras.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem; padding: 12px 0;">No cameras added yet. Click a button above to add one.</p>';
+      return;
+    }
+    container.innerHTML = cameras.map(cam => `
+      <div class="camera-card">
+        <button class="remove-cam" onclick="removeCamera(${cam.id})" title="Remove camera">✕</button>
+        <div class="cam-header">
+          <span class="cam-name">📷 ${escapeHtml(cam.name)}</span>
+        </div>
+        <div class="form-group">
+          <label>Camera Name</label>
+          <input type="text" value="${escapeHtml(cam.name)}" onchange="updateCamera(${cam.id}, 'name', this.value)" placeholder="Front Door">
+        </div>
+        <div class="cam-row">
+          <div class="form-group">
+            <label>Sub Stream (detect) RTSP URL</label>
+            <input type="text" value="${escapeHtml(cam.subStream)}" onchange="updateCamera(${cam.id}, 'subStream', this.value)" placeholder="rtsp://user:pass@ip:554/stream1">
+          </div>
+          <div class="form-group">
+            <label>Main Stream (record) RTSP URL</label>
+            <input type="text" value="${escapeHtml(cam.mainStream)}" onchange="updateCamera(${cam.id}, 'mainStream', this.value)" placeholder="rtsp://user:pass@ip:554/stream0">
+          </div>
+        </div>
+        <div class="cam-row three">
+          <div class="form-group">
+            <label>Resolution (W×H)</label>
+            <div style="display:flex;gap:8px;">
+              <input type="number" value="${cam.width}" onchange="updateCamera(${cam.id}, 'width', this.value)" placeholder="Width" style="flex:1;">
+              <span style="align-self:center;color:var(--text-secondary);">×</span>
+              <input type="number" value="${cam.height}" onchange="updateCamera(${cam.id}, 'height', this.value)" placeholder="Height" style="flex:1;">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Record FPS</label>
+            <input type="number" value="${cam.fps}" onchange="updateCamera(${cam.id}, 'fps', this.value)" min="1" max="30">
+          </div>
+          <div class="form-group">
+            <label>Detect FPS</label>
+            <input type="number" value="${cam.detectFps}" onchange="updateCamera(${cam.id}, 'detectFps', this.value)" min="1" max="15">
+          </div>
+        </div>
+        <div class="cam-row">
+          <div class="form-group">
+            <label>Detect Resolution (W×H)</label>
+            <div style="display:flex;gap:8px;">
+              <input type="number" value="${cam.detectWidth}" onchange="updateCamera(${cam.id}, 'detectWidth', this.value)" placeholder="Width" style="flex:1;">
+              <span style="align-self:center;color:var(--text-secondary);">×</span>
+              <input type="number" value="${cam.detectHeight}" onchange="updateCamera(${cam.id}, 'detectHeight', this.value)" placeholder="Height" style="flex:1;">
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Detection grid toggle
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.detection-item').forEach(item => {
+      item.addEventListener('click', () => {
+        item.classList.toggle('selected');
+      });
+    });
+
+    // Update Coral device path when detector type changes
+    document.getElementById('detector-type').addEventListener('change', function() {
+      const deviceInput = document.getElementById('coral-device');
+      const deviceGroup = document.getElementById('coral-device-group');
+      switch(this.value) {
+        case 'coral-usb':
+          deviceInput.value = '/dev/bus/usb/001/002';
+          deviceGroup.style.display = 'block';
+          break;
+        case 'coral-pcie':
+        case 'coral-pcie-single':
+          deviceInput.value = '/dev/apex_0';
+          deviceGroup.style.display = 'block';
+          break;
+        case 'openvino':
+          deviceInput.value = '';
+          deviceGroup.style.display = 'none';
+          break;
+        case 'cpu':
+          deviceInput.value = '';
+          deviceGroup.style.display = 'none';
+          break;
+      }
+    });
+
+    // Start with one camera
+    addCamera();
+  });
+
+  function getSelectedObjects() {
+    const selected = [];
+    document.querySelectorAll('.detection-item.selected').forEach(item => {
+      selected.push(item.dataset.object);
+    });
+    return selected;
+  }
+
+  function generateConfig() {
+    const mqttHost = document.getElementById('mqtt-host').value || '192.168.1.10';
+    const mqttPort = document.getElementById('mqtt-port').value || '1883';
+    const mqttUser = document.getElementById('mqtt-user').value;
+    const mqttPass = document.getElementById('mqtt-pass').value;
+    const detectorType = document.getElementById('detector-type').value;
+    const coralDevice = document.getElementById('coral-device').value;
+    const retainDays = document.getElementById('retain-days').value || '7';
+    const retainEvents = document.getElementById('retain-events').value || '30';
+    const preCapture = document.getElementById('pre-capture').value || '5';
+    const postCapture = document.getElementById('post-capture').value || '5';
+    const storagePath = document.getElementById('storage-path').value || '/media/frigate';
+    const snapshotsEnabled = document.getElementById('snapshots-enabled').value;
+    const rtmpEnabled = document.getElementById('rtmp-enabled').value;
+    const birdseyeEnabled = document.getElementById('birdseye-enabled').value;
+    const birdseyeMode = document.getElementById('birdseye-mode').value;
+    const ffmpegInputArgs = document.getElementById('ffmpeg-input-args').value;
+    const objects = getSelectedObjects();
+
+    if (cameras.length === 0) {
+      alert('Please add at least one camera.');
+      return;
+    }
+
+    if (objects.length === 0) {
+      alert('Please select at least one object to detect.');
+      return;
+    }
+
+    let yaml = '';
+
+    // Header
+    yaml += '# ============================================\n';
+    yaml += '# Frigate Config — Generated by devhandbook.io\n';
+    yaml += '# ============================================\n';
+    yaml += '# Review and adjust before deploying!\n';
+    yaml += '# Docs: https://docs.frigate.video\n\n';
+
+    // MQTT
+    yaml += '# --- MQTT ---\n';
+    yaml += '# Required. Frigate uses MQTT for internal comms and Home Assistant integration.\n';
+    yaml += 'mqtt:\n';
+    yaml += `  host: ${mqttHost}\n`;
+    yaml += `  port: ${mqttPort}\n`;
+    if (mqttUser) {
+      yaml += `  user: ${mqttUser}\n`;
+      yaml += `  password: ${mqttPass || 'YOUR_MQTT_PASSWORD'}\n`;
+    }
+    yaml += '\n';
+
+    // Detectors
+    yaml += '# --- Detectors ---\n';
+    yaml += '# Google Coral TPU for real-time object detection.\n';
+    yaml += 'detectors:\n';
+    if (detectorType === 'openvino') {
+      yaml += '  ov:\n';
+      yaml += '    type: openvino\n';
+      yaml += '    device: AUTO\n';
+      yaml += '    model:\n';
+      yaml += '      path: /openvino-model/ssdlite_mobilenet_v2.xml\n';
+    } else if (detectorType === 'cpu') {
+      yaml += '  cpu1:\n';
+      yaml += '    type: cpu\n';
+      yaml += '    num_threads: 3\n';
+    } else {
+      yaml += '  coral:\n';
+      yaml += '    type: edgetpu\n';
+      yaml += `    device: ${detectorType.startsWith('coral-pcie') ? 'pci' : 'usb'}\n`;
+      if (detectorType === 'coral-pcie') {
+        yaml += '    num_detectors: 2  # Dual TPU — comment out for single\n';
+      }
+    }
+    yaml += '\n';
+
+    // Birdseye
+    yaml += '# --- Birdseye View ---\n';
+    yaml += '# Combines all camera feeds into one overview.\n';
+    yaml += 'birdseye:\n';
+    yaml += `  enabled: ${birdseyeEnabled}\n`;
+    yaml += `  mode: ${birdseyeMode}\n`;
+    yaml += '\n';
+
+    // FFmpeg
+    yaml += '# --- FFmpeg ---\n';
+    yaml += 'ffmpeg:\n';
+    if (ffmpegInputArgs) {
+      yaml += '  input_args: >-\n';
+      yaml += `    ${ffmpegInputArgs}\n`;
+    }
+    yaml += '  hwaccel_args: auto  # Uses VAAPI/QSV/CUDA if available\n';
+    yaml += '\n';
+
+    // Record
+    yaml += '# --- Recording ---\n';
+    yaml += 'record:\n';
+    yaml += `  enabled: true\n`;
+    yaml += `  retain:\n`;
+    yaml += `    days: ${retainDays}\n`;
+    yaml += `    mode: all\n`;
+    yaml += `  events:\n`;
+    yaml += `    retain:\n`;
+    yaml += `      default: ${retainEvents}\n`;
+    yaml += `      mode: motion\n`;
+    yaml += `    pre_capture: ${preCapture}\n`;
+    yaml += `    post_capture: ${postCapture}\n`;
+    yaml += '\n';
+
+    // Snapshots
+    yaml += '# --- Snapshots ---\n';
+    yaml += 'snapshots:\n';
+    yaml += `  enabled: ${snapshotsEnabled}\n`;
+    if (snapshotsEnabled === 'true') {
+      yaml += '  timestamp: true\n';
+      yaml += '  bounding_box: true\n';
+      yaml += `  retain:\n`;
+      yaml += `    default: ${retainEvents}\n`;
+    }
+    yaml += '\n';
+
+    // RTMP
+    if (rtmpEnabled === 'true') {
+      yaml += '# --- RTMP ---\n';
+      yaml += '# Deprecated in newer Frigate versions. Use go2rtc instead.\n';
+      yaml += 'rtmp:\n';
+      yaml += '  enabled: true\n';
+      yaml += '\n';
+    }
+
+    // go2rtc
+    yaml += '# --- go2rtc (WebRTC/MSE live view) ---\n';
+    yaml += 'go2rtc:\n';
+    yaml += '  streams:\n';
+    cameras.forEach(cam => {
+      const camSlug = cam.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+      if (cam.mainStream) {
+        yaml += `    ${camSlug}:\n`;
+        yaml += `      - ${cam.mainStream}\n`;
+      }
+    });
+    yaml += '\n';
+
+    // Objects
+    yaml += '# --- Object Detection ---\n';
+    yaml += 'objects:\n';
+    yaml += '  track:\n';
+    objects.forEach(obj => {
+      yaml += `    - ${obj}\n`;
+    });
+    yaml += '  filters:\n';
+    yaml += '    person:\n';
+    yaml += '      min_area: 5000\n';
+    yaml += '      max_area: 100000\n';
+    yaml += '\n';
+
+    // Cameras
+    yaml += '# --- Cameras ---\n';
+    yaml += 'cameras:\n';
+    cameras.forEach(cam => {
+      const camSlug = cam.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+      yaml += `  ${camSlug}:\n`;
+      yaml += '    enabled: true\n';
+      yaml += '    ffmpeg:\n';
+      yaml += '      inputs:\n';
+      if (cam.subStream) {
+        yaml += `        - path: ${cam.subStream}\n`;
+        yaml += '          roles:\n';
+        yaml += '            - detect\n';
+      }
+      if (cam.mainStream) {
+        yaml += `        - path: ${cam.mainStream}\n`;
+        yaml += '          roles:\n';
+        yaml += '            - record\n';
+      }
+      yaml += '    detect:\n';
+      yaml += `      width: ${cam.detectWidth}\n`;
+      yaml += `      height: ${cam.detectHeight}\n`;
+      yaml += `      fps: ${cam.detectFps}\n`;
+      yaml += '    record:\n';
+      yaml += '      enabled: true\n';
+      yaml += '    motion:\n';
+      yaml += '      mask:\n';
+      yaml += '        - 0,0,0,0,0,0  # Add motion masks here to ignore areas\n';
+      yaml += '    zones: {}\n';
+      yaml += '    review: {}\n';
+      yaml += '\n';
+    });
+
+    // Version
+    yaml += '# --- Version ---\n';
+    yaml += '# Tested with Frigate 0.14+. Check your version:\n';
+    yaml += '# docker exec frigate python3 -c "import frigate; print(frigate.__version__)"\n';
+
+    // Display
+    const outputArea = document.getElementById('output-area');
+    const output = document.getElementById('config-output');
+    output.textContent = yaml;
+    outputArea.style.display = 'block';
+    outputArea.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function copyConfig() {
+    const output = document.getElementById('config-output').textContent;
+    navigator.clipboard.writeText(output).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      const originalText = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = originalText; }, 2000);
+    }).catch(() => {
+      // Fallback
+      const textarea = document.createElement('textarea');
+      textarea.value = output;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    });
+  }
+
+  function resetAll() {
+    cameras = [];
+    cameraCount = 0;
+    document.getElementById('mqtt-host').value = '192.168.1.10';
+    document.getElementById('mqtt-port').value = '1883';
+    document.getElementById('mqtt-user').value = '';
+    document.getElementById('mqtt-pass').value = '';
+    document.getElementById('detector-type').value = 'coral-usb';
+    document.getElementById('coral-device').value = '/dev/bus/usb/001/002';
+    document.getElementById('coral-device-group').style.display = 'block';
+    document.getElementById('retain-days').value = '7';
+    document.getElementById('retain-events').value = '30';
+    document.getElementById('pre-capture').value = '5';
+    document.getElementById('post-capture').value = '5';
+    document.getElementById('storage-path').value = '/media/frigate';
+    document.getElementById('storage-size').value = '500';
+    document.getElementById('snapshots-enabled').value = 'true';
+    document.getElementById('rtmp-enabled').value = 'false';
+    document.getElementById('birdseye-enabled').value = 'true';
+    document.getElementById('birdseye-mode').value = 'objects';
+    document.getElementById('ffmpeg-input-args').value = '';
+    document.querySelectorAll('.detection-item').forEach(item => {
+      if (item.dataset.object === 'person' || item.dataset.object === 'car') {
+        item.classList.add('selected');
+      } else {
+        item.classList.remove('selected');
+      }
+    });
+    document.getElementById('output-area').style.display = 'none';
+    addCamera();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diff Checker | Compare Text Online (Free, Client-Side)</title>
+    <meta name="description" content="Free online diff checker. Compare two texts side-by-side and see differences instantly. 100% client-side — your data never leaves your browser. Syntax highlighting, line numbers, and export options.">
+    <meta name="keywords" content="diff checker, text compare, diff tool, compare text online, code diff, text difference checker, side by side diff, merge tool">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Diff Checker | Compare Text Online (Free, Client-Side)">
+    <meta property="og:description" content="Compare two texts side-by-side. See differences instantly. 100% client-side, no data leaves your browser.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/diff-checker/">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        primary: '#10b981',
+                        'primary-dark': '#059669',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .diff-pane {
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            tab-size: 4;
+        }
+
+        .diff-added {
+            background-color: rgba(16, 185, 129, 0.15);
+            border-left: 3px solid #10b981;
+        }
+        .diff-removed {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-left: 3px solid #ef4444;
+        }
+        .diff-modified {
+            background-color: rgba(251, 191, 36, 0.15);
+            border-left: 3px solid #fbbf24;
+        }
+
+        .line-number {
+            color: #9ca3af;
+            user-select: none;
+            min-width: 3rem;
+            text-align: right;
+            padding-right: 0.75rem;
+        }
+
+        .diff-line {
+            display: flex;
+            min-height: 1.6em;
+        }
+        .diff-line-content {
+            flex: 1;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        textarea.diff-input {
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            tab-size: 4;
+        }
+
+        .stats-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .diff-pane { font-size: 11px; }
+            textarea.diff-input { font-size: 11px; }
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+
+    <!-- Header -->
+    <header class="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14">
+                <a href="/" class="flex items-center gap-2 text-gray-900 dark:text-white hover:text-primary transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    <span class="font-semibold text-sm">devhandbook.io</span>
+                </a>
+                <nav class="hidden sm:flex items-center gap-6 text-sm">
+                    <a href="/" class="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">Tools</a>
+                    <a href="/blog/" class="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">Blog</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Hero -->
+        <div class="text-center mb-8 fade-in">
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Diff Checker</h1>
+            <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-sm sm:text-base">
+                Compare two texts side-by-side. Find differences instantly. 100% client-side — your data never leaves your browser.
+            </p>
+        </div>
+
+        <!-- Input Area -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <label class="text-sm font-semibold text-gray-700 dark:text-gray-300">Original Text</label>
+                    <div class="flex gap-2">
+                        <button onclick="pasteText('left')" class="text-xs text-gray-400 hover:text-primary transition-colors" title="Paste from clipboard">📋 Paste</button>
+                        <button onclick="clearText('left')" class="text-xs text-gray-400 hover:text-red-500 transition-colors">Clear</button>
+                    </div>
+                </div>
+                <textarea id="leftInput" class="diff-input w-full h-64 p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-y transition-all" placeholder="Paste original text here..."></textarea>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <label class="text-sm font-semibold text-gray-700 dark:text-gray-300">Modified Text</label>
+                    <div class="flex gap-2">
+                        <button onclick="pasteText('right')" class="text-xs text-gray-400 hover:text-primary transition-colors" title="Paste from clipboard">📋 Paste</button>
+                        <button onclick="clearText('right')" class="text-xs text-gray-400 hover:text-red-500 transition-colors">Clear</button>
+                    </div>
+                </div>
+                <textarea id="rightInput" class="diff-input w-full h-64 p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-y transition-all" placeholder="Paste modified text here..."></textarea>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
+            <button onclick="runDiff()" class="px-6 py-2.5 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95">
+                Compare Texts
+            </button>
+            <button onclick="swapTexts()" class="px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                ⇄ Swap
+            </button>
+            <button onclick="loadSample()" class="px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                Try Sample
+            </button>
+            <div class="flex items-center gap-2 ml-2">
+                <label class="text-xs text-gray-400 flex items-center gap-1 cursor-pointer">
+                    <input type="checkbox" id="ignoreWhitespace" class="rounded" onchange="runDiff()">
+                    Ignore whitespace
+                </label>
+                <label class="text-xs text-gray-400 flex items-center gap-1 cursor-pointer">
+                    <input type="checkbox" id="ignoreCase" class="rounded" onchange="runDiff()">
+                    Ignore case
+                </label>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div id="statsBar" class="hidden flex-wrap justify-center gap-3 mb-6 fade-in">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Diff Output -->
+        <div id="diffOutput" class="hidden fade-in">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold">Differences</h2>
+                <div class="flex gap-2">
+                    <button onclick="copyDiff()" class="px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">📋 Copy</button>
+                    <button onclick="downloadDiff()" class="px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">⬇ Download</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-900">
+                    <div class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-xs font-semibold text-gray-500 uppercase tracking-wider">Original</div>
+                    <div id="leftDiff" class="diff-pane p-2 max-h-[600px] overflow-auto"></div>
+                </div>
+                <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-900">
+                    <div class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-xs font-semibold text-gray-500 uppercase tracking-wider">Modified</div>
+                    <div id="rightDiff" class="diff-pane p-2 max-h-[600px] overflow-auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unified Diff -->
+        <div id="unifiedOutput" class="hidden fade-in mt-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold">Unified Diff</h2>
+                <button onclick="copyUnified()" class="px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">📋 Copy</button>
+            </div>
+            <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-900">
+                <div id="unifiedDiff" class="diff-pane p-4 max-h-[600px] overflow-auto"></div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-16 text-gray-400">
+            <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            <p class="text-sm">Paste two texts above and click <strong>Compare Texts</strong> to see the differences.</p>
+        </div>
+
+        <!-- Info Section -->
+        <div class="mt-16 border-t border-gray-200 dark:border-gray-800 pt-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-500 dark:text-gray-400">
+                <div>
+                    <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">🔒 100% Private</h3>
+                    <p>All comparison happens in your browser. Your text never leaves your device — no server uploads, no tracking.</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">⚡ Instant Results</h3>
+                    <p>Powered by a fast Myers diff algorithm. Handles large texts efficiently with real-time comparison.</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">📤 Export Options</h3>
+                    <p>Copy to clipboard or download as a unified diff file. Perfect for code reviews and documentation.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 dark:border-gray-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-gray-400">
+            <a href="/" class="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">devhandbook.io</a>
+            &middot; Free developer tools &middot; No ads, no tracking, no BS
+        </div>
+    </footer>
+
+    <script>
+        // --- Myers Diff Algorithm ---
+        function myersDiff(a, b) {
+            const n = a.length;
+            const m = b.length;
+            const max = n + m;
+            const v = new Array(2 * max + 1);
+            const trace = [];
+
+            v[max + 1] = 0;
+            for (let d = 0; d <= max; d++) {
+                trace.push([...v]);
+                for (let k = -d; k <= d; k += 2) {
+                    const idx = max + k;
+                    let x = k === -d || (k !== d && v[idx - 1] < v[idx + 1]) ? v[idx + 1] : v[idx - 1] + 1;
+                    let y = x - k;
+                    while (x < n && y < m && a[x] === b[y]) { x++; y++; }
+                    v[idx] = x;
+                    if (x >= n && y >= m) {
+                        return backtrack(trace, a, b, d, k, max);
+                    }
+                }
+            }
+            return [];
+        }
+
+        function backtrack(trace, a, b, d, k, max) {
+            const edits = [];
+            let x = a.length;
+            let y = b.length;
+            for (let depth = d; depth >= 0; depth--) {
+                const v = trace[depth];
+                const idx = max + k;
+                const prevK = k === -depth || (k !== depth && v[idx - 1] < v[idx + 1]) ? k + 1 : k - 1;
+                const prevX = v[max + prevK];
+                const prevY = prevX - prevK;
+
+                while (x > prevX && y > prevY) {
+                    edits.unshift({ type: 'equal', oldLine: a[x - 1], newLine: b[y - 1], oldIdx: x - 1, newIdx: y - 1 });
+                    x--; y--;
+                }
+                if (depth > 0) {
+                    if (x === prevX) {
+                        edits.unshift({ type: 'insert', oldLine: null, newLine: b[y - 1], oldIdx: x, newIdx: y - 1 });
+                        y--;
+                    } else {
+                        edits.unshift({ type: 'delete', oldLine: a[x - 1], newLine: null, oldIdx: x - 1, newIdx: y });
+                        x--;
+                    }
+                }
+                k = prevK;
+            }
+            return edits;
+        }
+
+        function computeDiff(leftLines, rightLines) {
+            return myersDiff(leftLines, rightLines);
+        }
+
+        // --- UI Functions ---
+        function getLines(text) {
+            if (text === '') return [];
+            return text.split('\n');
+        }
+
+        function runDiff() {
+            let leftText = document.getElementById('leftInput').value;
+            let rightText = document.getElementById('rightInput').value;
+
+            if (document.getElementById('ignoreCase').checked) {
+                leftText = leftText.toLowerCase();
+                rightText = rightText.toLowerCase();
+            }
+
+            let leftLines = getLines(leftText);
+            let rightLines = getLines(rightText);
+
+            if (document.getElementById('ignoreWhitespace').checked) {
+                leftLines = leftLines.map(l => l.trim()).map(l => l.replace(/\s+/g, ' '));
+                rightLines = rightLines.map(l => l.trim()).map(l => l.replace(/\s+/g, ' '));
+            }
+
+            if (leftLines.length === 0 && rightLines.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('diffOutput').classList.add('hidden');
+                document.getElementById('unifiedOutput').classList.add('hidden');
+                document.getElementById('statsBar').classList.add('hidden');
+                return;
+            }
+
+            const edits = computeDiff(leftLines, rightLines);
+
+            // Stats
+            const added = edits.filter(e => e.type === 'insert').length;
+            const removed = edits.filter(e => e.type === 'delete').length;
+            const unchanged = edits.filter(e => e.type === 'equal').length;
+
+            document.getElementById('statsBar').innerHTML = `
+                <span class="stats-badge bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">+${added} added</span>
+                <span class="stats-badge bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">-${removed} removed</span>
+                <span class="stats-badge bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">${unchanged} unchanged</span>
+                <span class="stats-badge bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">${edits.length} total lines</span>
+            `;
+            document.getElementById('statsBar').classList.remove('hidden');
+
+            // Side-by-side diff
+            let leftHtml = '';
+            let rightHtml = '';
+            let leftLineNum = 0;
+            let rightLineNum = 0;
+
+            for (const edit of edits) {
+                if (edit.type === 'equal') {
+                    leftLineNum++;
+                    rightLineNum++;
+                    leftHtml += `<div class="diff-line"><span class="line-number">${leftLineNum}</span><span class="diff-line-content">${escapeHtml(edit.oldLine)}</span></div>`;
+                    rightHtml += `<div class="diff-line"><span class="line-number">${rightLineNum}</span><span class="diff-line-content">${escapeHtml(edit.newLine)}</span></div>`;
+                } else if (edit.type === 'delete') {
+                    leftLineNum++;
+                    leftHtml += `<div class="diff-line diff-removed"><span class="line-number">${leftLineNum}</span><span class="diff-line-content">${escapeHtml(edit.oldLine)}</span></div>`;
+                    rightHtml += `<div class="diff-line diff-removed" style="opacity:0.3"><span class="line-number"></span><span class="diff-line-content"></span></div>`;
+                } else if (edit.type === 'insert') {
+                    rightLineNum++;
+                    leftHtml += `<div class="diff-line diff-added" style="opacity:0.3"><span class="line-number"></span><span class="diff-line-content"></span></div>`;
+                    rightHtml += `<div class="diff-line diff-added"><span class="line-number">${rightLineNum}</span><span class="diff-line-content">${escapeHtml(edit.newLine)}</span></div>`;
+                }
+            }
+
+            document.getElementById('leftDiff').innerHTML = leftHtml || '<div class="p-4 text-gray-400 text-sm">(empty)</div>';
+            document.getElementById('rightDiff').innerHTML = rightHtml || '<div class="p-4 text-gray-400 text-sm">(empty)</div>';
+
+            // Unified diff
+            let unifiedHtml = '';
+            let oldLine = 0;
+            let newLine = 0;
+            for (const edit of edits) {
+                if (edit.type === 'equal') {
+                    oldLine++; newLine++;
+                    unifiedHtml += `<div class="diff-line"><span class="line-number">${oldLine}  ${newLine}</span><span class="diff-line-content" style="color:#9ca3af"> ${escapeHtml(edit.oldLine)}</span></div>`;
+                } else if (edit.type === 'delete') {
+                    oldLine++;
+                    unifiedHtml += `<div class="diff-line diff-removed"><span class="line-number">${oldLine}  </span><span class="diff-line-content">-${escapeHtml(edit.oldLine)}</span></div>`;
+                } else if (edit.type === 'insert') {
+                    newLine++;
+                    unifiedHtml += `<div class="diff-line diff-added"><span class="line-number">  ${newLine}</span><span class="diff-line-content">+${escapeHtml(edit.newLine)}</span></div>`;
+                }
+            }
+            document.getElementById('unifiedDiff').innerHTML = unifiedHtml || '<div class="p-4 text-gray-400 text-sm">No differences found.</div>';
+
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('diffOutput').classList.remove('hidden');
+            document.getElementById('unifiedOutput').classList.remove('hidden');
+
+            // Scroll sync
+            syncScroll();
+        }
+
+        function syncScroll() {
+            const left = document.getElementById('leftDiff');
+            const right = document.getElementById('rightDiff');
+            left.onscroll = () => { right.scrollTop = left.scrollTop; };
+            right.onscroll = () => { left.scrollTop = right.scrollTop; };
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function pasteText(side) {
+            navigator.clipboard.readText().then(text => {
+                document.getElementById(side === 'left' ? 'leftInput' : 'rightInput').value = text;
+            }).catch(() => {
+                alert('Unable to access clipboard. Please paste manually (Cmd+V).');
+            });
+        }
+
+        function clearText(side) {
+            document.getElementById(side === 'left' ? 'leftInput' : 'rightInput').value = '';
+            runDiff();
+        }
+
+        function swapTexts() {
+            const left = document.getElementById('leftInput');
+            const right = document.getElementById('rightInput');
+            [left.value, right.value] = [right.value, left.value];
+            runDiff();
+        }
+
+        function loadSample() {
+            document.getElementById('leftInput').value = `function greet(name) {\n  return "Hello, " + name + "!";\n}\n\nfunction farewell(name) {\n  return "Goodbye, " + name + ".";\n}\n\nconst user = "World";\nconsole.log(greet(user));\nconsole.log(farewell(user));`;
+            document.getElementById('rightInput').value = `function greet(name, excited = false) {\n  const greeting = "Hello, " + name + "!";\n  return excited ? greeting.toUpperCase() : greeting;\n}\n\nfunction farewell(name) {\n  return "See you later, " + name + "!";\n}\n\nconst user = "World";\nconsole.log(greet(user, true));\nconsole.log(farewell(user));\nconsole.log("Done!");`;
+            runDiff();
+        }
+
+        function copyDiff() {
+            const left = document.getElementById('leftDiff').innerText;
+            const right = document.getElementById('rightDiff').innerText;
+            navigator.clipboard.writeText(`=== ORIGINAL ===\n${left}\n\n=== MODIFIED ===\n${right}`).then(() => {
+                const btn = event.target;
+                const orig = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => btn.textContent = orig, 1500);
+            });
+        }
+
+        function copyUnified() {
+            const unified = document.getElementById('unifiedDiff').innerText;
+            navigator.clipboard.writeText(unified).then(() => {
+                const btn = event.target;
+                const orig = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => btn.textContent = orig, 1500);
+            });
+        }
+
+        function downloadDiff() {
+            const unified = document.getElementById('unifiedDiff').innerText;
+            const blob = new Blob([unified], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'diff.patch';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Keyboard shortcut: Cmd+Enter to run diff
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                runDiff();
+            }
+        });
+
+        // Auto-run on input (debounced)
+        let debounceTimer;
+        ['leftInput', 'rightInput'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(runDiff, 300);
+            });
+        });
+    </script>
+</body>
+</html>

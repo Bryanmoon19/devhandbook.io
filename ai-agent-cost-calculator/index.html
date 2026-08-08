@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Agent Cost Calculator — devhandbook.io</title>
+  <meta name="description" content="Estimate your monthly AI coding agent costs (Claude Code, Cursor, Copilot, Codex) and compare against self-hosted Ollama. Free, private, instant.">
+  <meta name="keywords" content="ai agent cost calculator, claude code cost, cursor pricing, copilot cost, codex pricing, ai coding assistant, ollama self hosted, dev hand book">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://devhandbook.io/ai-agent-cost-calculator/">
+  <meta property="og:title" content="AI Agent Cost Calculator — devhandbook.io">
+  <meta property="og:description" content="Estimate your monthly AI coding agent costs and compare against self-hosted Ollama. Free, private, instant.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://devhandbook.io/ai-agent-cost-calculator/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI Agent Cost Calculator — devhandbook.io">
+  <meta name="twitter:description" content="Estimate your monthly AI coding agent costs and compare against self-hosted Ollama.">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BQXTZYP8H4');
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --bg-2: #11131a;
+      --bg-3: #161822;
+      --text: #e8eaf0;
+      --text-dim: #8b91a7;
+      --accent: #7c5cff;
+      --accent-2: #4f8cff;
+      --accent-3: #00d4aa;
+      --accent-4: #ff8a5c;
+      --border: #1e2230;
+      --card: #141720;
+      --danger: #ff5c5c;
+      --warning: #ffb74d;
+      --success: #00d4aa;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.35);
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11,13,16,0.85);
+      backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    nav { display: flex; gap: 6px; }
+
+    nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+
+    nav a:hover { color: var(--text); background: var(--bg-3); }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 64px 24px 40px;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,92,255,0.12), transparent);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      background: linear-gradient(90deg, var(--text), #b8bdd1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-dim);
+      font-size: 1.15rem;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .disclaimer {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 6px 14px;
+      background: rgba(255,183,77,0.08);
+      border: 1px solid rgba(255,183,77,0.2);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: var(--warning);
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card h2 .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card h3 .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-3);
+    }
+
+    /* Inputs */
+    .field { margin-bottom: 18px; }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,92,255,0.15);
+    }
+
+    input[type="number"] { -moz-appearance: textfield; }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Checkbox list (tools) */
+    .tool-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tool-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tool-item:hover { border-color: var(--accent-2); }
+    .tool-item.selected { border-color: var(--accent); background: rgba(124,92,255,0.08); }
+
+    .tool-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .tool-item-body { flex: 1; min-width: 0; }
+
+    .tool-item-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tool-item-provider {
+      font-weight: 500;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    .tool-item-pricing {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(0,212,170,0.12);
+      color: var(--accent-3);
+      border: 1px solid rgba(0,212,170,0.25);
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tag.pay {
+      background: rgba(79,140,255,0.12);
+      color: var(--accent-2);
+      border-color: rgba(79,140,255,0.25);
+    }
+
+    .tag.flat {
+      background: rgba(255,138,92,0.12);
+      color: var(--accent-4);
+      border-color: rgba(255,138,92,0.25);
+    }
+
+    .tag.os {
+      background: rgba(124,92,255,0.12);
+      color: var(--accent);
+      border-color: rgba(124,92,255,0.25);
+    }
+
+    /* Tool config panel */
+    .tool-config {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tool-config.show { display: block; }
+
+    .tool-config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 540px) {
+      .tool-config-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Radio */
+    .radio-group {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+    }
+
+    .radio-group label {
+      flex: 1;
+      text-align: center;
+      padding: 8px 4px;
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--text-dim);
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .radio-group label.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .radio-group input { display: none; }
+
+    /* Slider */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slider-wrap input[type="range"] {
+      flex: 1;
+      width: auto;
+      padding: 0;
+      background: transparent;
+      border: none;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .slider-wrap input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      background: var(--bg-3);
+      border-radius: 3px;
+    }
+
+    .slider-wrap input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: var(--bg-3);
+      border-radius: 3px;
+    }
+
+    .slider-wrap input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-top: -6px;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(124,92,255,0.5);
+    }
+
+    .slider-wrap input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      background: var(--accent);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(124,92,255,0.5);
+    }
+
+    .slider-value {
+      min-width: 40px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+
+    /* Toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: var(--bg-3);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch.active { background: var(--accent); }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--text);
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle-switch.active::after { transform: translateX(20px); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(124,92,255,0.3);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,92,255,0.4); }
+
+    .btn-secondary {
+      background: var(--bg-3);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: var(--bg-2); }
+
+    .btn-danger {
+      background: rgba(255,92,92,0.12);
+      color: var(--danger);
+      border: 1px solid rgba(255,92,92,0.25);
+    }
+
+    .btn-danger:hover { background: rgba(255,92,92,0.2); }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Results */
+    .results-grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .metric {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .metric.danger::before { background: var(--danger); }
+    .metric.warning::before { background: var(--warning); }
+    .metric.success::before { background: var(--success); }
+    .metric.big::before { background: linear-gradient(90deg, var(--accent), var(--accent-3)); height: 4px; }
+
+    .metric.big .metric-value { font-size: 2.4rem; }
+
+    .metric-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    /* Chart */
+    .chart-wrap {
+      position: relative;
+      height: 280px;
+    }
+
+    .chart-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .chart-label {
+      width: 110px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .chart-track {
+      flex: 1;
+      height: 32px;
+      background: var(--bg-2);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chart-fill {
+      height: 100%;
+      border-radius: var(--radius-sm);
+      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .chart-fill.cloud { background: linear-gradient(90deg, #ff5c5c, #ff8a5c); }
+    .chart-fill.local { background: linear-gradient(90deg, #00d4aa, #4f8cff); }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: var(--bg-2);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .num { font-variant-numeric: tabular-nums; }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .badge.green { background: rgba(0,212,170,0.12); color: var(--success); border: 1px solid rgba(0,212,170,0.25); }
+    .badge.yellow { background: rgba(255,183,77,0.12); color: var(--warning); border: 1px solid rgba(255,183,77,0.25); }
+    .badge.red { background: rgba(255,92,92,0.12); color: var(--danger); border: 1px solid rgba(255,92,92,0.25); }
+    .badge.blue { background: rgba(79,140,255,0.12); color: var(--accent-2); border: 1px solid rgba(79,140,255,0.25); }
+
+    /* Real-world examples */
+    .rwt-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .rwt-card {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rwt-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .rwt-body { flex: 1; min-width: 0; }
+
+    .rwt-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .rwt-sub {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* Tips */
+    .tip {
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .tip-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(0,212,170,0.15);
+      color: var(--accent-3);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .tip-body { flex: 1; min-width: 0; }
+
+    .tip-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+
+    .tip-text {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    /* Methodology accordion */
+    details.methodology {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+    }
+
+    details.methodology summary {
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.95rem;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    details.methodology summary::-webkit-details-marker { display: none; }
+
+    details.methodology summary::before {
+      content: '▸';
+      color: var(--accent);
+      transition: transform 0.2s;
+    }
+
+    details.methodology[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    details.methodology[open] { margin-bottom: 12px; }
+
+    details.methodology .content {
+      margin-top: 14px;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    details.methodology .content code {
+      background: var(--bg-3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: var(--text);
+    }
+
+    details.methodology .content ul {
+      margin: 10px 0 10px 20px;
+    }
+
+    details.methodology .content li { margin-bottom: 4px; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--accent-2); text-decoration: none; }
+
+    /* Utility */
+    .hidden { display: none !important; }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 24px 0;
+    }
+
+    /* Stacked tool list under sidebar */
+    .empty-state {
+      text-align: center;
+      padding: 30px 16px;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      background: var(--bg-2);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--card);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: 0.3s;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Pie chart container */
+    .pie-wrap {
+      position: relative;
+      height: 320px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">dh</div>
+      <span>devhandbook.io</span>
+    </a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/guides">Guides</a>
+      <a href="/tools">Tools</a>
+      <a href="/about">About</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>AI Agent Cost Calculator</h1>
+  <p>Estimate what Claude Code, Cursor, Copilot, and Codex really cost per month — and whether self-hosting with Ollama actually saves money.</p>
+  <div class="disclaimer">Estimates based on public pricing as of August 2026. Actual costs vary.</div>
+</section>
+
+<div class="container">
+  <!-- Sidebar: Inputs -->
+  <aside class="inputs-column">
+    <div class="card">
+      <h2><span class="dot"></span> Your AI Coding Tools</h2>
+      <div class="field">
+        <label>Select the tools you use</label>
+        <div class="tool-list" id="toolList">
+          <!-- JS fills -->
+        </div>
+      </div>
+      <div class="field">
+        <label for="workDays">Working Days / Month</label>
+        <input type="number" id="workDays" value="22" min="1" max="31">
+        <div class="hint">Default 22 (Mon–Fri, no holidays)</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> Self-Hosting Setup</h2>
+      <div class="field">
+        <label for="electricity">Electricity Rate ($/kWh)</label>
+        <input type="number" id="electricity" value="0.14" min="0" step="0.01">
+        <div class="hint">US average ≈ $0.14</div>
+      </div>
+      <div class="field">
+        <label for="gpu">Local GPU / Hardware</label>
+        <select id="gpu">
+          <option value="cpu">CPU only (no GPU)</option>
+          <option value="r3060">NVIDIA RTX 3060 ($300)</option>
+          <option value="r4060">NVIDIA RTX 4060 ($300)</option>
+          <option value="r4090" selected>NVIDIA RTX 4090 ($1,600)</option>
+          <option value="macm2">Mac Mini M2 ($600)</option>
+          <option value="macm4">Mac Mini M4 ($600)</option>
+          <option value="rpi5">Raspberry Pi 5 ($80)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="uptime">Uptime (hours / day)</label>
+        <input type="number" id="uptime" value="16" min="1" max="24">
+        <div class="hint">Hours the local box runs per day</div>
+      </div>
+      <div class="field">
+        <label for="amortizeYears">Hardware Amortization (years)</label>
+        <input type="number" id="amortizeYears" value="3" min="1" max="10">
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> Actions</h2>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btnReset" style="flex:1;justify-content:center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          Reset
+        </button>
+        <button class="btn btn-primary" id="btnShare" style="flex:1;justify-content:center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          Share
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main: Results -->
+  <main class="results-column">
+    <div class="card results-card">
+      <h2><span class="dot"></span> Your Monthly Bill</h2>
+      <div class="metric-row">
+        <div class="metric big">
+          <div class="metric-label">Total Monthly</div>
+          <div class="metric-value" id="vMonthly">$0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Annual</div>
+          <div class="metric-value" id="vAnnual">$0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Daily Average</div>
+          <div class="metric-value" id="vDaily">$0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Per Working Day</div>
+          <div class="metric-value" id="vPerDay">$0</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3><span class="dot"></span> Cost Breakdown</h3>
+      <div class="pie-wrap">
+        <canvas id="costPie"></canvas>
+      </div>
+      <div id="emptyChart" class="empty-state" style="display:none">
+        Select at least one tool on the left to see your cost breakdown.
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> Per-Tool Cost</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Model</th>
+              <th>Usage</th>
+              <th style="text-align:right">Monthly</th>
+              <th style="text-align:right">Annual</th>
+            </tr>
+          </thead>
+          <tbody id="perToolBody">
+            <tr><td colspan="5" style="text-align:center;color:var(--text-dim)">No tools selected</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> What Your Money Actually Buys</h2>
+      <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px">Translated into things you can touch. At your current spend, here's what you could buy each month instead:</p>
+      <div class="rwt-list" id="rwtList">
+        <!-- JS fills -->
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> Self-Hosting Comparison</h2>
+      <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px">Cloud AI tools vs running Ollama (or similar) on your own hardware. Local models trade some quality for predictable, often-cheaper cost at scale.</p>
+
+      <div class="metric-row">
+        <div class="metric danger">
+          <div class="metric-label">Cloud AI / Month</div>
+          <div class="metric-value" id="vCloudMonthly">$0</div>
+        </div>
+        <div class="metric success">
+          <div class="metric-label">Local Ollama / Month</div>
+          <div class="metric-value" id="vLocalMonthly">$0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Savings / Month</div>
+          <div class="metric-value" id="vSavings">$0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Break-Even</div>
+          <div class="metric-value" id="vBreakEven">—</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3><span class="dot"></span> Side-by-Side</h3>
+      <div class="chart-wrap" id="chartWrap">
+        <div class="chart-bar">
+          <div class="chart-label">Cloud AI</div>
+          <div class="chart-track"><div class="chart-fill cloud" id="barCloud" style="width:0%">—</div></div>
+        </div>
+        <div class="chart-bar">
+          <div class="chart-label">Self-Hosted</div>
+          <div class="chart-track"><div class="chart-fill local" id="barLocal" style="width:0%">—</div></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3><span class="dot"></span> Local Cost Breakdown</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th style="text-align:right">Monthly</th>
+              <th style="text-align:right">Annual</th>
+            </tr>
+          </thead>
+          <tbody id="localBody">
+            <tr><td colspan="3" style="text-align:center;color:var(--text-dim)">Configure self-hosting to see details</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-weight:700">Recommendation:</span>
+        <span class="badge" id="recBadge">—</span>
+        <span id="recText" style="color:var(--text-dim);font-size:0.9rem"></span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> Cost-Saving Tips</h2>
+      <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px">Personalized based on your selections. Higher-impact tips first.</p>
+      <div id="tipsList">
+        <div class="empty-state">Pick some tools to get personalized tips.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h2><span class="dot"></span> Methodology</h2>
+      <details class="methodology" open>
+        <summary>How we calculate this</summary>
+        <div class="content">
+          <p>This calculator is a <em>model</em>, not a meter. It uses public pricing pages and a few reasonable assumptions about token use to give you a ballpark monthly bill.</p>
+
+          <p style="margin-top:10px"><strong>Token estimates per intensity:</strong></p>
+          <ul>
+            <li><code>Light</code> ≈ 50K input + 10K output tokens / day</li>
+            <li><code>Medium</code> ≈ 200K input + 40K output tokens / day</li>
+            <li><code>Heavy</code> ≈ 500K input + 100K output tokens / day</li>
+          </ul>
+
+          <p style="margin-top:10px"><strong>Per-token cost (per 1M tokens):</strong></p>
+          <ul>
+            <li>Claude Opus 4: <code>$15 in / $75 out</code></li>
+            <li>Claude Sonnet 4: <code>$3 in / $15 out</code></li>
+            <li>Claude Haiku 3.5: <code>$0.80 in / $4 out</code></li>
+            <li>GPT-4o: <code>$2.50 in / $10 out</code></li>
+            <li>GPT-4: <code>$30 in / $60 out</code></li>
+            <li>GPT-4o-mini: <code>$0.15 in / $0.60 out</code></li>
+            <li>Gemini 2.5 Pro: <code>$1.25 in / $10 out</code></li>
+            <li>DeepSeek V3: <code>$0.27 in / $1.10 out</code></li>
+          </ul>
+
+          <p style="margin-top:10px"><strong>Flat-rate tools</strong> (Cursor, Copilot, Windsurf) charge a fixed monthly fee regardless of usage within their tier. We add them as-is. The <em>business</em> tier of Copilot is $39/mo; the individual tier is $10/mo.</p>
+
+          <p style="margin-top:10px"><strong>Open-source tools</strong> (Aider, Continue.dev) are free themselves, but you still pay the underlying model API. We treat them as <em>API passthroughs</em> — the cost is whatever model you point them at.</p>
+
+          <p style="margin-top:10px"><strong>Self-hosting math:</strong></p>
+          <ul>
+            <li>Electricity: <code>watts × hours/day × 30 / 1000 × $/kWh</code></li>
+            <li>Hardware amortization: <code>cost / (years × 12)</code></li>
+            <li>Local <em>capability</em> is not identical to cloud — a 70B local model is roughly GPT-4-class on most coding tasks but won't match Claude Opus 4. The "savings" here is a cost ceiling; in practice you may use both.</li>
+          </ul>
+
+          <p style="margin-top:10px">All math runs in your browser. Nothing is uploaded. You can verify each line in the per-tool and per-category tables above.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <p>Built for <a href="https://devhandbook.io">devhandbook.io</a> — Open source, no trackers, no signup.</p>
+  <p style="margin-top:6px">Related: <a href="/homelab-cost-calculator/">Homelab Cost Calculator</a> · <a href="/dev-tool-cost-calculator/">Dev Tool Cost Calculator</a></p>
+</footer>
+
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script>
+'use strict';
+
+// ============= PRICING DATA =============
+const TOOLS = {
+  claude: {
+    id: 'claude',
+    name: 'Claude Code',
+    provider: 'Anthropic',
+    type: 'pay',
+    defaultModel: 'sonnet',
+    models: [
+      { id: 'opus',   name: 'Claude Opus 4',   in: 15,    out: 75   },
+      { id: 'sonnet', name: 'Claude Sonnet 4', in: 3,     out: 15   },
+      { id: 'haiku',  name: 'Claude Haiku 3.5', in: 0.80, out: 4    }
+    ]
+  },
+  codex: {
+    id: 'codex',
+    name: 'Codex CLI',
+    provider: 'OpenAI',
+    type: 'pay',
+    defaultModel: 'gpt4o',
+    models: [
+      { id: 'gpt4',     name: 'GPT-4',        in: 30,   out: 60  },
+      { id: 'gpt4o',    name: 'GPT-4o',       in: 2.50, out: 10  },
+      { id: 'gpt4omini',name: 'GPT-4o mini',  in: 0.15, out: 0.60 }
+    ]
+  },
+  cursor: {
+    id: 'cursor',
+    name: 'Cursor',
+    provider: 'Anysphere',
+    type: 'flat',
+    flatPrice: 20,
+    flatNote: '$20/mo Pro plan (flat)'
+  },
+  copilot: {
+    id: 'copilot',
+    name: 'GitHub Copilot',
+    provider: 'GitHub',
+    type: 'flat',
+    flatPrice: 10,
+    flatNote: '$10/mo Individual · $39/mo Business',
+    hasTier: true
+  },
+  windsurf: {
+    id: 'windsurf',
+    name: 'Windsurf',
+    provider: 'Codeium',
+    type: 'flat',
+    flatPrice: 15,
+    flatNote: '$15/mo Pro plan (flat)'
+  },
+  aider: {
+    id: 'aider',
+    name: 'Aider',
+    provider: 'Open Source',
+    type: 'pay',
+    freeSoftware: true,
+    defaultModel: 'sonnet',
+    models: [
+      { id: 'opus',   name: 'Claude Opus 4',   in: 15,    out: 75   },
+      { id: 'sonnet', name: 'Claude Sonnet 4', in: 3,     out: 15   },
+      { id: 'haiku',  name: 'Claude Haiku 3.5', in: 0.80, out: 4    },
+      { id: 'gpt4o',  name: 'GPT-4o',          in: 2.50, out: 10   },
+      { id: 'deepseek',name: 'DeepSeek V3',     in: 0.27, out: 1.10 }
+    ],
+    note: 'Free; you bring your own API key'
+  },
+  continue: {
+    id: 'continue',
+    name: 'Continue.dev',
+    provider: 'Open Source',
+    type: 'pay',
+    freeSoftware: true,
+    defaultModel: 'gpt4omini',
+    models: [
+      { id: 'opus',   name: 'Claude Opus 4',   in: 15,    out: 75   },
+      { id: 'sonnet', name: 'Claude Sonnet 4', in: 3,     out: 15   },
+      { id: 'gpt4o',  name: 'GPT-4o',          in: 2.50, out: 10   },
+      { id: 'gpt4omini',name: 'GPT-4o mini',    in: 0.15, out: 0.60 },
+      { id: 'gemini', name: 'Gemini 2.5 Pro',  in: 1.25, out: 10   },
+      { id: 'deepseek',name: 'DeepSeek V3',     in: 0.27, out: 1.10 }
+    ],
+    note: 'Free; you bring your own API key'
+  },
+  custom: {
+    id: 'custom',
+    name: 'Custom / Other',
+    provider: 'You choose',
+    type: 'custom',
+    note: 'Enter a fixed monthly amount'
+  }
+};
+
+const INTENSITY = {
+  light:  { in: 50,  out: 10,  label: 'Light',  desc: '~50K in / 10K out tokens/day' },
+  medium: { in: 200, out: 40,  label: 'Medium', desc: '~200K in / 40K out tokens/day' },
+  heavy:  { in: 500, out: 100, label: 'Heavy',  desc: '~500K+ in / 100K out tokens/day' }
+};
+
+const GPU = {
+  cpu:   { watts: 65,  cost: 0,    name: 'CPU only' },
+  r3060: { watts: 170, cost: 300,  name: 'RTX 3060' },
+  r4060: { watts: 115, cost: 300,  name: 'RTX 4060' },
+  r4090: { watts: 450, cost: 1600, name: 'RTX 4090' },
+  macm2: { watts: 40,  cost: 600,  name: 'Mac Mini M2' },
+  macm4: { watts: 45,  cost: 600,  name: 'Mac Mini M4' },
+  rpi5:  { watts: 8,   cost: 80,   name: 'Raspberry Pi 5' }
+};
+
+// ============= STATE =============
+const state = {
+  selected: {},
+  workDays: 22,
+  electricity: 0.14,
+  gpu: 'r4090',
+  uptime: 16,
+  amortizeYears: 3
+};
+
+// state.selected[toolId] = { enabled, sessions, intensity, model, tier, customCost }
+
+const STORAGE_KEY = 'ai-agent-cost-calc-v1';
+
+// ============= HELPERS =============
+const $ = id => document.getElementById(id);
+
+function fmt$(n, decimals=0) {
+  if (!isFinite(n)) return '$0';
+  return '$' + n.toLocaleString(undefined, {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+}
+
+function fmtNum(n) {
+  if (!isFinite(n)) return '0';
+  return Math.round(n).toLocaleString();
+}
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ============= PERSISTENCE =============
+function save() {
+  try {
+    const payload = {
+      selected: state.selected,
+      workDays: state.workDays,
+      electricity: state.electricity,
+      gpu: state.gpu,
+      uptime: state.uptime,
+      amortizeYears: state.amortizeYears
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch (e) { /* ignore */ }
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.workDays)        state.workDays = data.workDays;
+    if (data.electricity != null) state.electricity = data.electricity;
+    if (data.gpu)             state.gpu = data.gpu;
+    if (data.uptime)          state.uptime = data.uptime;
+    if (data.amortizeYears)   state.amortizeYears = data.amortizeYears;
+    if (data.selected && typeof data.selected === 'object') {
+      // only keep ids we know about
+      Object.keys(data.selected).forEach(k => {
+        if (TOOLS[k]) state.selected[k] = data.selected[k];
+      });
+    }
+  } catch (e) { /* ignore */ }
+}
+
+function reset() {
+  if (!confirm('Reset all tools and self-hosting settings?')) return;
+  state.selected = {};
+  state.workDays = 22;
+  state.electricity = 0.14;
+  state.gpu = 'r4090';
+  state.uptime = 16;
+  state.amortizeYears = 3;
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  hydrateInputs();
+  render();
+  toast('Reset to defaults');
+}
+
+// ============= RENDER TOOL LIST =============
+function renderToolList() {
+  const list = $('toolList');
+  list.innerHTML = '';
+  Object.values(TOOLS).forEach(tool => {
+    const item = document.createElement('div');
+    item.className = 'tool-item';
+    item.dataset.tool = tool.id;
+    const cfg = state.selected[tool.id] || {};
+    if (cfg.enabled) item.classList.add('selected');
+
+    let tag = '';
+    if (tool.freeSoftware)      tag = '<span class="tag os">OSS</span>';
+    else if (tool.type === 'pay') tag = '<span class="tag pay">Pay-per-token</span>';
+    else if (tool.type === 'flat') tag = '<span class="tag flat">Flat</span>';
+    else if (tool.type === 'custom') tag = '<span class="tag">Custom</span>';
+
+    item.innerHTML = `
+      <input type="checkbox" id="chk-${tool.id}" ${cfg.enabled ? 'checked' : ''}>
+      <div class="tool-item-body">
+        <div class="tool-item-name">
+          <span>${tool.name}</span>
+          ${tag}
+        </div>
+        <div class="tool-item-provider">${tool.provider}</div>
+        <div class="tool-item-pricing">${tool.flatNote || tool.note || 'API passthrough'}</div>
+      </div>
+    `;
+
+    list.appendChild(item);
+
+    // Config panel
+    const config = document.createElement('div');
+    config.className = 'tool-config' + (cfg.enabled ? ' show' : '');
+    config.id = `cfg-${tool.id}`;
+    config.innerHTML = buildToolConfigHTML(tool, cfg);
+    list.appendChild(config);
+
+    // Bind
+    item.querySelector('input[type="checkbox"]').addEventListener('change', e => {
+      toggleTool(tool.id, e.target.checked);
+    });
+    bindToolConfigEvents(tool.id, config);
+  });
+}
+
+function buildToolConfigHTML(tool, cfg) {
+  let html = '';
+
+  // Custom cost (only for custom tool)
+  if (tool.type === 'custom') {
+    html += `
+      <div class="field">
+        <label>Monthly cost ($)</label>
+        <input type="number" data-cfg="customCost" min="0" step="0.01" value="${cfg.customCost ?? 50}">
+      </div>
+    `;
+    return html;
+  }
+
+  // Sessions slider
+  html += `
+    <div class="field">
+      <label>Sessions per day</label>
+      <div class="slider-wrap">
+        <input type="range" data-cfg="sessions" min="1" max="20" value="${cfg.sessions ?? 5}">
+        <div class="slider-value" data-cfg-display="sessions">${cfg.sessions ?? 5}</div>
+      </div>
+    </div>
+  `;
+
+  // Intensity radios
+  const intensity = cfg.intensity || 'medium';
+  html += `
+    <div class="field">
+      <label>Intensity</label>
+      <div class="radio-group" data-cfg-group="intensity">
+        <label class="${intensity==='light'?'active':''}" data-val="light">Light</label>
+        <label class="${intensity==='medium'?'active':''}" data-val="medium">Medium</label>
+        <label class="${intensity==='heavy'?'active':''}" data-val="heavy">Heavy</label>
+      </div>
+      <div class="hint">${INTENSITY[intensity].desc}</div>
+    </div>
+  `;
+
+  // Model dropdown for pay/OSS tools
+  if (tool.models) {
+    const currentModel = cfg.model || tool.defaultModel;
+    html += `
+      <div class="field">
+        <label>Model</label>
+        <select data-cfg="model">
+          ${tool.models.map(m => `<option value="${m.id}" ${m.id===currentModel?'selected':''}>${m.name}</option>`).join('')}
+        </select>
+      </div>
+    `;
+  }
+
+  // Copilot tier
+  if (tool.hasTier) {
+    const tier = cfg.tier || 'individual';
+    html += `
+      <div class="field">
+        <label>Tier</label>
+        <div class="radio-group" data-cfg-group="tier">
+          <label class="${tier==='individual'?'active':''}" data-val="individual">Individual $10</label>
+          <label class="${tier==='business'?'active':''}" data-val="business">Business $39</label>
+        </div>
+      </div>
+    `;
+  }
+
+  return html;
+}
+
+function bindToolConfigEvents(toolId, root) {
+  // Inputs (number, text, select, range)
+  root.querySelectorAll('[data-cfg]').forEach(el => {
+    const key = el.dataset.cfg;
+    el.addEventListener('input', () => {
+      ensureCfg(toolId);
+      let v = el.value;
+      if (el.type === 'number' || el.type === 'range') v = parseFloat(v) || 0;
+      state.selected[toolId][key] = v;
+      // Slider display
+      const disp = root.querySelector(`[data-cfg-display="${key}"]`);
+      if (disp) disp.textContent = v;
+      save();
+      renderResults();
+    });
+    el.addEventListener('change', () => {
+      ensureCfg(toolId);
+      let v = el.value;
+      if (el.type === 'number' || el.type === 'range') v = parseFloat(v) || 0;
+      state.selected[toolId][key] = v;
+      save();
+      renderResults();
+    });
+  });
+
+  // Radio groups
+  root.querySelectorAll('[data-cfg-group]').forEach(group => {
+    const key = group.dataset.cfgGroup;
+    group.querySelectorAll('label').forEach(lab => {
+      lab.addEventListener('click', () => {
+        const val = lab.dataset.val;
+        group.querySelectorAll('label').forEach(l => l.classList.remove('active'));
+        lab.classList.add('active');
+        ensureCfg(toolId);
+        state.selected[toolId][key] = val;
+        // Update hint under intensity
+        if (key === 'intensity') {
+          const hint = group.parentElement.querySelector('.hint');
+          if (hint) hint.textContent = INTENSITY[val].desc;
+        }
+        save();
+        renderResults();
+      });
+    });
+  });
+}
+
+function ensureCfg(toolId) {
+  if (!state.selected[toolId]) {
+    const tool = TOOLS[toolId];
+    state.selected[toolId] = {
+      enabled: false,
+      sessions: 5,
+      intensity: 'medium',
+      model: tool.defaultModel || null,
+      tier: tool.hasTier ? 'individual' : null,
+      customCost: 50
+    };
+  }
+}
+
+function toggleTool(toolId, enabled) {
+  ensureCfg(toolId);
+  state.selected[toolId].enabled = enabled;
+  const item = document.querySelector(`.tool-item[data-tool="${toolId}"]`);
+  if (item) item.classList.toggle('selected', enabled);
+  const cfg = $('cfg-' + toolId);
+  if (cfg) cfg.classList.toggle('show', enabled);
+  save();
+  renderResults();
+}
+
+// ============= CALCULATIONS =============
+function calcToolCost(toolId) {
+  const tool = TOOLS[toolId];
+  const cfg = state.selected[toolId];
+  if (!cfg || !cfg.enabled) return null;
+
+  if (tool.type === 'custom') {
+    const cost = parseFloat(cfg.customCost) || 0;
+    return {
+      name: tool.name,
+      model: 'Custom',
+      cost,
+      annual: cost * 12,
+      note: 'Fixed monthly'
+    };
+  }
+
+  if (tool.type === 'flat') {
+    let cost = tool.flatPrice;
+    if (tool.hasTier && cfg.tier === 'business') cost = 39;
+    return {
+      name: tool.name,
+      model: (cfg.tier === 'business' ? 'Business' : 'Pro'),
+      cost,
+      annual: cost * 12,
+      note: 'Flat-rate subscription'
+    };
+  }
+
+  // pay-per-token
+  const model = (tool.models || []).find(m => m.id === cfg.model) || tool.models[0];
+  if (!model) return { name: tool.name, model: '?', cost: 0, annual: 0, note: 'No model' };
+
+  const sessions = parseFloat(cfg.sessions) || 0;
+  const intensity = INTENSITY[cfg.intensity] || INTENSITY.medium;
+  // assume each "session" uses about 1 intensity-day worth of tokens
+  // (a session is roughly equivalent to a working chunk of conversation)
+  const days = state.workDays;
+  const dailyCost = (intensity.in / 1e6) * model.in * sessions
+                  + (intensity.out / 1e6) * model.out * sessions;
+  // The above gives cost for `sessions` chunks per day. We treat each session
+  // as a fraction of a day's "intensity budget" — so multiply by days.
+  const monthly = dailyCost * days;
+
+  return {
+    name: tool.name,
+    model: model.name,
+    cost: monthly,
+    annual: monthly * 12,
+    note: `${sessions} sessions/day · ${INTENSITY[cfg.intensity].label} · ${model.name}`,
+    sessions,
+    intensity: cfg.intensity
+  };
+}
+
+function calcAll() {
+  const items = [];
+  let total = 0;
+  Object.keys(TOOLS).forEach(id => {
+    const r = calcToolCost(id);
+    if (r) { items.push(r); total += r.cost; }
+  });
+  return { items, total };
+}
+
+function calcLocal() {
+  const gpu = GPU[state.gpu];
+  const electricity = parseFloat(state.electricity) || 0;
+  const hours = parseFloat(state.uptime) || 0;
+  const amortYears = parseFloat(state.amortizeYears) || 1;
+
+  const monthlyKwh = (gpu.watts * hours * 30) / 1000;
+  const monthlyElectricity = monthlyKwh * electricity;
+  const monthlyAmort = gpu.cost / (amortYears * 12);
+  const monthlyTotal = monthlyElectricity + monthlyAmort;
+
+  return {
+    gpu,
+    monthlyElectricity,
+    monthlyAmort,
+    monthlyTotal,
+    annualTotal: monthlyTotal * 12,
+    monthlyKwh
+  };
+}
+
+// ============= RENDER RESULTS =============
+let pieChart = null;
+
+function renderResults() {
+  const { items, total } = calcAll();
+  const local = calcLocal();
+
+  // Top metrics
+  $('vMonthly').textContent = fmt$(total);
+  $('vAnnual').textContent  = fmt$(total * 12);
+  $('vDaily').textContent   = fmt$(total / 30);
+  $('vPerDay').textContent  = fmt$(total / state.workDays);
+
+  // Per-tool table
+  const body = $('perToolBody');
+  if (items.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim)">No tools selected</td></tr>';
+  } else {
+    body.innerHTML = items.map(it => `
+      <tr>
+        <td><strong>${it.name}</strong></td>
+        <td>${it.model}</td>
+        <td style="color:var(--text-dim);font-size:0.85rem">${it.note || ''}</td>
+        <td class="num" style="text-align:right">${fmt$(it.cost, 2)}</td>
+        <td class="num" style="text-align:right">${fmt$(it.annual)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Real-world examples
+  $('rwtList').innerHTML = buildRWT(total);
+
+  // Self-hosting metrics
+  $('vCloudMonthly').textContent = fmt$(total);
+  $('vLocalMonthly').textContent = fmt$(local.monthlyTotal, 2);
+
+  const savings = total - local.monthlyTotal;
+  const savingsEl = $('vSavings');
+  if (Math.abs(savings) < 0.5) {
+    savingsEl.textContent = '$0';
+    savingsEl.style.color = 'var(--text-dim)';
+  } else if (savings > 0) {
+    savingsEl.textContent = '↓ ' + fmt$(savings);
+    savingsEl.style.color = 'var(--success)';
+  } else {
+    savingsEl.textContent = '↑ ' + fmt$(-savings);
+    savingsEl.style.color = 'var(--danger)';
+  }
+
+  // Break-even
+  const beEl = $('vBreakEven');
+  if (local.monthlyAmort > 0 && savings > 0) {
+    // months until hardware pays for itself
+    const months = GPU[state.gpu].cost / savings;
+    beEl.textContent = months < 1 ? `${Math.round(months*30)} days` :
+                       months < 12 ? `${months.toFixed(1)} mo` :
+                       `${(months/12).toFixed(1)} yr`;
+  } else if (savings <= 0 && total > 0) {
+    beEl.textContent = 'Never';
+    beEl.style.color = 'var(--danger)';
+  } else {
+    beEl.textContent = '—';
+    beEl.style.color = '';
+  }
+  if (savings > 0) beEl.style.color = 'var(--success)';
+
+  // Cloud vs Local bars
+  const max = Math.max(total, local.monthlyTotal, 1);
+  $('barCloud').style.width = (total / max * 100) + '%';
+  $('barCloud').textContent = fmt$(total, 0);
+  $('barLocal').style.width = (local.monthlyTotal / max * 100) + '%';
+  $('barLocal').textContent = fmt$(local.monthlyTotal, 0);
+
+  // Local cost breakdown table
+  $('localBody').innerHTML = `
+    <tr>
+      <td>Hardware: ${local.gpu.name}</td>
+      <td class="num" style="text-align:right">${fmt$(local.monthlyAmort, 2)}</td>
+      <td class="num" style="text-align:right">${fmt$(local.monthlyAmort * 12, 0)}</td>
+    </tr>
+    <tr>
+      <td>Electricity (${local.monthlyKwh.toFixed(1)} kWh @ ${state.electricity}/kWh)</td>
+      <td class="num" style="text-align:right">${fmt$(local.monthlyElectricity, 2)}</td>
+      <td class="num" style="text-align:right">${fmt$(local.monthlyElectricity * 12, 0)}</td>
+    </tr>
+    <tr style="background:var(--bg-2);font-weight:700">
+      <td>Total Self-Host</td>
+      <td class="num" style="text-align:right">${fmt$(local.monthlyTotal, 2)}</td>
+      <td class="num" style="text-align:right">${fmt$(local.monthlyTotal * 12, 0)}</td>
+    </tr>
+  `;
+
+  // Recommendation
+  const recBadge = $('recBadge');
+  const recText = $('recText');
+  recBadge.className = 'badge';
+  if (items.length === 0) {
+    recBadge.classList.add('blue');
+    recBadge.textContent = 'Pick tools to compare';
+    recText.textContent = '';
+  } else if (savings > 50) {
+    recBadge.classList.add('green');
+    recBadge.textContent = 'Self-host wins';
+    recText.textContent = `You'd save ${fmt$(savings)}/month by going local with ${local.gpu.name}.`;
+  } else if (savings > 0) {
+    recBadge.classList.add('yellow');
+    recBadge.textContent = 'Slight edge to self-host';
+    recText.textContent = `Marginal savings (${fmt$(savings)}/mo). Self-host if you value privacy or want a local dev playground.`;
+  } else {
+    recBadge.classList.add('red');
+    recBadge.textContent = 'Cloud is cheaper at your volume';
+    recText.textContent = `Local costs ${fmt$(-savings)}/mo more. Self-hosting only wins at higher session counts or heavier intensity.`;
+  }
+
+  // Tips
+  $('tipsList').innerHTML = buildTips(items, total, local) || '<div class="empty-state">No tips yet.</div>';
+
+  // Chart
+  renderPie(items, total);
+}
+
+function renderPie(items, total) {
+  const canvas = $('costPie');
+  const empty = $('emptyChart');
+  if (items.length === 0 || total === 0) {
+    canvas.style.display = 'none';
+    empty.style.display = 'block';
+    if (pieChart) { pieChart.destroy(); pieChart = null; }
+    return;
+  }
+  canvas.style.display = 'block';
+  empty.style.display = 'none';
+
+  const colors = [
+    '#7c5cff', '#4f8cff', '#00d4aa', '#ff8a5c',
+    '#ffb74d', '#ff5c5c', '#a78bfa', '#34d399',
+    '#60a5fa'
+  ];
+
+  const data = {
+    labels: items.map(i => i.name),
+    datasets: [{
+      data: items.map(i => Math.max(i.cost, 0.01)),
+      backgroundColor: colors.slice(0, items.length),
+      borderColor: '#0b0d10',
+      borderWidth: 2
+    }]
+  };
+
+  if (pieChart) {
+    pieChart.data = data;
+    pieChart.update();
+  } else {
+    pieChart = new Chart(canvas, {
+      type: 'doughnut',
+      data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '55%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#e8eaf0',
+              font: { family: 'inherit', size: 12 },
+              padding: 14,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const v = ctx.parsed;
+                const pct = (v / total * 100).toFixed(1);
+                return ` ${ctx.label}: ${fmt$(v, 2)} (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+}
+
+// ============= REAL-WORLD TRANSLATION =============
+function buildRWT(monthly) {
+  if (monthly <= 0) {
+    return '<div class="empty-state">No spend yet — pick a tool to see what your money buys.</div>';
+  }
+
+  // Items with approximate USD cost
+  const items = [
+    { icon: '🥧',  name: 'Raspberry Pi 5',       unit: 80,    unitNote: '8GB kit' },
+    { icon: '☕',  name: 'Coffee shop lattes',   unit: 5.50,  unitNote: 'per latte' },
+    { icon: '🍕',  name: 'Takeout pizzas',       unit: 18,    unitNote: 'per pie' },
+    { icon: '🎮',  name: 'Indie game purchases', unit: 25,    unitNote: 'Steam sale' },
+    { icon: '📚',  name: 'Technical books',      unit: 40,    unitNote: 'hardcover' },
+    { icon: '⛽',  name: 'Gallons of gas',       unit: 3.80,  unitNote: 'US average' },
+    { icon: '🎬',  name: 'Movie tickets',        unit: 14,    unitNote: 'matinee' },
+    { icon: '🍺',  name: 'Craft beer pints',     unit: 8,     unitNote: 'at the bar' },
+    { icon: '🛜',  name: 'Months of Starlink',   unit: 80,    unitNote: 'residential' }
+  ];
+
+  // Pick a few that fit the range
+  const sorted = items
+    .map(it => ({ ...it, count: monthly / it.unit }))
+    .filter(it => it.count >= 0.5);
+
+  // sort by "narrative interest": prefer whole-ish numbers in mid-range
+  sorted.sort((a, b) => {
+    const scoreA = Math.abs(Math.log(a.count) - 1);
+    const scoreB = Math.abs(Math.log(b.count) - 1);
+    return scoreA - scoreB;
+  });
+
+  // Take top 6
+  return sorted.slice(0, 6).map(it => `
+    <div class="rwt-card">
+      <div class="rwt-icon">${it.icon}</div>
+      <div class="rwt-body">
+        <div class="rwt-title">${it.count >= 1 ? it.count.toFixed(it.count < 10 ? 1 : 0) : it.count.toFixed(2)} × ${it.name}</div>
+        <div class="rwt-sub">${it.unitNote} · ${fmt$(it.unit)} each</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============= TIPS =============
+function buildTips(items, total, local) {
+  const tips = [];
+  const selectedIds = items.map(i => {
+    const id = Object.keys(TOOLS).find(k => TOOLS[k].name === i.name);
+    return id;
+  }).filter(Boolean);
+
+  const hasOpus = items.some(i => i.model.includes('Opus'));
+  const hasGpt4 = items.some(i => i.model === 'GPT-4');
+  const hasCursor = selectedIds.includes('cursor');
+  const hasCopilot = selectedIds.includes('copilot');
+  const hasAider = selectedIds.includes('aider');
+  const hasContinue = selectedIds.includes('continue');
+  const flat = items.filter(i => i.note === 'Flat-rate subscription').reduce((a, b) => a + b.cost, 0);
+  const token = items.filter(i => i.note && i.note !== 'Flat-rate subscription' && i.note !== 'Fixed monthly').reduce((a, b) => a + b.cost, 0);
+
+  if (hasOpus) {
+    const opusSpend = items.filter(i => i.model.includes('Opus')).reduce((a, b) => a + b.cost, 0);
+    const save = opusSpend * 0.6;
+    tips.push({
+      title: `Switch from Opus to Sonnet for routine work → save ~${fmt$(save)}/mo`,
+      text: 'Claude Sonnet 4 handles ~85% of coding tasks at 1/5 the cost. Reserve Opus for architecture decisions and gnarly bugs.'
+    });
+  }
+
+  if (hasGpt4) {
+    const gpt4Spend = items.filter(i => i.model === 'GPT-4').reduce((a, b) => a + b.cost, 0);
+    const save = gpt4Spend * 0.9;
+    tips.push({
+      title: `Drop GPT-4 for GPT-4o → save ~${fmt$(save)}/mo`,
+      text: 'GPT-4o is roughly as capable as GPT-4 for code at ~1/12 the price. You almost certainly do not need legacy GPT-4 anymore.'
+    });
+  }
+
+  if (hasCursor) {
+    tips.push({
+      title: 'Use Continue.dev with your own API key instead of Cursor → save $20/mo',
+      text: 'Cursor\'s $20/mo Pro plan bundles model access. Continue.dev is free; you pay only the underlying API, and you can swap models per task.'
+    });
+  }
+
+  if (hasCopilot && state.selected.copilot && state.selected.copilot.tier === 'business') {
+    tips.push({
+      title: 'Re-check if you actually need Copilot Business ($39/mo)',
+      text: 'Individual is $10/mo. The business tier adds IP indemnity and org policy controls — most solo devs and small teams don\'t need it.'
+    });
+  }
+
+  if (local.monthlyTotal < total && total > 0) {
+    const save = total - local.monthlyTotal;
+    tips.push({
+      title: `Run a local model for boilerplate / refactoring → save ~${fmt$(save)}/mo`,
+      text: 'A 70B local model (Qwen, Llama, DeepSeek) handles repetitive code tasks well. Use cloud for the hard 15% of work, local for the easy 85%.'
+    });
+  }
+
+  if (token > 0 && items.length > 1) {
+    tips.push({
+      title: 'Batch your AI sessions to reduce idle token waste',
+      text: 'Each session burns tokens for system prompts, context, and history. Bundling 5 questions into 1 session can cut token use by 30–40%.'
+    });
+  }
+
+  if (!hasAider && !hasContinue && token > 50) {
+    tips.push({
+      title: 'Try Aider or Continue.dev with your own API key',
+      text: 'Both are free, open source, and let you bring whichever model you want. You stop paying a vendor markup on top of API cost.'
+    });
+  }
+
+  if (total > 500) {
+    tips.push({
+      title: 'You\'re in the top 1% of AI spend. Negotiate or batch-buy credits.',
+      text: 'At this volume, Anthropic and OpenAI have enterprise reps. OpenAI also offers batch API calls at 50% off (24-hour turnaround).'
+    });
+  }
+
+  if (total > 100 && total <= 500) {
+    tips.push({
+      title: 'Set a monthly budget cap in your API provider dashboard',
+      text: 'Hard limits prevent runaway sessions from spiking your bill. Both Anthropic and OpenAI let you set monthly spend caps.'
+    });
+  }
+
+  if (items.length === 0) {
+    return '<div class="empty-state">Pick some tools to get personalized tips.</div>';
+  }
+
+  if (tips.length === 0) {
+    return '<div class="empty-state">No specific tips for this configuration. You\'re already lean.</div>';
+  }
+
+  return tips.map(t => `
+    <div class="tip">
+      <div class="tip-icon">$</div>
+      <div class="tip-body">
+        <div class="tip-title">${t.title}</div>
+        <div class="tip-text">${t.text}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============= SHARING =============
+async function shareResults() {
+  const { items, total } = calcAll();
+  const local = calcLocal();
+  const savings = total - local.monthlyTotal;
+
+  const lines = [
+    '🧮 AI Agent Cost Calculator',
+    '━━━━━━━━━━━━━━━━━━━━━━━',
+    `Total monthly: ${fmt$(total)}`,
+    `Annual: ${fmt$(total * 12)}`,
+    ''
+  ];
+
+  if (items.length) {
+    lines.push('Per-tool:');
+    items.forEach(i => lines.push(`  • ${i.name} (${i.model}): ${fmt$(i.cost, 2)}/mo`));
+    lines.push('');
+  }
+
+  lines.push('Self-hosting:');
+  lines.push(`  Hardware: ${local.gpu.name}`);
+  lines.push(`  Local total: ${fmt$(local.monthlyTotal, 2)}/mo`);
+  if (savings > 0) {
+    lines.push(`  Savings: ${fmt$(savings)}/mo`);
+  }
+  lines.push('');
+  lines.push('https://devhandbook.io/ai-agent-cost-calculator/');
+
+  const text = lines.join('\n');
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Summary copied to clipboard');
+  } catch (e) {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast('Summary copied'); } catch (e2) { toast('Copy failed'); }
+    document.body.removeChild(ta);
+  }
+}
+
+// ============= INIT =============
+function hydrateInputs() {
+  $('workDays').value = state.workDays;
+  $('electricity').value = state.electricity;
+  $('gpu').value = state.gpu;
+  $('uptime').value = state.uptime;
+  $('amortizeYears').value = state.amortizeYears;
+}
+
+function bindGlobalEvents() {
+  $('workDays').addEventListener('input', e => {
+    state.workDays = Math.max(1, Math.min(31, parseInt(e.target.value) || 22));
+    save(); renderResults();
+  });
+  $('electricity').addEventListener('input', e => {
+    state.electricity = parseFloat(e.target.value) || 0;
+    save(); renderResults();
+  });
+  $('gpu').addEventListener('change', e => {
+    state.gpu = e.target.value;
+    save(); renderResults();
+  });
+  $('uptime').addEventListener('input', e => {
+    state.uptime = Math.max(1, Math.min(24, parseFloat(e.target.value) || 0));
+    save(); renderResults();
+  });
+  $('amortizeYears').addEventListener('input', e => {
+    state.amortizeYears = Math.max(1, parseFloat(e.target.value) || 1);
+    save(); renderResults();
+  });
+  $('btnReset').addEventListener('click', reset);
+  $('btnShare').addEventListener('click', shareResults);
+}
+
+function render() {
+  hydrateInputs();
+  renderToolList();
+  renderResults();
+}
+
+function init() {
+  load();
+  bindGlobalEvents();
+  render();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
