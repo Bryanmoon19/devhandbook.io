@@ -29,6 +29,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("docker-compose-generator");
   eleventyConfig.addPassthroughCopy("freelancer-tax-estimator");
   eleventyConfig.addPassthroughCopy("token-counter");
+  eleventyConfig.addPassthroughCopy("ai-agent-cost-calculator");
   eleventyConfig.addPassthroughCopy("og-images");
 
   // Blog collection sorted by date descending
