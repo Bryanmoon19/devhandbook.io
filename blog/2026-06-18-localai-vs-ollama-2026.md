@@ -187,7 +187,7 @@ This is where LocalAI dominates. I have a Python script that summarizes my daily
 ```python
 # Works with LocalAI instantly — just change the base_url
 client = OpenAI(
-    base_url="http://192.168.7.201:8080/v1",
+    base_url="http://192.168.1.201:8080/v1",
     api_key="not-needed"
 )
 
@@ -294,8 +294,8 @@ Mac Mini M4 (16GB)
 │   └── Quick model tests
 │   └── Open WebUI chat
 │
-Proxmox LXC (192.168.7.201)
-├── LocalAI (192.168.7.201:8080)
+Proxmox LXC (192.168.1.201)
+├── LocalAI (192.168.1.201:8080)
 │   └── RSS summarizer script
 │   └── Code review tool
 │   └── Any app expecting OpenAI API

@@ -135,16 +135,16 @@ scrape_configs:
   - job_name: 'node'
     static_configs:
       - targets: 
-        - '192.168.7.134:9100'  # Proxmox host
-        - '192.168.7.201:9100'  # TeslaMate LXC
-        - '192.168.7.202:9100'  # Media tools LXC
-        - '192.168.7.165:9100'  # Mac Mini
+        - '192.168.1.134:9100'  # Proxmox host
+        - '192.168.1.201:9100'  # TeslaMate LXC
+        - '192.168.1.202:9100'  # Media tools LXC
+        - '192.168.1.165:9100'  # Mac Mini
 
   - job_name: 'cadvisor'
     static_configs:
       - targets:
-        - '192.168.7.201:8080'
-        - '192.168.7.202:8080'
+        - '192.168.1.201:8080'
+        - '192.168.1.202:8080'
 
   - job_name: 'prometheus'
     static_configs:
@@ -404,7 +404,7 @@ docker images --format "{% raw %}{{.Repository}}{% endraw %}:{% raw %}{{.Tag}}{%
 done
 
 # Proxmox packages
-ssh root@192.168.7.134 "apt list --upgradable 2>/dev/null | wc -l" | xargs echo "Proxmox packages to update:"
+ssh root@192.168.1.134 "apt list --upgradable 2>/dev/null | wc -l" | xargs echo "Proxmox packages to update:"
 ```
 
 This runs Sunday mornings and posts a summary to Telegram. I batch-update when convenient instead of reacting to security announcements.
@@ -568,7 +568,7 @@ For every alert I have, I keep a one-page runbook in a Git repo:
 # Alert: Plex Down
 
 ## Check
-1. Is the LXC responding? `ping 192.168.7.203`
+1. Is the LXC responding? `ping 192.168.1.203`
 2. Is Docker running? `docker ps`
 3. Check logs: `docker logs plex --tail 100`
 
@@ -579,7 +579,7 @@ For every alert I have, I keep a one-page runbook in a Git repo:
 
 ## Fix
 ```bash
-ssh root@192.168.7.203
+ssh root@192.168.1.203
 docker restart plex
 ```
 

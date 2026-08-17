@@ -287,11 +287,11 @@ policy_out: DROP
 
 # Allow SSH from your management network only
 [IN]
-IN ACCEPT -source 192.168.7.0/24 -p tcp -dport 22
+IN ACCEPT -source 192.168.1.0/24 -p tcp -dport 22
 
 # Allow DNS (needed for package updates)
 [OUT]
-OUT ACCEPT -dest 192.168.7.1 -p udp -dport 53
+OUT ACCEPT -dest 192.168.1.1 -p udp -dport 53
 
 # Block everything else
 OUT DROP
@@ -676,8 +676,8 @@ IN DROP
 OUT DROP
 
 # Allow only specific outbound
-OUT ACCEPT -dest 192.168.7.0/24 -p tcp -dport 443  # Internal HTTPS only
-OUT ACCEPT -dest 192.168.7.1 -p udp -dport 53       # DNS
+OUT ACCEPT -dest 192.168.1.0/24 -p tcp -dport 443  # Internal HTTPS only
+OUT ACCEPT -dest 192.168.1.1 -p udp -dport 53       # DNS
 
 # Apply to agent containers
 [VM 1003]

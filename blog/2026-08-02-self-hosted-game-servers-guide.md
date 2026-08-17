@@ -149,7 +149,7 @@ credentials-file: /root/.cloudflared/<your-tunnel-id>.json
 
 ingress:
   - hostname: pterodactyl.yourdomain.com
-    service: http://192.168.7.50:80
+    service: http://192.168.1.50:80
   - service: http_status:404
 ```
 
@@ -175,8 +175,8 @@ Port forward from your router to the Proxmox LXC IP. Lock it down to the game tr
 # /etc/network/interfaces on the LXC
 auto eth0
 iface eth0 inet static
-  address 192.168.7.55/24
-  gateway 192.168.7.1
+  address 192.168.1.55/24
+  gateway 192.168.1.1
   dns-nameservers 1.1.1.1 8.8.8.8
 ```
 
@@ -224,7 +224,7 @@ pct create 200 local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst \
   --hostname valheim \
   --memory 3072 \
   --cores 2 \
-  --net0 name=eth0,bridge=vmbr0,ip=192.168.7.55/24,gw=192.168.7.1 \
+  --net0 name=eth0,bridge=vmbr0,ip=192.168.1.55/24,gw=192.168.1.1 \
   --features nesting=1 \
   --unprivileged 0
 pct start 200

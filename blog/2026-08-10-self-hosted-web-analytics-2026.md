@@ -442,11 +442,11 @@ All four tools should sit behind a reverse proxy with SSL. Here's a sample Nginx
 
 ```
 # Umami
-Domain: analytics.yourdomain.com → http://192.168.7.210:3000
+Domain: analytics.yourdomain.com → http://192.168.1.210:3000
 SSL: Let's Encrypt, Force SSL
 
 # Talivia
-Domain: stats.yourdomain.com → http://192.168.7.211:3000
+Domain: stats.yourdomain.com → http://192.168.1.211:3000
 SSL: Let's Encrypt, Force SSL
 ```
 

@@ -93,7 +93,7 @@ Claude Code supports E2B sandboxes natively. To point it at your local Dormice i
 
 ```bash
 # Set the E2B API URL to your Dormice instance
-export E2B_API_URL="http://192.168.7.XXX:49999"
+export E2B_API_URL="http://192.168.1.XXX:49999"
 export E2B_API_KEY="dormice"  # Dormice doesn't require auth by default
 
 # Now run Claude Code — it will use Dormice for sandboxing
@@ -107,7 +107,7 @@ For OpenClaw, add this to your gateway config:
   "sandbox": {
     "provider": "e2b",
     "e2b": {
-      "apiUrl": "http://192.168.7.XXX:49999",
+      "apiUrl": "http://192.168.1.XXX:49999",
       "apiKey": "dormice"
     }
   }
@@ -395,7 +395,7 @@ Here's what a typical workflow looks like with Dormice:
 docker start dormice
 
 # 2. Point Claude Code at your local sandbox
-export E2B_API_URL="http://192.168.7.202:49999"
+export E2B_API_URL="http://192.168.1.202:49999"
 export E2B_API_KEY="dormice"
 
 # 3. Run Claude Code with sandboxing

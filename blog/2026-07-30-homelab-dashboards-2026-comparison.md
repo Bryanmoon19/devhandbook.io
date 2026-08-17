@@ -411,25 +411,25 @@ Then add a `config/services.yaml` with your services:
 ---
 - Media:
     - Sonarr:
-        href: http://192.168.7.XXX:8989
+        href: http://192.168.1.XXX:8989
         description: TV shows
         widget:
           type: sonarr
-          url: http://192.168.7.XXX:8989
+          url: http://192.168.1.XXX:8989
           key: your-api-key
     - Radarr:
-        href: http://192.168.7.XXX:7878
+        href: http://192.168.1.XXX:7878
         description: Movies
         widget:
           type: radarr
-          url: http://192.168.7.XXX:7878
+          url: http://192.168.1.XXX:7878
           key: your-api-key
 - Network:
     - Pi-hole:
-        href: http://192.168.7.XXX:8080
+        href: http://192.168.1.XXX:8080
         widget:
           type: pihole
-          url: http://192.168.7.XXX:8080
+          url: http://192.168.1.XXX:8080
           key: your-api-key
 ```
 

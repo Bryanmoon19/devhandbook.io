@@ -35,7 +35,7 @@ Before we dive in, here's what I'm actually running as of today:
 | WireGuard + Pi-hole | VPN + DNS filtering | Proxmox LXC | $0 |
 | Vaultwarden | Password manager | Proxmox LXC | $0 |
 | Autobrr + *arr stack | Media automation | Proxmox LXC (VMID 1003) | $0 |
-| OpenClaw (Moon) | AI assistant | Mac mini (192.168.7.165) | ~$3 electricity |
+| OpenClaw (Moon) | AI assistant | Mac mini (192.168.1.165) | ~$3 electricity |
 | GPU VM (LLMs) | Local AI inference | Proxmox VM (RTX 3060) | ~$15 electricity |
 | Cloudflare Pages | Static hosting | Cloudflare | $0 |
 | Various Workers | Automation, APIs | Cloudflare | $0 |

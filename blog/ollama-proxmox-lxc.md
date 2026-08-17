@@ -141,7 +141,7 @@ Now Ollama is accessible at `http://<container-ip>:11434` from any machine on yo
 Test from another machine:
 
 ```bash
-curl http://192.168.7.XXX:11434/api/generate \
+curl http://192.168.1.XXX:11434/api/generate \
   -d '{"model":"llama3.2","prompt":"Hello!","stream":false}'
 ```
 
@@ -252,7 +252,7 @@ This is where it gets genuinely useful for a smart home. You can use Ollama as t
 In Home Assistant:
 
 1. **Settings → Integrations → Add Integration → Ollama**
-2. Enter your Ollama URL: `http://192.168.7.XXX:11434`
+2. Enter your Ollama URL: `http://192.168.1.XXX:11434`
 3. Select your preferred model (llama3.2 works well for HA)
 4. Set as your default conversation agent
 
@@ -269,7 +269,7 @@ action: rest_command.ask_ollama
 # configuration.yaml
 rest_command:
   ask_ollama:
-    url: "http://192.168.7.XXX:11434/api/generate"
+    url: "http://192.168.1.XXX:11434/api/generate"
     method: POST
     content_type: "application/json"
     payload: '{"model":"llama3.2","prompt":"{{ prompt }}","stream":false}'

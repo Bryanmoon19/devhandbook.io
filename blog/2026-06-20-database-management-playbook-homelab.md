@@ -294,7 +294,7 @@ Now I have a standardized strategy. Here's what I actually do:
 
 ### Daily Automated Backups to NAS
 
-I run a cron job on my Proxmox host every night at 2 AM. It dumps all databases, compresses them, and copies them to my UNAS NAS at `192.168.7.200`.
+I run a cron job on my Proxmox host every night at 2 AM. It dumps all databases, compresses them, and copies them to my UNAS NAS at `192.168.1.200`.
 
 ```bash
 #!/bin/bash
@@ -304,15 +304,15 @@ BACKUP_DIR="/mnt/unas-media/backups/databases/$(date +%Y%m%d)"
 mkdir -p "$BACKUP_DIR"
 
 # MariaDB/MySQL backup
-ssh root@192.168.7.202 "docker exec mariadb mariadb-dump --all-databases --single-transaction --quick --lock-tables=false" \
+ssh root@192.168.1.202 "docker exec mariadb mariadb-dump --all-databases --single-transaction --quick --lock-tables=false" \
   | gzip > "$BACKUP_DIR/mariadb-all.sql.gz"
 
 # PostgreSQL backup
-ssh root@192.168.7.201 "docker exec postgres pg_dumpall -U homelab" \
+ssh root@192.168.1.201 "docker exec postgres pg_dumpall -U homelab" \
   | gzip > "$BACKUP_DIR/postgres-all.sql.gz"
 
 # Per-database backups (for granular restores)
-ssh root@192.168.7.202 "docker exec mariadb mariadb-dump -u root -p\$MARIADB_ROOT_PASSWORD --databases nextcloud homeassistant" \
+ssh root@192.168.1.202 "docker exec mariadb mariadb-dump -u root -p\$MARIADB_ROOT_PASSWORD --databases nextcloud homeassistant" \
   | gzip > "$BACKUP_DIR/mariadb-apps.sql.gz"
 
 # Keep only last 7 days locally, sync to NAS
@@ -431,8 +431,8 @@ You can't manage what you don't measure. I monitor my databases with a combinati
 # /opt/scripts/db-health-report.sh
 
 # MariaDB health
-THREADS=$(ssh root@192.168.7.202 "docker exec mariadb mariadb -uroot -p\$MARIADB_ROOT_PASSWORD -e 'SHOW STATUS LIKE \"Threads_connected\";'" | tail -1)
-SLOW=$(ssh root@192.168.7.202 "docker exec mariadb mariadb -uroot -p\$MARIADB_ROOT_PASSWORD -e 'SHOW GLOBAL STATUS LIKE \"Slow_queries\";'" | tail -1)
+THREADS=$(ssh root@192.168.1.202 "docker exec mariadb mariadb -uroot -p\$MARIADB_ROOT_PASSWORD -e 'SHOW STATUS LIKE \"Threads_connected\";'" | tail -1)
+SLOW=$(ssh root@192.168.1.202 "docker exec mariadb mariadb -uroot -p\$MARIADB_ROOT_PASSWORD -e 'SHOW GLOBAL STATUS LIKE \"Slow_queries\";'" | tail -1)
 DB_SIZE=$(du -sh /mnt/unas-media/docker/mariadb | cut -f1)
 
 echo "MariaDB Health Report"

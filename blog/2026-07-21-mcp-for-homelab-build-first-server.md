@@ -96,15 +96,15 @@ import requests
 
 # ── Configuration (use env vars in production) ──────────────────────
 
-PROXMOX_HOST = os.getenv("PROXMOX_HOST", "192.168.7.134")
+PROXMOX_HOST = os.getenv("PROXMOX_HOST", "192.168.1.134")
 PROXMOX_USER = os.getenv("PROXMOX_USER", "root@pam")
 PROXMOX_TOKEN = os.getenv("PROXMOX_TOKEN", "")
 PROXMOX_TOKEN_NAME = os.getenv("PROXMOX_TOKEN_NAME", "moonbot")
 
 DOCKER_HOST = os.getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-# For remote Docker: "ssh://root@192.168.7.202"
+# For remote Docker: "ssh://root@192.168.1.202"
 
-HA_URL = os.getenv("HA_URL", "http://192.168.7.46:8123")
+HA_URL = os.getenv("HA_URL", "http://192.168.1.46:8123")
 HA_TOKEN = os.getenv("HA_TOKEN", "")
 
 # ── Proxmox Helpers ─────────────────────────────────────────────────
@@ -378,17 +378,17 @@ Create a `.env` file (add to `.gitignore` immediately):
 
 ```bash
 # Proxmox API
-PROXMOX_HOST=192.168.7.134
+PROXMOX_HOST=192.168.1.134
 PROXMOX_USER=root@pam
 PROXMOX_TOKEN_NAME=moonbot
 PROXMOX_TOKEN=your-proxmox-api-token-here
 
 # Docker (local socket or remote SSH)
 DOCKER_HOST=unix:///var/run/docker.sock
-# DOCKER_HOST=ssh://root@192.168.7.202  # Remote Docker
+# DOCKER_HOST=ssh://root@192.168.1.202  # Remote Docker
 
 # Home Assistant
-HA_URL=http://192.168.7.46:8123
+HA_URL=http://192.168.1.46:8123
 HA_TOKEN=your-long-lived-access-token-here
 ```
 
@@ -429,10 +429,10 @@ Claude Code supports MCP servers natively. Add to your Claude Code config:
       "command": "python3",
       "args": ["/Users/bryan/homelab-mcp/server.py"],
       "env": {
-        "PROXMOX_HOST": "192.168.7.134",
+        "PROXMOX_HOST": "192.168.1.134",
         "PROXMOX_TOKEN": "your-token-here",
-        "DOCKER_HOST": "ssh://root@192.168.7.202",
-        "HA_URL": "http://192.168.7.46:8123",
+        "DOCKER_HOST": "ssh://root@192.168.1.202",
+        "HA_URL": "http://192.168.1.46:8123",
         "HA_TOKEN": "your-ha-token-here"
       }
     }
@@ -464,7 +464,7 @@ OpenClaw supports MCP servers through its plugin system. Add to your OpenClaw co
         "command": "python3",
         "args": ["/Users/bryan/homelab-mcp/server.py"],
         "env": {
-          "PROXMOX_HOST": "192.168.7.134",
+          "PROXMOX_HOST": "192.168.1.134",
           "PROXMOX_TOKEN": "your-token-here"
         }
       }

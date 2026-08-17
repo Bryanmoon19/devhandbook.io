@@ -123,7 +123,7 @@ You install ANAS as a plugin on the Proxmox host itself, and it shows up at `htt
 
 ## Bryan's Take
 
-I've been running Proxmox on my Venus host (192.168.7.134) since 2023. For bulk storage, I actually run a **UNAS Pro** mounted to Proxmox via CIFS — it's a 4-bay unit with 4× 8 TB drives, and it handles the heavy lifting for media, backups, and the *arr stack. Proxmox itself runs off NVMe for VMs and containers, with the UNAS Pro providing the cold/warm storage layer via a network mount.
+I've been running Proxmox on my Venus host (192.168.1.134) since 2023. For bulk storage, I actually run a **UNAS Pro** mounted to Proxmox via CIFS — it's a 4-bay unit with 4× 8 TB drives, and it handles the heavy lifting for media, backups, and the *arr stack. Proxmox itself runs off NVMe for VMs and containers, with the UNAS Pro providing the cold/warm storage layer via a network mount.
 
 So my Proxmox box doesn't need its own big ZFS array. But a lot of homelabbers are starting fresh with a single Proxmox host and a stack of drives they want to use — and that's where these three options come in.
 

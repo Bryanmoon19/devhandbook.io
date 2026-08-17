@@ -204,7 +204,7 @@ Here's a stripped-down but production-ready config for a 2-camera setup with a C
 {% raw %}
 mqtt:
   enabled: true
-  host: 192.168.7.46  # Your MQTT broker (Home Assistant Mosquitto)
+  host: 192.168.1.46  # Your MQTT broker (Home Assistant Mosquitto)
   port: 1883
   topic_prefix: frigate
   client_id: frigate
@@ -220,7 +220,7 @@ cameras:
     enabled: true
     ffmpeg:
       inputs:
-        - path: rtsp://admin:password@192.168.7.51:554/h264Preview_01_main
+        - path: rtsp://admin:password@192.168.1.51:554/h264Preview_01_main
           roles:
             - detect
             - record
@@ -257,7 +257,7 @@ cameras:
     enabled: true
     ffmpeg:
       inputs:
-        - path: rtsp://admin:password@192.168.7.52:554/h264Preview_01_main
+        - path: rtsp://admin:password@192.168.1.52:554/h264Preview_01_main
           roles:
             - detect
             - record
@@ -374,7 +374,7 @@ Check the `record.retain.days` value vs. disk space. Frigate uses ~70% of availa
 
 ### 5. "Home Assistant Can't Connect"
 
-Check that the Frigate container's hostname resolves from HA. If using Docker Compose on a separate host, point HA at the server IP (`http://192.168.7.20:5000`). If using HA add-on, use `http://ccab4aaf-frigate:5000` (replace the prefix with your add-on slug).
+Check that the Frigate container's hostname resolves from HA. If using Docker Compose on a separate host, point HA at the server IP (`http://192.168.1.20:5000`). If using HA add-on, use `http://ccab4aaf-frigate:5000` (replace the prefix with your add-on slug).
 
 ### 6. "Notifications Fire Constantly"
 

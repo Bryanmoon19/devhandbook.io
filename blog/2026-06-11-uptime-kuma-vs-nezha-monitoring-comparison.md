@@ -168,7 +168,7 @@ This is what I run. Uptime Kuma handles the public-facing "is Plex up?" question
 
 ## My Current Stack: How They Play Together
 
-On my Proxmox host (192.168.7.134), I have:
+On my Proxmox host (192.168.1.134), I have:
 
 - **Uptime Kuma** in LXC 1003 (media tools container) — monitors Jellyfin, Navidrome, *arr apps, and the blog
 - **Nezha Dashboard** in LXC 1002 (TeslaMate container, since it has resources to spare) — monitors all LXCs plus the Proxmox host itself
