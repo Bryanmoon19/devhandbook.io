@@ -1,0 +1,22 @@
+[
+  { "slug": "jwt-debugger", "lastmod": "2026-02-25" },
+  { "slug": "base64-converter", "lastmod": "2026-02-25" },
+  { "slug": "json-formatter", "lastmod": "2026-02-25" },
+  { "slug": "timestamp-converter", "lastmod": "2026-02-25" },
+  { "slug": "password-generator", "lastmod": "2026-02-25" },
+  { "slug": "url-encoder", "lastmod": "2026-02-25" },
+  { "slug": "color-converter", "lastmod": "2026-02-25" },
+  { "slug": "cron-generator", "lastmod": "2026-02-25" },
+  { "slug": "html-entities", "lastmod": "2026-02-25" },
+  { "slug": "regex-tester", "lastmod": "2026-02-25" },
+  { "slug": "pdf-tools", "lastmod": "2026-02-25" },
+  { "slug": "ai-sanitizer", "lastmod": "2026-02-25" },
+  { "slug": "docker-compose-generator", "lastmod": "2026-03-30" },
+  { "slug": "homelab-cost-calculator", "lastmod": "2026-04-22" },
+  { "slug": "token-counter", "lastmod": "2026-04-22" },
+  { "slug": "finance-tracker", "lastmod": "2026-04-28" },
+  { "slug": "freelance-rate-calculator", "lastmod": "2026-06-15" },
+  { "slug": "dev-tool-cost-calculator", "lastmod": "2026-06-15" },
+  { "slug": "diff-checker", "lastmod": "2026-08-08" },
+  { "slug": "ai-agent-cost-calculator", "lastmod": "2026-08-08" }
+]
