@@ -6,6 +6,7 @@ description: "Most OpenClaw users spend $50-200/month on API bills. Here's how t
 tags: ["openclaw", "ollama", "self-hosted", "ai", "free", "local-llm", "openrouter"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/openclaw-free-setup"
+affiliate: true
 ---
 
 *This post is based on [a discussion by u/ShabzSparq on r/AskClaw](https://www.reddit.com/r/AskClaw/comments/1s55ubm/). We verified the configs against the actual OpenClaw schema, corrected some details, and added editorial context.*

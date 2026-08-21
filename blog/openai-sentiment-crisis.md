@@ -6,6 +6,7 @@ description: "A 295% spike in ChatGPT uninstalls reveals a critical infrastructu
 tags: ["ai", "llm", "infrastructure", "self-hosted", "risk-management"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/openai-sentiment-crisis"
+affiliate: true
 ---
 
 In early 2025, OpenAI announced a deepening partnership with the Pentagon — providing AI tools for military operations. The response was immediate: ChatGPT uninstalls spiked **295%** in the following weeks<sup>[1](#ref-1)</sup>. Users, concerned about their data being tied to defense contracts, voted with their feet.

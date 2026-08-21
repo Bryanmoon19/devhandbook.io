@@ -6,6 +6,7 @@ description: "A step-by-step guide to running Home Assistant Container in a Prox
 tags: ["homelab", "proxmox", "home-assistant", "self-hosted", "lxc"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/proxmox-home-assistant-lxc"
+affiliate: true
 ---
 
 If you're running a Proxmox homelab, you've probably already got a VM or two taking up RAM. Home Assistant is one of those services you want running 24/7, but dedicating a full virtual machine to it can feel wasteful — especially when a lightweight LXC container does the job just as well. This guide walks you through getting Home Assistant Container up and running inside a Proxmox LXC, from scratch.

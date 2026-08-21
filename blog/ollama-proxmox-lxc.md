@@ -6,6 +6,7 @@ description: "Step-by-step guide to running Ollama inside a Proxmox LXC containe
 tags: ["ollama", "proxmox", "self-hosted", "llm", "homelab", "lxc", "ai"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/ollama-proxmox-lxc"
+affiliate: true
 ---
 
 Your Proxmox server is probably sitting idle most of the day. It's got RAM you're not using, CPU headroom to spare, and if you have a dGPU in it, a graphics card that's doing absolutely nothing. Running Ollama inside an LXC container is one of the highest-value things you can do with that spare capacity — a private, always-on LLM that responds in under a second, never leaks your prompts to a third party, and costs $0/month beyond existing electricity.

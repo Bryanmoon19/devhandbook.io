@@ -6,6 +6,7 @@ description: "Stop guessing. Match the right local LLM to your actual homelab ha
 tags: ["ollama", "local-llm", "proxmox", "homelab", "ai", "self-hosted", "hardware"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/local-llms-homelab-hardware-guide"
+affiliate: true
 ---
 
 The hardest part of running local LLMs isn't the installation — it's knowing which model to run on the hardware you actually own. Pull a 70B model on a 16GB machine and the system crawls. Run a 1B model on a GPU server and you're leaving performance on the table.
