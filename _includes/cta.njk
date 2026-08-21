@@ -1,0 +1,15 @@
+{%- comment -%}
+  Reusable contextual CTA / sponsor slot for blog posts.
+  Usage: {% include "cta.njk" %}
+  Renders a subtle "sponsor" card. Reads from _data/affiliates.json.
+  Only renders when the post front matter sets cta: true (or always, if you prefer).
+{%- endcomment -%}
+<div class="cta-card">
+  <div class="cta-card__label">Sponsored</div>
+  <p class="cta-card__text">Running a homelab? These are the tools and services I actually use and recommend — they keep this site free.</p>
+  <div class="cta-card__links">
+    <a href="{{ affiliates.programs.cloudflare.url }}" rel="nofollow sponsored" target="_blank" rel="noopener">Cloudflare</a>
+    <a href="{{ affiliates.programs.hetzner.url }}" rel="nofollow sponsored" target="_blank" rel="noopener">Hetzner</a>
+    <a href="{{ affiliates.programs.ovh.url }}" rel="nofollow sponsored" target="_blank" rel="noopener">OVHcloud</a>
+  </div>
+</div>

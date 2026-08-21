@@ -6,6 +6,8 @@ description: "Six months into 2026, I'm taking honest stock of my homelab. What'
 tags: ["homelab", "self-hosted", "review", "proxmox", "docker", "2026", "productivity", "cost-analysis"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/2026-07-01-midyear-homelab-review-2026"
+affiliate: true
+cta: true
 ---
 
 It's July 1st. We're halfway through 2026. And I just got my electricity bill.

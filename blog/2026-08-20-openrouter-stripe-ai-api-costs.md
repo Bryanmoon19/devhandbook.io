@@ -6,6 +6,8 @@ description: "OpenRouter joined Stripe, GPT-5.6 Sol's price just dropped 50%, an
 tags: ["ai", "openrouter", "stripe", "api", "llm", "gpt-5.6", "self-hosted", "apple-silicon", "cost", "billing", "local-llm", "homelab"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/2026-08-20-openrouter-stripe-ai-api-costs"
+affiliate: true
+cta: true
 ---
 
 # OpenRouter Just Joined Stripe — What It Means for Your AI API Bill (and Whether to Go Self-Hosted)

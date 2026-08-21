@@ -1,0 +1,53 @@
+{
+  "disclosure": "Some links on this page are affiliate links — I earn a small commission at no extra cost to you. I only recommend products and services I've personally used or researched for homelab use.",
+  "programs": {
+    "amazon": {
+      "name": "Amazon Associates",
+      "tag": "devhandbook26-20",
+      "url": "https://www.amazon.com/dp/{{asin}}?tag=devhandbook26-20",
+      "status": "approved",
+      "note": "Live — used in local-llms-homelab-hardware-guide and ollama-proxmox-lxc"
+    },
+    "cloudflare": {
+      "name": "Cloudflare",
+      "program": "Cloudflare Partner / Affiliate",
+      "url": "https://www.cloudflare.com/plans/",
+      "ref": "PLACEHOLDER_CLOUDFLARE_REF",
+      "status": "pending-application",
+      "note": "Fill in ref once approved. Biggest traffic driver = Workers/Pages posts."
+    },
+    "hetzner": {
+      "name": "Hetzner",
+      "program": "Hetzner Affiliate",
+      "url": "https://www.hetzner.com/cloud",
+      "ref": "PLACEHOLDER_HETZNER_REF",
+      "status": "pending-application",
+      "note": "Fill in ref once approved. Use in email + homelab hosting posts."
+    },
+    "ovh": {
+      "name": "OVHcloud",
+      "program": "OVH Affiliate",
+      "url": "https://www.ovhcloud.com/en/vps/",
+      "ref": "PLACEHOLDER_OVH_REF",
+      "status": "pending-application",
+      "note": "Fill in ref once approved. Use in email + homelab hosting posts."
+    }
+  },
+  "evergreen_promo": [
+    {
+      "slug": "local-llms-homelab-hardware-guide",
+      "title": "Local LLMs for Homelab: Hardware Guide",
+      "why": "High-intent buying audience, already has Amazon affiliate links. Best ROI for community promo."
+    },
+    {
+      "slug": "2026-08-20-openrouter-stripe-ai-api-costs",
+      "title": "OpenRouter + Stripe: AI API Costs",
+      "why": "Timely, high-traffic, ties API vs self-host decision to hardware purchases."
+    },
+    {
+      "slug": "2026-08-16-self-hosted-email-2026-stack-that-delivers-to-gmail",
+      "title": "Self-Hosted Email Stack That Delivers to Gmail",
+      "why": "Evergreen pain point, natural fit for Hetzner/OVH hosting affiliate links."
+    }
+  ]
+}

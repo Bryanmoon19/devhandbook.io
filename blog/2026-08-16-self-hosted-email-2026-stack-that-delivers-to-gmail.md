@@ -6,6 +6,8 @@ description: "Self-hosting email is harder than it's ever been — Gmail, Outloo
 tags: ["self-hosted", "email", "mox", "wildduck", "stalwart", "maddy", "deliverability", "homelab", "smtp", "imap", "gmail"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/2026-08-16-self-hosted-email-2026-stack-that-delivers-to-gmail"
+affiliate: true
+cta: true
 ---
 
 There's a post that keeps resurfacing on Hacker News — 316 points, titled something like *"Self-hosting email is the hardest it's ever been."* The comments are a graveyard of people who tried, got their mail silently dropped by Gmail, and gave up. And they're not wrong: the big three providers (Gmail, Outlook, Yahoo) have spent the last five years making it brutally hard for a random IP address to land in an inbox.
@@ -89,7 +91,7 @@ This is the single biggest factor, and it's the one most guides gloss over. Gmai
 
 The reality: **you almost certainly cannot send mail directly from your homelab IP.** Residential IPs are on blocklists by default, and most ISPs block outbound port 25 anyway. Your options are:
 
-- **A reputable VPS** with a clean IP (Hetzner, DigitalOcean, Vultr — but check the specific IP's reputation first, because cloud ranges are heavily abused)
+- **A reputable VPS** with a clean IP ([Hetzner](https://www.hetzner.com/cloud?ref=PLACEHOLDER_HETZNER_REF), [OVHcloud](https://www.ovhcloud.com/en/vps/?ref=PLACEHOLDER_OVH_REF), DigitalOcean, Vultr — but check the specific IP's reputation first, because cloud ranges are heavily abused)
 - **A mail relay** (see below) that sends on your behalf from a trusted IP
 
 This is the part where a lot of people get stuck, because it means self-hosting email isn't *fully* self-hosted — you're renting a clean IP from someone. More on that in the verdict.

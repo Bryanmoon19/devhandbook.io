@@ -1,0 +1,6 @@
+{%- comment -%}
+  Reusable affiliate disclosure block.
+  Usage: {% include "affiliate-disclosure.njk" %}
+  Reads disclosure text from _data/affiliates.json.
+{%- endcomment -%}
+<div class="affiliate-disclosure">{{ affiliates.disclosure }}</div>

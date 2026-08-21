@@ -205,6 +205,48 @@ layout: base.njk
     border-color: rgba(41,151,255,0.15);
   }
 
+  /* CTA / sponsor card */
+  .cta-card {
+    margin: 40px 0 8px;
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+  }
+  .cta-card__label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+    margin-bottom: 8px;
+  }
+  .cta-card__text {
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .cta-card__links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .cta-card__links a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 980px;
+    padding: 6px 14px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .cta-card__links a:hover {
+    border-color: var(--accent);
+    background: rgba(0,113,227,0.05);
+  }
+
   /* Post footer */
   .post-footer {
     margin-top: 48px;
@@ -251,4 +293,10 @@ layout: base.njk
   <div class="post-body">
     {{ content | safe }}
   </div>
+  {% if affiliate %}
+    {% include "affiliate-disclosure.njk" %}
+  {% endif %}
+  {% if cta %}
+    {% include "cta.njk" %}
+  {% endif %}
 </article>
