@@ -225,4 +225,21 @@ Self-hosting your ebooks is the last piece of the "own your media" puzzle, and i
 
 Your audiobooks are self-hosted. Your music is self-hosted. Your video is self-hosted. It's time your ebooks were too.
 
+## Related Posts
+
+- [Self-Hosted Audiobookshelf: The Complete 2026 Guide](/blog/2026-07-01-self-hosted-audiobookshelf-complete-guide/) — The natural prequel to this post, and the tool Bookshelf is modeled on
+- [Self-Hosted Music Streaming: Navidrome Setup Guide](/blog/2026-05-16-self-hosted-music-navidrome-soulseek/) — Same ownership philosophy, different media
+- [Jellyfin Ecosystem: The Complete Self-Hosted Media Stack](/blog/2026-08-10-jellyfin-ecosystem-stack/) — Where video fits into the picture
+- [Immich: Self-Hosted Photo Management for Your Homelab](/blog/2026-06-17-immich-photo-management-homelab/) — Photos, the other media you should own
+- [Self-Hosted S3 at Home with MinIO](/blog/2026-08-23-s3-at-home-minio/) — The object-storage stack Bookshelf runs on
+
+## Resources & Links
+
+- [Calibre-Web GitHub](https://github.com/janeczku/calibre-web)
+- [Kavita GitHub](https://github.com/Kareadita/Kavita)
+- [Komga GitHub](https://github.com/gotson/komga)
+- [Bookshelf GitHub](https://github.com/bookshelfapp/bookshelf)
+- [Calibre (desktop app)](https://calibre-ebook.com/) — The desktop manager Calibre-Web is built around
+- [OPDS specification](https://opds.io/) — The standard protocol all these tools speak
+
 *This is part of my ongoing self-hosting series. If you found it useful, the [Audiobookshelf guide](/blog/2026-07-01-self-hosted-audiobookshelf-complete-guide/) and the [MinIO object-storage guide](/blog/2026-08-23-s3-at-home-minio/) are the natural next reads.*

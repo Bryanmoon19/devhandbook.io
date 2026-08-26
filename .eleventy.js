@@ -4,6 +4,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("*.svg");
   eleventyConfig.addPassthroughCopy("*.ico");
   eleventyConfig.addPassthroughCopy("robots.txt");
+  eleventyConfig.addPassthroughCopy("_redirects");
   // sitemap.xml is now generated dynamically via sitemap.njk — not a passthrough
   eleventyConfig.addPassthroughCopy("apple-redesign.css");
 
