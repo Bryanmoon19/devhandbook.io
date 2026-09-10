@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelancer Tax Estimator — 1099 Self-Employment Tax Calculator | devhandbook.io</title>
+    <meta name="description" content="Estimate your 1099 self-employment taxes in seconds — federal income tax, self-employment tax, QBI deduction, and quarterly estimated payments. Free, private, instant.">
+    <meta name="keywords" content="freelancer tax estimator, 1099 tax calculator, self employment tax calculator, quarterly estimated taxes, freelance tax calculator, contractor tax estimator">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devhandbook.io/freelancer-tax-estimator/">
+    <meta property="og:title" content="Freelancer Tax Estimator — 1099 Self-Employment Tax Calculator">
+    <meta property="og:description" content="Estimate your 1099 self-employment taxes — federal income tax, SE tax, QBI deduction, and quarterly payments. Free, private, instant.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devhandbook.io/freelancer-tax-estimator/">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <style>
+        :root {
+            --bg: #fbfbfd;
+            --surface: rgba(255,255,255,0.78);
+            --surface-mid: rgba(255,255,255,0.6);
+            --text: #1d1d1f;
+            --text-2: #6e6e73;
+            --accent: #0071e3;
+            --accent-hover: #0077ed;
+            --accent-green: #34c759;
+            --accent-orange: #ff9500;
+            --accent-red: #ff3b30;
+            --border: rgba(0,0,0,0.07);
+            --shadow: 0 2px 16px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04);
+            --r-card: 20px;
+            --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        html.dark {
+            --bg: #000;
+            --surface: rgba(28,28,30,0.78);
+            --surface-mid: rgba(44,44,46,0.6);
+            --text: #f5f5f7;
+            --text-2: #98989d;
+            --border: rgba(255,255,255,0.08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+        }
+        .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+        .header { text-align: center; padding: 60px 0 40px; }
+        .header h1 {
+            font-size: 44px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-green));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .header p { font-size: 20px; color: var(--text-2); max-width: 520px; margin: 0 auto; }
+
+        .result-card {
+            background: var(--surface); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border); border-radius: var(--r-card);
+            padding: 32px; margin-bottom: 24px; box-shadow: var(--shadow); text-align: center;
+        }
+        .result-label { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); margin-bottom: 8px; }
+        .result-value { font-size: 56px; font-weight: 700; letter-spacing: -0.02em; color: var(--accent); line-height: 1.1; }
+        .result-sub { font-size: 15px; color: var(--text-2); margin-top: 8px; }
+        .result-breakdown { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
+        .breakdown-item { text-align: center; }
+        .breakdown-value { font-size: 22px; font-weight: 700; color: var(--text); }
+        .breakdown-label { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+
+        .section {
+            background: var(--surface); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border); border-radius: var(--r-card);
+            padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow);
+        }
+        .section-title { font-size: 17px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .section-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+        .input-group { margin-bottom: 16px; }
+        .input-group:last-child { margin-bottom: 0; }
+        .input-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+        .input-hint { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+        input[type="number"], input[type="text"], select {
+            width: 100%; padding: 12px 16px; font-size: 16px; font-family: var(--font);
+            background: var(--surface-mid); border: 1px solid var(--border); border-radius: 12px;
+            color: var(--text); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .note {
+            background: rgba(0,113,227,0.06); border: 1px solid rgba(0,113,227,0.15);
+            border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--text-2);
+            margin-top: 16px; line-height: 1.5;
+        }
+        .note strong { color: var(--text); }
+
+        .footer { text-align: center; padding: 40px 0 60px; color: var(--text-2); font-size: 13px; }
+        .footer a { color: var(--accent); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 34px; }
+            .result-value { font-size: 44px; }
+            .result-breakdown { grid-template-columns: 1fr; }
+            .input-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Freelancer Tax Estimator</h1>
+            <p>Estimate your 1099 self-employment taxes — federal income tax, SE tax, QBI deduction, and quarterly payments.</p>
+        </div>
+
+        <div class="result-card">
+            <div class="result-label">Total Estimated Tax (2025)</div>
+            <div class="result-value" id="totalTax">$0</div>
+            <div class="result-sub" id="effectiveRate">Effective rate: 0.0% of net income</div>
+            <div class="result-breakdown">
+                <div class="breakdown-item">
+                    <div class="breakdown-value" id="fedTax">$0</div>
+                    <div class="breakdown-label">Federal Income Tax</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-value" id="seTax">$0</div>
+                    <div class="breakdown-label">Self-Employment Tax</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-value" id="quarterly">$0</div>
+                    <div class="breakdown-label">Quarterly Payment</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><span class="section-icon">💰</span> Income</div>
+            <div class="input-group">
+                <label class="input-label" for="grossIncome">Gross freelance income (1099)</label>
+                <input type="number" id="grossIncome" value="80000" min="0" step="1000">
+                <div class="input-hint">Total revenue before any deductions.</div>
+            </div>
+            <div class="input-group">
+                <label class="input-label" for="expenses">Business expenses</label>
+                <input type="number" id="expenses" value="5000" min="0" step="500">
+                <div class="input-hint">Software, hardware, home office, travel, etc.</div>
+            </div>
+            <div class="input-group">
+                <label class="input-label" for="filingStatus">Filing status</label>
+                <select id="filingStatus">
+                    <option value="single">Single</option>
+                    <option value="mfj">Married filing jointly</option>
+                    <option value="mfs">Married filing separately</option>
+                    <option value="hoh">Head of household</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label class="input-label" for="otherIncome">Other income (W-2, interest, etc.)</label>
+                <input type="number" id="otherIncome" value="0" min="0" step="1000">
+                <div class="input-hint">Any non-freelance income that affects your tax bracket.</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><span class="section-icon">🧾</span> Deductions & Credits</div>
+            <div class="input-group">
+                <label class="input-label" for="retirement">Retirement contributions (SEP/Solo 401k)</label>
+                <input type="number" id="retirement" value="0" min="0" step="500">
+                <div class="input-hint">Deductible contributions reduce taxable income.</div>
+            </div>
+            <div class="input-group">
+                <label class="input-label" for="healthInsurance">Self-employed health insurance premiums</label>
+                <input type="number" id="healthInsurance" value="0" min="0" step="500">
+                <div class="input-hint">Deductible above-the-line for self-employed.</div>
+            </div>
+            <div class="input-group">
+                <label class="input-label" for="dependents">Number of dependents (child tax credit)</label>
+                <input type="number" id="dependents" value="0" min="0" step="1">
+                <div class="input-hint">$2,000 credit per qualifying child under 17.</div>
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>Estimates only — not tax advice.</strong> Uses 2025 federal tax brackets, standard deduction, self-employment tax (15.3%), and the 20% QBI deduction. Does not include state/local taxes, the additional 0.9% Medicare surtax, or the NIIT. Consult a CPA for your specific situation.
+        </div>
+
+        <div class="footer">
+            <a href="/">← Back to devhandbook.io</a>
+        </div>
+    </div>
+
+    <script>
+        // 2025 federal tax brackets
+        const BRACKETS = {
+            single: [
+                [11925, 0.10], [48475, 0.12], [103350, 0.22], [197300, 0.24],
+                [250525, 0.32], [626350, 0.35], [Infinity, 0.37]
+            ],
+            mfj: [
+                [23850, 0.10], [96950, 0.12], [206700, 0.22], [394600, 0.24],
+                [501050, 0.32], [751600, 0.35], [Infinity, 0.37]
+            ],
+            mfs: [
+                [11925, 0.10], [48475, 0.12], [103350, 0.22], [197300, 0.24],
+                [250525, 0.32], [375800, 0.35], [Infinity, 0.37]
+            ],
+            hoh: [
+                [17000, 0.10], [64850, 0.12], [103350, 0.22], [197300, 0.24],
+                [250500, 0.32], [626350, 0.35], [Infinity, 0.37]
+            ]
+        };
+        const STANDARD_DEDUCTION = { single: 15000, mfj: 30000, mfs: 15000, hoh: 22500 };
+        const SE_RATE = 0.153; // 12.4% SS + 2.9% Medicare
+        const SS_WAGE_BASE = 176100; // 2025 Social Security wage base
+        const QBI_RATE = 0.20;
+        const CHILD_CREDIT = 2000;
+
+        function calcFederalTax(taxableIncome, status) {
+            const brackets = BRACKETS[status];
+            let tax = 0, prev = 0;
+            for (const [cap, rate] of brackets) {
+                if (taxableIncome > prev) {
+                    tax += (Math.min(taxableIncome, cap) - prev) * rate;
+                }
+                prev = cap;
+                if (taxableIncome <= cap) break;
+            }
+            return tax;
+        }
+
+        function calcSETax(netProfit) {
+            // Social Security portion capped at wage base
+            const ssBase = Math.min(netProfit, SS_WAGE_BASE);
+            const ssTax = ssBase * 0.124;
+            const medicareTax = netProfit * 0.029;
+            return ssTax + medicareTax;
+        }
+
+        function fmt(n) {
+            return '$' + Math.round(n).toLocaleString('en-US');
+        }
+
+        function update() {
+            const gross = Number(document.getElementById('grossIncome').value) || 0;
+            const expenses = Number(document.getElementById('expenses').value) || 0;
+            const status = document.getElementById('filingStatus').value;
+            const otherIncome = Number(document.getElementById('otherIncome').value) || 0;
+            const retirement = Number(document.getElementById('retirement').value) || 0;
+            const healthIns = Number(document.getElementById('healthInsurance').value) || 0;
+            const dependents = Number(document.getElementById('dependents').value) || 0;
+
+            const netProfit = Math.max(0, gross - expenses);
+
+            // Self-employment tax
+            const seTax = calcSETax(netProfit);
+
+            // Half of SE tax is deductible
+            const halfSETax = seTax / 2;
+
+            // QBI deduction (20% of qualified business income, capped by taxable income)
+            const qbiDeduction = netProfit * QBI_RATE;
+
+            // Taxable income
+            const standardDeduction = STANDARD_DEDUCTION[status];
+            const totalDeductions = standardDeduction + halfSETax + qbiDeduction + retirement + healthIns;
+            const taxableIncome = Math.max(0, netProfit + otherIncome - totalDeductions);
+
+            // Federal income tax
+            let fedTax = calcFederalTax(taxableIncome, status);
+
+            // Child tax credit
+            fedTax = Math.max(0, fedTax - (dependents * CHILD_CREDIT));
+
+            const totalTax = seTax + fedTax;
+            const effectiveRate = netProfit > 0 ? (totalTax / netProfit) * 100 : 0;
+            const quarterly = totalTax / 4;
+
+            document.getElementById('totalTax').textContent = fmt(totalTax);
+            document.getElementById('effectiveRate').textContent = 'Effective rate: ' + effectiveRate.toFixed(1) + '% of net income';
+            document.getElementById('fedTax').textContent = fmt(fedTax);
+            document.getElementById('seTax').textContent = fmt(seTax);
+            document.getElementById('quarterly').textContent = fmt(quarterly);
+        }
+
+        ['grossIncome','expenses','filingStatus','otherIncome','retirement','healthInsurance','dependents'].forEach(id => {
+            document.getElementById(id).addEventListener('input', update);
+        });
+
+        update();
+    </script>
+</body>
+</html>
