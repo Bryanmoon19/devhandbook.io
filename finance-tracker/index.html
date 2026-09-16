@@ -422,7 +422,7 @@
             <div class="success-message" id="successMsg">
                 ✅ You're on the list! Check your inbox for confirmation.
             </div>
-            <p style="font-size: 12px; color: #94a3b8; margin-top: 10px;">No spam. Unsubscribe anytime. 47 people already waiting.</p>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 10px;">No spam. Unsubscribe anytime.</p>
         </div>
         
         <div class="features">
@@ -525,22 +525,48 @@
     </div>
     
     <script>
-        document.getElementById('notifyForm').addEventListener('submit', function(e) {
+        const WAITLIST_URL = 'https://finance-waitlist.bryanmoon19.workers.dev';
+
+        document.getElementById('notifyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = this.querySelector('.email-input').value;
-            // Store in localStorage for now - Bryan can export later
-            let emails = JSON.parse(localStorage.getItem('finance_tracker_emails') || '[]');
-            if (!emails.includes(email)) {
-                emails.push(email);
-                localStorage.setItem('finance_tracker_emails', JSON.stringify(emails));
+            const input = this.querySelector('.email-input');
+            const email = input.value.trim();
+            const btn = this.querySelector('.email-submit');
+            const success = document.getElementById('successMsg');
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+                input.style.borderColor = '#ef4444';
+                input.focus();
+                return;
             }
-            document.getElementById('successMsg').style.display = 'block';
-            this.querySelector('.email-input').value = '';
-            
-            // Also notify via Telegram if configured
-            console.log('New signup:', email);
+            input.style.borderColor = '';
+            btn.disabled = true;
+            btn.textContent = 'Signing up…';
+
+            try {
+                const res = await fetch(WAITLIST_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok) {
+                    success.textContent = '✅ You\'re on the list! Check your inbox for confirmation.';
+                    success.style.display = 'block';
+                    input.value = '';
+                } else {
+                    throw new Error(data.error || 'Signup failed');
+                }
+            } catch (err) {
+                success.textContent = '⚠️ Something went wrong. Please try again.';
+                success.style.color = '#ef4444';
+                success.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Notify Me';
+            }
         });
-        
+
         function showNotify() {
             document.querySelector('.email-capture').scrollIntoView({ behavior: 'smooth' });
         }
