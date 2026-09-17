@@ -23,6 +23,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("ai-sanitizer");
   eleventyConfig.addPassthroughCopy("homelab-cost-calculator");
   eleventyConfig.addPassthroughCopy("finance-tracker");
+  eleventyConfig.addPassthroughCopy("sovereign-stack");
   eleventyConfig.addPassthroughCopy("freelance-rate-calculator");
   eleventyConfig.addPassthroughCopy("ai-model-picker");
   eleventyConfig.addPassthroughCopy("dev-tool-cost-calculator");
