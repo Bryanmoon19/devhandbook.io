@@ -164,12 +164,15 @@ You don't need a $3,000 GPU to run useful local LLMs. A $150 Intel N100 running 
 
 The key is matching the model size and quantization to the RAM or VRAM you actually have. Start with Q4_K_M, measure tokens per second, and upgrade your hardware only after you've proven the use case.
 
+**Want the exact list of everything I actually run?** → [My Gear — the homelab & local AI hardware I use](/gear/)
+
 ---
 
 <div class="affiliate-disclosure">Some links above are affiliate links — I earn a small commission at no extra cost to you. I only recommend hardware I've personally used or researched for homelab use.</div>
 
 ## Related Posts
 
+- [My Gear — the full homelab & local AI hardware list](/gear/) — every box I run, with links
 - [Run Ollama on Proxmox LXC (Full Setup Guide)](/blog/ollama-proxmox-lxc/) — Installation, GPU passthrough, and Home Assistant integration
 - [Proxmox Home Assistant LXC Setup](/blog/proxmox-home-assistant-lxc/) — Build the foundation for local smart-home AI
 

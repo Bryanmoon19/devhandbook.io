@@ -117,4 +117,4 @@ Until then, the best local-LLM machine is still the one you already own, running
 
 *Are you upgrading for local LLMs, or sitting this one out? I'd love to hear your bandwidth-to-dollars math — find me on [GitHub](https://github.com/bryanmoon19) or drop a note in the comments.*
 
-*If you found this useful, you might also like my [practical guide to running local LLMs on a Mac mini](/blog/2026-06-12-local-llms-mac-mini-practical-guide/), the [local LLM homelab hardware guide](/blog/2026-08-21-local-llms-homelab-hardware-guide/), and my [LocalAI vs Ollama comparison](/blog/2026-06-18-localai-vs-ollama-2026/).*
+*If you found this useful, you might also like my [practical guide to running local LLMs on a Mac mini](/blog/2026-06-12-local-llms-mac-mini-practical-guide/), the [local LLM homelab hardware guide](/blog/2026-08-21-local-llms-homelab-hardware-guide/), my [LocalAI vs Ollama comparison](/blog/2026-06-18-localai-vs-ollama-2026/), and the [full gear list of everything I actually run](/gear/).*

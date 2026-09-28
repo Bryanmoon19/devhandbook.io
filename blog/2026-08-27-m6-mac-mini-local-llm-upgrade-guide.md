@@ -114,4 +114,4 @@ The best local LLM machine is the one that runs the model you actually use at a 
 
 *Running local LLMs on Apple Silicon? I'd love to hear your real-world tokens-per-second numbers — find me on [GitHub](https://github.com/bryanmoon19) or drop a note in the comments.*
 
-*If you found this useful, you might also like my [practical Mac mini local LLM guide](/blog/2026-06-12-local-llms-mac-mini-practical-guide/), the [homelab hardware matching guide](/blog/local-llms-homelab-hardware-guide/), and the [Ollama on Proxmox LXC setup](/blog/ollama-proxmox-lxc/).*
+*If you found this useful, you might also like my [practical Mac mini local LLM guide](/blog/2026-06-12-local-llms-mac-mini-practical-guide/), the [homelab hardware matching guide](/blog/local-llms-homelab-hardware-guide/), the [Ollama on Proxmox LXC setup](/blog/ollama-proxmox-lxc/), and the [full gear list of everything I actually run](/gear/).*

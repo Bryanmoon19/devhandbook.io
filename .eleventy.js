@@ -23,6 +23,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("ai-sanitizer");
   eleventyConfig.addPassthroughCopy("homelab-cost-calculator");
   eleventyConfig.addPassthroughCopy("finance-tracker");
+  eleventyConfig.addPassthroughCopy("ev-dividend");
   eleventyConfig.addPassthroughCopy("sovereign-stack");
   eleventyConfig.addPassthroughCopy("freelance-rate-calculator");
   eleventyConfig.addPassthroughCopy("ai-model-picker");
@@ -33,6 +34,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("token-counter");
   eleventyConfig.addPassthroughCopy("ai-agent-cost-calculator");
   eleventyConfig.addPassthroughCopy("cursorexit");
+  eleventyConfig.addPassthroughCopy("gear");
   eleventyConfig.addPassthroughCopy("og-images");
 
   // Blog collection sorted by date descending

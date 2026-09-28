@@ -337,6 +337,8 @@ If you're building or upgrading for local LLM inference, here's what I'd recomme
 **Full Proxmox server (if starting fresh):**
 - [Beelink SER7 (AMD 7840HS)](https://www.amazon.com/dp/B0CR1JNMXL?tag=devhandbook26-20) — Powerful mini PC with integrated Radeon 780M. Runs Proxmox beautifully, handles 7B models on the iGPU via ROCm.
 
+**See the full list of everything I run** → [My Gear — homelab & local AI hardware](/gear/)
+
 ## What's Next
 
 **Open WebUI, AnythingLLM for RAG, and Whisper+Piper for a fully local voice assistant are the natural next steps.**
@@ -349,6 +351,8 @@ Once Ollama is running, the usual next steps are:
 - **Home Assistant AI Voice** — Combine Whisper (local STT) + Ollama (LLM) + Piper (local TTS) for a fully local voice assistant
 
 The Ollama ecosystem is expanding fast. A Proxmox LXC is the right foundation: isolated, low-overhead, easy to snapshot before experiments, and trivial to clone if you want to test multiple model setups.
+
+For the complete hardware list — the exact boxes, GPUs, and storage I recommend for this setup — see [My Gear](/gear/).
 
 ---
 

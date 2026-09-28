@@ -167,4 +167,4 @@ That's the whole game. Everything else is just a headline.
 
 ---
 
-*Want to go deeper on local LLMs? Start with the [practical Mac mini guide](/blog/2026-06-12-local-llms-mac-mini-practical-guide/), then check out the [hardware guide](/blog/local-llms-homelab-hardware-guide/), the [quantization deep-dive](/blog/2026-08-21-shrink-local-llm-quantization/), and the [M6 upgrade math](/blog/2026-08-26-m6-mac-mini-local-llms/).*
+*Want to go deeper on local LLMs? Start with the [practical Mac mini guide](/blog/2026-06-12-local-llms-mac-mini-practical-guide/), then check out the [hardware guide](/blog/local-llms-homelab-hardware-guide/), the [quantization deep-dive](/blog/2026-08-21-shrink-local-llm-quantization/), the [M6 upgrade math](/blog/2026-08-26-m6-mac-mini-local-llms/), and the [full gear list](/gear/).*

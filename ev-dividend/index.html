@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Dividend Report — Tesla/EV Cost & Savings Spreadsheet | devhandbook.io</title>
+    <meta name="description" content="Know exactly what your EV is saving you — down to the penny per mile. Feed it your charging data and get your real EV dividend: savings vs gas, cost per mile, CO2 avoided.">
+    <meta property="og:title" content="EV Dividend Report — Know What Your EV Saves You">
+    <meta property="og:description" content="Turn raw charging data into your real, dollar-for-dollar EV dividend.">
+    <meta property="og:type" content="product">
+    <meta property="og:image" content="https://devhandbook.io/og-images/ev-dividend.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://devhandbook.io/og-images/ev-dividend.png">
+    <link rel="canonical" href="https://devhandbook.io/ev-dividend/">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background: #f8fafc;
+        }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        header { text-align: center; margin-bottom: 50px; }
+        .badge {
+            display: inline-block; background: #10b981; color: white;
+            padding: 8px 20px; border-radius: 20px; font-size: 14px;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px;
+        }
+        h1 { font-size: 42px; font-weight: 800; line-height: 1.2; margin-bottom: 20px; }
+        .subtitle { font-size: 20px; color: #64748b; max-width: 600px; margin: 0 auto; }
+        .hero-mockup {
+            background: #0f172a; border-radius: 16px; padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); margin-bottom: 50px; overflow: hidden;
+        }
+        .sheet-tabs {
+            display: flex; gap: 8px; margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.12); padding-bottom: 15px; flex-wrap: wrap;
+        }
+        .tab {
+            padding: 8px 16px; background: rgba(255,255,255,0.08); border-radius: 6px;
+            font-size: 14px; color: #94a3b8; cursor: pointer; transition: all 0.2s;
+        }
+        .tab:hover, .tab.active { background: #10b981; color: white; }
+        .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .metric-card {
+            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;
+            border-left: 3px solid #10b981;
+        }
+        .metric-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .metric-value { font-size: 24px; font-weight: 700; color: #f1f5f9; }
+        .metric-value.accent { color: #34d399; }
+        .features { background: white; border-radius: 16px; padding: 40px; margin-bottom: 40px; }
+        h2 { font-size: 28px; font-weight: 700; margin-bottom: 30px; text-align: center; }
+        .feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
+        .feature { display: flex; gap: 15px; }
+        .feature-icon {
+            width: 48px; height: 48px; background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; flex-shrink: 0;
+        }
+        .feature h3 { font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+        .feature p { font-size: 14px; color: #64748b; }
+        .pricing {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+            border-radius: 16px; padding: 50px; text-align: center; color: white;
+        }
+        .price { font-size: 56px; font-weight: 800; margin-bottom: 10px; }
+        .price-note { font-size: 18px; opacity: 0.9; margin-bottom: 30px; }
+        .cta-button {
+            display: inline-block; background: #10b981; color: white;
+            padding: 18px 50px; border-radius: 50px; font-size: 20px; font-weight: 700;
+            text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; border: none; cursor: pointer;
+        }
+        .cta-button:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .guarantee { margin-top: 25px; font-size: 14px; opacity: 0.9; }
+        .email-capture {
+            background: white; border-radius: 16px; padding: 40px; margin: 40px 0;
+            text-align: center; border: 2px dashed #e2e8f0;
+        }
+        .email-form { display: flex; gap: 10px; max-width: 500px; margin: 20px auto 0; }
+        .email-input {
+            flex: 1; padding: 14px 20px; border: 2px solid #e2e8f0; border-radius: 50px;
+            font-size: 16px; outline: none; transition: border-color 0.2s;
+        }
+        .email-input:focus { border-color: #10b981; }
+        .email-submit {
+            padding: 14px 30px; background: #10b981; color: white; border: none;
+            border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s;
+        }
+        .email-submit:hover { transform: scale(1.05); }
+        .testimonial { background: white; border-radius: 16px; padding: 40px; margin-top: 40px; text-align: center; }
+        .quote { font-size: 20px; font-style: italic; color: #475569; margin-bottom: 20px; }
+        .author { font-weight: 600; color: #1e293b; }
+        .author-title { font-size: 14px; color: #64748b; }
+        .faq { background: white; border-radius: 16px; padding: 40px; margin-top: 40px; }
+        .faq-item { margin-bottom: 25px; }
+        .faq-item:last-child { margin-bottom: 0; }
+        .faq h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .faq p { font-size: 14px; color: #64748b; }
+        .creator { background: white; border-radius: 16px; padding: 40px; margin-top: 40px; display: flex; gap: 25px; align-items: center; }
+        .creator-avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+            display: flex; align-items: center; justify-content: center; font-size: 36px; flex-shrink: 0;
+        }
+        .creator-info h3 { font-size: 18px; font-weight: 600; margin-bottom: 5px; }
+        .creator-info p { font-size: 14px; color: #64748b; }
+        footer { text-align: center; margin-top: 50px; padding-top: 30px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px; }
+        .success-message { display: none; background: #d1fae5; color: #065f46; padding: 16px; border-radius: 10px; margin-top: 15px; font-weight: 500; }
+        @media (max-width: 600px) {
+            .feature-grid { grid-template-columns: 1fr; }
+            .metrics { grid-template-columns: 1fr; }
+            h1 { font-size: 32px; }
+            .email-form { flex-direction: column; }
+            .creator { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="badge">Spreadsheet Template · $20</div>
+            <h1>EV Dividend Report</h1>
+            <p class="subtitle">Know exactly what your EV is saving you — down to the penny per mile.</p>
+        </header>
+
+        <div class="hero-mockup">
+            <div class="sheet-tabs">
+                <div class="tab active">EV Dividend Report</div>
+                <div class="tab">Charging Log</div>
+                <div class="tab">Settings</div>
+                <div class="tab">Read Me</div>
+            </div>
+            <div class="metrics">
+                <div class="metric-card">
+                    <div class="metric-label">Charging Cost</div>
+                    <div class="metric-value">$101</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Gas-Equivalent</div>
+                    <div class="metric-value">$235</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Your EV Dividend</div>
+                    <div class="metric-value accent">$134</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="email-capture">
+            <h2 style="margin-bottom: 15px;">⚡ Launching Soon</h2>
+            <p style="color: #64748b; margin-bottom: 5px;">Get notified when this goes live + receive a launch discount.</p>
+            <form class="email-form" id="notifyForm">
+                <input type="email" class="email-input" placeholder="Enter your email" required>
+                <button type="submit" class="email-submit">Notify Me</button>
+            </form>
+            <div class="success-message" id="successMsg">✅ You're on the list! We'll reach out when it goes live.</div>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 10px;">No spam. Unsubscribe anytime.</p>
+        </div>
+
+        <div class="features">
+            <h2>What's Inside</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <div>
+                        <h3>EV Dividend Report</h3>
+                        <p>Total kWh, charging cost, gas-equivalent cost, and your headline savings number.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔋</div>
+                    <div>
+                        <h3>Charging Log</h3>
+                        <p>Paste your sessions (date + kWh + cost). Formulas read the whole column — keep adding rows.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚙️</div>
+                    <div>
+                        <h3>Settings</h3>
+                        <p>Your electricity rate, gas price, comparable MPG, and EV efficiency. Everything recalculates live.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📉</div>
+                    <div>
+                        <h3>Cost Per Mile</h3>
+                        <p>EV vs. gas car, side by side — plus gallons and CO2 avoided.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔓</div>
+                    <div>
+                        <h3>No Lock-In</h3>
+                        <p>Works with TeslaMate or plain notes. Real, auditable formulas — no magic, no app required.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <div>
+                        <h3>Google Sheets + Excel</h3>
+                        <p>One .xlsx file, your choice. Buy once, use forever — no subscription.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pricing">
+            <div class="price">$20</div>
+            <div class="price-note">One-time purchase · No subscription · Lifetime updates</div>
+            <button class="cta-button" onclick="showNotify()">Get Launch Notification</button>
+            <div class="guarantee">✓ Works in Google Sheets and Excel · ✓ Instant download · ✓ 30-day money back</div>
+        </div>
+
+        <div class="testimonial">
+            <p class="quote">"Every EV owner hears 'you'll save money on gas.' But almost nobody can tell you their actual number. I built this because I wanted the real one — for my own Model S — not the marketing one."</p>
+            <p class="author">Bryan Moon</p>
+            <p class="author-title">EV owner · Personal Banker · Creator of this spreadsheet</p>
+        </div>
+
+        <div class="creator">
+            <div class="creator-avatar">🚗</div>
+            <div class="creator-info">
+                <h3>Built by an EV Owner Who Works in Finance</h3>
+                <p>I drive a Tesla Model S and I'm a personal banker. I built the EV Dividend Report because I wanted the real cost-of-ownership number — and couldn't find a clean, honest spreadsheet that gave it to me.</p>
+            </div>
+        </div>
+
+        <div class="faq">
+            <h2>Common Questions</h2>
+            <div class="faq-item">
+                <h3>Do I need TeslaMate?</h3>
+                <p>No. It works with TeslaMate exports, the Tesla app, or plain notes. Any source of kWh (and optional cost) is fine.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Do I need to know spreadsheets?</h3>
+                <p>Nope. Paste your charges into one column, set three numbers in Settings, and the report calculates itself.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Is this a subscription?</h3>
+                <p>No. Pay $20 once, use it forever. Future improvements ship free.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Does it work for non-Tesla EVs?</h3>
+                <p>Yes. Any EV with charging data works — the math is the same for a Mach-E, Ioniq, or Bolt.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Is this tax or financial advice?</h3>
+                <p>No — it's a visibility tool for your own numbers, not formal advice.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Stop guessing what your EV saves you. Get the number. ⚡</p>
+            <p style="margin-top: 10px;">© 2026 devhandbook.io</p>
+        </footer>
+    </div>
+
+    <script>
+        const WAITLIST_URL = 'https://finance-waitlist.bryanmoon19.workers.dev';
+
+        document.getElementById('notifyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const input = this.querySelector('.email-input');
+            const email = input.value.trim();
+            const btn = this.querySelector('.email-submit');
+            const success = document.getElementById('successMsg');
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+                input.style.borderColor = '#ef4444';
+                input.focus();
+                return;
+            }
+            input.style.borderColor = '';
+            btn.disabled = true;
+            btn.textContent = 'Signing up…';
+
+            try {
+                const res = await fetch(WAITLIST_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, source: 'ev-dividend' }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok) {
+                    success.textContent = '✅ You\'re on the list! We\'ll reach out when it goes live.';
+                    success.style.display = 'block';
+                    input.value = '';
+                } else {
+                    throw new Error(data.error || 'Signup failed');
+                }
+            } catch (err) {
+                success.textContent = '⚠️ Something went wrong. Please try again.';
+                success.style.color = '#ef4444';
+                success.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Notify Me';
+            }
+        });
+
+        function showNotify() {
+            document.querySelector('.email-capture').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
