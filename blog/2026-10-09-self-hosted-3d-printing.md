@@ -5,7 +5,7 @@ date: 2026-10-09
 description: "Your printer is a Linux server you've been ignoring. Here's the full self-hosted stack — OctoPrint, Klipper + Moonraker, and Home Assistant integration — for turning a dumb 3D printer into a remote-controlled, monitored, automatable part of your homelab."
 tags: ["3d-printing", "octoprint", "klipper", "moonraker", "home-assistant", "self-hosted", "homelab", "maker", "iot"]
 author: "Bryan Moon"
-canonical: "https://devhandbook.io/blog/self-hosted-3d-printing"
+canonical: "https://devhandbook.io/blog/2026-10-09-self-hosted-3d-printing"
 affiliate: true
 ---
 
