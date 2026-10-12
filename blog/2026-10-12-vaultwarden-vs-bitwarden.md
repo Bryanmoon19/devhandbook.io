@@ -1,14 +1,21 @@
-# Self-Hosted Password Manager: Vaultwarden vs Bitwarden
-
-*A practical guide to running your own password vault at home.*
-
 ---
-
-## 1. Introduction: Why Self-Host a Password Manager?
+layout: post.njk
+title: "Vaultwarden vs Bitwarden: Which Self-Hosted Password Manager Should You Run?"
+date: 2026-10-12
+description: "A practical comparison of the official Bitwarden self-hosted stack and the lean Rust Vaultwarden rewrite — feature parity, resource footprint, setup, migration, and backup. Plus where Bitwarden's new dual-license model tips the scales."
+tags: ["vaultwarden", "bitwarden", "password-manager", "self-hosted", "homelab", "security", "docker", "sqlite", "2fa", "privacy"]
+author: "Bryan Moon"
+canonical: "https://devhandbook.io/blog/2026-10-12-vaultwarden-vs-bitwarden/"
+affiliate: false
+cta: true
+---
 
 Let's be honest: trusting every password you've ever created to a cloud service you don't control is... a choice. For the privacy-conscious, the homelab enthusiast, or anyone who's just tired of subscription fatigue, self-hosting a password manager is one of the most empowering moves you can make.
 
+> **Note:** This comparison got sharper in October 2026, when Bitwarden announced its app-store builds would move to a dual-license model with future components "evaluated on a case-by-case basis." I wrote a dedicated decision tree for that news — [Bitwarden's Dual-License Change: Should You Migrate to Vaultwarden Now?](/blog/2026-10-11-bitwarden-dual-license-vaultwarden-migration/) — and this guide is the evergreen companion to it.
+
 You get:
+
 - **Full data ownership**: Your vault lives on your hardware, not someone else's server.
 - **No subscription fees**: (Well, mostly. We'll get to that.)
 - **Custom integrations**: Tie it into your existing infrastructure.
@@ -20,7 +27,7 @@ This guide breaks down both, shows you how to set them up, and helps you pick th
 
 ---
 
-## 2. What Are Bitwarden and Vaultwarden?
+## What Are Bitwarden and Vaultwarden?
 
 ### Bitwarden (Official)
 
@@ -42,7 +49,7 @@ Vaultwarden is a third-party, unofficial Rust implementation of the Bitwarden se
 
 ---
 
-## 3. Detailed Comparison
+## Detailed Comparison
 
 | Feature | Bitwarden (Official) | Vaultwarden |
 |---------|---------------------|-------------|
@@ -71,13 +78,17 @@ Bitwarden has the edge in formal security posture: SOC 2 compliance, regular thi
 
 Bitwarden self-hosted is free for basic features, but premium features (TOTP, emergency access, advanced 2FA) require a license starting around $3–4/month. Vaultwarden includes all these features for free, since it's not bound by Bitwarden's licensing.
 
+### License Certainty
+
+Bitwarden's October 2026 dual-license announcement — where *new components may ship only in the commercial build* — is the wildcard. Vaultwarden is AGPLv3 and community-driven, with no corporate roadmap deciding which future feature lands in a paid build. If you care about a predictable, fully-free feature set, that difference matters more than it did a year ago.
+
 ---
 
-## 4. Step-by-Step: Vaultwarden Setup with Docker Compose
+## Step-by-Step: Vaultwarden Setup with Docker Compose
 
 Vaultwarden is the easiest self-hosted password manager you'll ever deploy.
 
-### 4.1. Docker Compose File
+### Docker Compose File
 
 Create a directory and a `docker-compose.yml`:
 
@@ -102,7 +113,7 @@ services:
       - "3012:3012"  # websocket for live sync
 ```
 
-### 4.2. Environment File
+### Environment File
 
 Create `.env`:
 
@@ -111,20 +122,20 @@ Create `.env`:
 ADMIN_TOKEN=$(openssl rand -base64 48)
 ```
 
-### 4.3. Start It
+### Start It
 
 ```bash
 cd ~/docker/vaultwarden
 docker compose up -d
 ```
 
-### 4.4. First Setup
+### First Setup
 
 1. Visit `http://your-server-ip`.
 2. Create your account. If `SIGNUPS_ALLOWED=false`, temporarily set it to `true`, restart, create your account, then disable it again.
 3. Access the admin panel at `http://your-server-ip/admin` with your `ADMIN_TOKEN`.
 
-### 4.5. Reverse Proxy (Nginx / Nginx Proxy Manager)
+### Reverse Proxy (Nginx / Nginx Proxy Manager)
 
 Add a proxy host pointing to `http://vaultwarden:80`. Enable websockets support. For HTTPS, add your certificate or use Let's Encrypt.
 
@@ -148,17 +159,17 @@ location /notifications/hub {
 
 ---
 
-## 5. Step-by-Step: Official Bitwarden Self-Hosted Setup
+## Step-by-Step: Official Bitwarden Self-Hosted Setup
 
 Bitwarden's official server is more involved but gives you the "real thing."
 
-### 5.1. Prerequisites
+### Prerequisites
 
 - Docker & Docker Compose
 - At least 2GB RAM available
 - Domain name (for HTTPS)
 
-### 5.2. Install
+### Install
 
 Bitwarden provides an installation script:
 
@@ -169,11 +180,12 @@ curl -Lso bitwarden.sh https://go.btwrdn.co/bw-sh \
 ```
 
 The script will prompt you for:
+
 - Domain name (e.g., `bitwarden.yourdomain.com`)
 - Let's Encrypt email
 - SSL choice (Let's Encrypt or custom)
 
-### 5.3. Configure
+### Configure
 
 Edit `./bwdata/env/global.override.env`:
 
@@ -186,13 +198,13 @@ globalSettings__baseServiceUri__api=https://bitwarden.yourdomain.com/api
 globalSettings__disableUserRegistration=true
 ```
 
-### 5.4. Start
+### Start
 
 ```bash
 ./bitwarden.sh start
 ```
 
-### 5.5. Updating
+### Updating
 
 ```bash
 ./bitwarden.sh updateself
@@ -203,7 +215,7 @@ globalSettings__disableUserRegistration=true
 
 ---
 
-## 6. Migration Guide
+## Migration Guide
 
 ### Bitwarden Cloud → Vaultwarden (or Self-Hosted Bitwarden)
 
@@ -218,9 +230,11 @@ globalSettings__disableUserRegistration=true
 
 Since both use the same data format, you can export/import JSON backups freely. If you want to migrate the raw database (Vaultwarden's SQLite to Bitwarden's MSSQL), it's more complex—stick to JSON exports for simplicity.
 
+For a full end-to-end migration walkthrough triggered by the license change, see the [Bitwarden → Vaultwarden decision tree](/blog/2026-10-11-bitwarden-dual-license-vaultwarden-migration/).
+
 ---
 
-## 7. Mobile App Setup and Sync
+## Mobile App Setup and Sync
 
 ### For Vaultwarden
 
@@ -236,7 +250,7 @@ Same process—the official app talks natively to the official server. Just poin
 
 ---
 
-## 8. Backup Strategies
+## Backup Strategies
 
 Your password vault is one of the worst things to lose. Back it up. Now.
 
@@ -273,7 +287,7 @@ docker exec bitwarden-mssql /opt/mssql-tools/bin/sqlcmd \
 
 ---
 
-## 9. Which One Should You Choose?
+## Which One Should You Choose?
 
 | You Should Pick... | If... |
 |-------------------|-------|
@@ -282,9 +296,11 @@ docker exec bitwarden-mssql /opt/mssql-tools/bin/sqlcmd \
 
 For 95% of homelabbers, **Vaultwarden is the pragmatic choice**. It's fast, free, and fully compatible with the official clients. The only reason to run the official server is compliance, enterprise requirements, or personal preference for the "real thing."
 
+Bitwarden's move toward a dual-license model — with future features potentially gated to the commercial build — only strengthens that default. When the roadmap of your password manager is subject to "case-by-case" licensing decisions, the community-run, AGPL-licensed option starts to look like the safer long-term bet.
+
 ---
 
-## 10. Conclusion
+## Conclusion
 
 Self-hosting your password manager is a rite of passage in the homelab world. Whether you choose the lean efficiency of Vaultwarden or the enterprise pedigree of official Bitwarden, you're taking control of one of the most sensitive pieces of your digital life.
 
