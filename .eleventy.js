@@ -51,7 +51,10 @@ module.exports = function(eleventyConfig) {
 
   // ISO date filter for sitemap (YYYY-MM-DD)
   eleventyConfig.addFilter("isoDate", function(date) {
-    return new Date(date).toISOString().split("T")[0];
+    if (!date) return "1970-01-01";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "1970-01-01";
+    return d.toISOString().split("T")[0];
   });
 
   // RFC 2822 date filter for RSS feed
