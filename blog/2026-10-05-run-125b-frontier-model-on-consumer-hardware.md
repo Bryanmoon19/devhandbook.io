@@ -64,6 +64,17 @@ Let's be concrete about what "consumer hardware" means here, because the headlin
 **The tradeoff you're signing up for:**
 A 2-bit quant of a 125B model is *not* the same as the unquantized version. You'll notice degradation on fine reasoning, nuance, and edge cases. But for many real jobs — drafting, summarizing, agentic tool use, broad Q&A — a frontier model at 2-bit *still* outperforms a mid-size model at 8-bit, because it has far more total knowledge and pattern capacity to lose from.
 
+## What to Buy (If You're Building This Rig)
+
+The RTX 4090 in the report is the flagship, but you don't need flagship money to get into this tier. Here's the hardware I actually track and recommend across the local-LLM curve — with the honest note that these are the cards *I* recommend for most budgets, while the 4090 is what the benchmark used:
+
+- **NVIDIA RTX 4060 Ti 16GB** — the cheapest card with 16GB of VRAM, enough to load a 2-bit 125B model *and* run 14B models comfortably at Q4. The sensible "I want big-model capability without a 4090 bill" pick. [Check price](https://www.amazon.com/dp/B0C9KLS6BN?tag=devhandbook26-20)
+- **NVIDIA RTX 3060 12GB** — the used-market value king. 12GB won't hold a 125B model alone, but it's the sweet spot for 13–14B models and it's been findable around $200 used for years. [Check price](https://www.amazon.com/dp/B08WR34RFY?tag=devhandbook26-20)
+- **32GB DDR5 SO-DIMM Kit** — two of these gets you to the 64GB of system RAM this post calls out for headroom. [Check price](https://www.amazon.com/dp/B0C9V3HD87?tag=devhandbook26-20)
+- **Samsung 990 Pro 2TB NVMe** — 30–60GB of model weights load from disk first; fast Gen4 NVMe cuts cold-start time dramatically. [Check price](https://www.amazon.com/dp/B0BHJJ9Y77?tag=devhandbook26-20)
+
+If you want the full list of everything I run — mini PCs, GPUs, storage, sensors — it's all on the [Gear page](/gear/).
+
 ## The Numbers, In Perspective
 
 To understand why 100 t/s on a 4090 is a big deal, it helps to see it next to what the same card does with smaller models:

@@ -6,7 +6,7 @@ description: "A Rust team shipped a working Metal driver for NVIDIA GeForce card
 tags: ["nvidia", "metal", "macos", "local-llm", "gpu", "egpu", "cuda", "hackintosh", "opencore", "self-hosted", "homelab", "ai", "inference"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/2026-10-14-nvidia-gpu-macos-metal-driver-local-llms/"
-affiliate: false
+affiliate: true
 cta: true
 ---
 
@@ -72,6 +72,15 @@ What it *does* change is the other half of the Mac homelab:
 The VRAM math is the headline: an RTX 5090 has 32 GB, an RTX 4090 has 24 GB, and even a 4060 Ti has 16 GB — all of it now addressable from a Mac that can also run Ollama's Metal backend, Core ML, and the rest of the macOS toolchain. That's the ceiling-breaker the local-LLM crowd has been waiting for, just not on the hardware most of us assumed.
 
 ---
+
+## The Hardware, If You Want to Try It
+
+If you've got an Intel Mac, a Thunderbolt 3 eGPU enclosure, or an OpenCore box and you want to test this yourself, the cards I'd actually buy for a budget build are the same ones I recommend across my local-LLM guides:
+
+- **NVIDIA RTX 4060 Ti 16GB** — 16GB of VRAM at the best price-per-GB in the current lineup, and more than enough to make a Thunderbolt enclosure a genuinely useful local-inference box. [Check price](https://www.amazon.com/dp/B0C9KLS6BN?tag=devhandbook26-20)
+- **NVIDIA RTX 3060 12GB** — if you're building on a used or older Intel Mac, this is the value play; 12GB handles 13–14B models fully offloaded and it's still findable around $200 used. [Check price](https://www.amazon.com/dp/B08WR34RFY?tag=devhandbook26-20)
+
+(Heads up: this driver targets *Intel* Macs and Hackintoshes — an Apple Silicon M-series machine can't use it, as covered above. And you're signing up for OpenCore, SIP off, and unsigned kexts, so don't do this on your only daily-driver machine.)
 
 ## The Honest Verdict
 
