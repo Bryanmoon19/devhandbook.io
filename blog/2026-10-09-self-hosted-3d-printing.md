@@ -66,10 +66,12 @@ You'll need a small Linux box to act as the printer's brain. The Raspberry Pi (3
 The other essential piece is a camera. Any USB webcam or the official Raspberry Pi Camera Module works. The camera is what turns "I can send g-code" into "I can *see* my print from bed," which is the difference between a convenient tool and a genuinely useful one.
 
 **The minimum shopping list:**
-- Raspberry Pi 4 (or better) + power supply + microSD card
+- [Raspberry Pi 5 (8GB)](https://www.amazon.com/dp/B0CTG3JZ6S?tag=devhandbook26-20) (or a Pi 4 if you already have one) + power supply + microSD card
 - USB cable to connect the printer (check your printer's port — most use USB-B or USB-C)
 - A USB webcam or Pi Camera Module
 - Optional: a relay module if you want to cut printer power programmatically
+
+The Pi is the one piece worth buying new — a Pi 5 runs OctoPrint and Klipper with headroom to spare, and it's the same box you'd reuse for half a dozen other homelab projects. Everything else (camera, cables, SD card) you probably already own or can grab used.
 
 ## Setting Up the Stack
 

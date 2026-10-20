@@ -6,6 +6,7 @@ description: "The memory market just spiked — DDR4 and DDR5 prices are up as m
 tags: ["homelab", "ram", "memory", "hardware", "ddr5", "ddr4", "proxmox", "nas", "self-hosted", "budget", "upgrade", "build"]
 author: "Bryan Moon"
 canonical: "https://devhandbook.io/blog/ram-prices-homelab-guide"
+affiliate: true
 ---
 
 # RAM Prices Just Went Up 500%. Here's How to Build (or Upgrade) Your Homelab Anyway
@@ -136,6 +137,16 @@ Here's a realistic mid-range homelab build, specced two ways — the "normal mar
 The shortage-aware build costs **roughly 40–50% less on the RAM line item** and delivers 90% of the real-world performance for homelab workloads. And because you left two DIMM slots open, you can double the RAM later at (hopefully) lower prices.
 
 If you want to run the full numbers for *your* build — hardware, power draw, and the break-even vs. cloud — I built a tool for exactly this. The [Homelab Cost Calculator](https://devhandbook.io/homelab-cost-calculator/) lets you plug in your hardware, your electricity rate, and your cloud alternative, and it'll tell you whether self-hosting actually saves you money. It's free, runs entirely in your browser, and it's been the most useful thing I've built for my own build decisions.
+
+## The Shortcut: Mini PCs and the SODIMM Angle
+
+One more way to sidestep the shortage entirely: skip the loose-DIMM market and buy a mini PC that ships with its RAM already installed. The spike hits bare desktop DIMMs hardest — a NUC-class box with 32GB on board is often a *better* value right now than sourcing a motherboard + CPU + RAM separately.
+
+- **Beelink SER7 (Ryzen 7 7840HS)** — 32GB DDR5 on board, runs Proxmox and a handful of LXCs with headroom to spare, and the Radeon 780M iGPU does real local-inference work via ROCm. [Check price](https://www.amazon.com/dp/B0CR1JNMXL?tag=devhandbook26-20)
+- **Intel N100 Mini PC** — the budget always-on box. Fanless, sips power, handles the *arr stack and a few containers without breaking a sweat. [Check price](https://www.amazon.com/dp/B0CWJ3X2JH?tag=devhandbook26-20)
+- **32GB DDR5 SO-DIMM Kit** — if you already own a mini PC or NUC and want to top it out, this is the upgrade. More RAM = larger local models. [Check price](https://www.amazon.com/dp/B0C9V3HD87?tag=devhandbook26-20)
+
+If you're going the used-enterprise route from earlier in this post, none of this applies — a decommissioned Dell or HP with DDR4 ECC RDIMMs is still the cheapest GB-per-dollar, and you source that off eBay, not retail. But if power draw and noise rule out rack gear, a mini PC is the clean dodge.
 
 ## The Bottom Line
 

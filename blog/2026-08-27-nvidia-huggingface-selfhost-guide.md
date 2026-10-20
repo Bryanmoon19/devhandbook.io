@@ -155,6 +155,17 @@ The headlines will scream "Nvidia owns Hugging Face!" for a week and then move o
 
 You don't need to obsess. You need to *notice* when the ground shifts, so you can act before it's a problem.
 
+## The Gear, If You're Hardening Your Local Stack
+
+The de-risking playbook above comes down to one thing: *keep your own copy of the weights.* That means a place to store them, and a machine that can actually run them. Both are one-time purchases that pay for themselves the first time Hugging Face (or any upstream) hiccups.
+
+- **Samsung 990 Pro 2TB NVMe** — a 2TB Gen4 drive holds a serious cold mirror: dozens of GGUF quantizations with room to spare, and fast NVMe cuts cold-start time when you pull a model into Ollama. [Check price](https://www.amazon.com/dp/B0BHJJ9Y77?tag=devhandbook26-20)
+- **Samsung 870 EVO 1TB SSD** — the budget model-storage option. Ollama reads weights sequentially, so even SATA is fine for a model library. [Check price](https://www.amazon.com/dp/B08QBJ2YMG?tag=devhandbook26-20)
+- **NVIDIA RTX 3060 12GB** — the value king for local inference. 12GB fully offloads 7–13B models, and it's been findable around $200 used for years. [Check price](https://www.amazon.com/dp/B08WR34RFY?tag=devhandbook26-20)
+- **NVIDIA RTX 4060 Ti 16GB** — if you want headroom for 30B+ models. The cheapest current card with 16GB of VRAM. [Check price](https://www.amazon.com/dp/B0C9KLS6BN?tag=devhandbook26-20)
+
+For the full list of everything I run — mini PCs, GPUs, storage, sensors — it's on the [Gear page](/gear/).
+
 ## The One Thing to Do This Week
 
 If you do nothing else, do this: **back up your model cache and mirror the two or three models you actually rely on.**
