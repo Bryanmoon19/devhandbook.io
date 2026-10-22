@@ -273,6 +273,8 @@ The pattern is clear: **quantization buys you roughly one model-size tier.** A 1
 
 And the "57GB DeepSeek V4 Flash" thread is the extreme end of this curve — a model that *should* need a server, compressed to fit on a 64GB Mac mini. It's not the daily-driver setup, but it's proof that the ceiling is higher than most people think.
 
+**If you *do* decide to spend:** when quantization isn't enough and you're buying hardware anyway, the two upgrades that move the needle most are RAM (to hold a bigger model plus its KV cache) and a fast NVMe (to cut model load times). The [32GB DDR5 SO-DIMM kit](https://www.amazon.com/dp/B0C9V3HD87?tag=devhandbook26-20) and a [Samsung 990 Pro 2TB NVMe](https://www.amazon.com/dp/B0BHJJ9Y77?tag=devhandbook26-20) are what I'd get — but only *after* you've quantized the model you already can't run, which is the whole point of this post.
+
 ## The Bottom Line
 
 The "shrink it yourself" wave — Vomit, Shoehorn, Graft, Frugal Tokens, and the 57GB DeepSeek thread — is pointing at something real: **the bottleneck on local AI is no longer the model, it's your willingness to quantize.**

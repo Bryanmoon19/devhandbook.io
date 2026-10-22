@@ -124,6 +124,16 @@ A modest movie collection (500 films) plus TV shows can easily reach **10–20 T
 - **Gigabit LAN** minimum; 2.5 GbE or faster if you have multiple 4K streams
 - **Upload bandwidth** for remote access: 5–10 Mbps per 1080p stream; 25+ Mbps per 4K stream
 
+### The Gear (If You're Building a Dedicated Box)
+
+If you're buying hardware for this rather than repurposing an old machine, here's what I'd actually spend money on — the same pieces I recommend in the [homelab hardware guide](/blog/local-llms-homelab-hardware-guide/):
+
+- **[Intel N100 Mini PC](https://www.amazon.com/dp/B0CWJ3X2JH?tag=devhandbook26-20)** — the low-power sweet spot. Direct-plays everything and handles a couple of 1080p transcodes on Quick Sync for pennies of electricity.
+- **[Beelink SER7 Mini PC (AMD 7840HS)](https://www.amazon.com/dp/B0CR1JNMXL?tag=devhandbook26-20)** — the step up when you want 4K software transcodes plus headroom for the *arr stack and a few more containers.
+- **[NVIDIA RTX 3060 12GB](https://www.amazon.com/dp/B08WR34RFY?tag=devhandbook26-20)** — if your server has a free PCIe slot, NVENC on the 3060 chews through multiple simultaneous 4K transcodes without touching the CPU.
+- **[Samsung 990 Pro 2TB NVMe](https://www.amazon.com/dp/B0BHJJ9Y77?tag=devhandbook26-20)** — the OS + metadata cache drive. Fast library scans and snappy poster-art loading.
+- **[Samsung 870 EVO 1TB SSD](https://www.amazon.com/dp/B08QBJ2YMG?tag=devhandbook26-20)** — SATA scratch space for downloads and transcode temp files.
+
 ---
 
 ## Jellyfin Setup with Docker Compose

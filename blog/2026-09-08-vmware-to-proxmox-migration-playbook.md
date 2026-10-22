@@ -152,6 +152,8 @@ Broadcom is making VMware harder to leave — but the exit is still a weekend pr
 
 If you've been waiting for a sign, this is it. The free ESXi license is gone, the pricing only goes one direction, and the tooling to leave is getting harder to reach. Migrate now, while the path is still well-trodden.
 
+**Headed to Proxmox?** If you're buying hardware for the new host rather than repurposing the ESXi box, the two specs that matter most are RAM and fast storage — Proxmox is hungry for both once you run a few LXCs plus VMs. I'd start with a [32GB DDR5 SO-DIMM kit](https://www.amazon.com/dp/B0C9V3HD87?tag=devhandbook26-20) and a [Samsung 990 Pro 2TB NVMe](https://www.amazon.com/dp/B0BHJJ9Y77?tag=devhandbook26-20) for the VM datastore. If the whole point is consolidating several services off VMware, a [Beelink SER7 Mini PC](https://www.amazon.com/dp/B0CR1JNMXL?tag=devhandbook26-20) makes a quiet, low-power Proxmox node with headroom to spare.
+
 ---
 
 *Running Proxmox already? Check out our guides on [Portainer alternatives for Proxmox LXC](/blog/portainer-alternatives-proxmox-lxc-2026/), [TrueNAS migration](/blog/truenas-core-eol-migration-path/), and [running Home Assistant in an LXC](/blog/proxmox-home-assistant-lxc/).*
