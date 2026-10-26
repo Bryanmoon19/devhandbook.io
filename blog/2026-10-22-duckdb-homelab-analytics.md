@@ -106,7 +106,7 @@ The thing that ties this back to [Postgres for everything](/blog/2026-08-20-post
 INSTALL postgres;
 LOAD postgres;
 
-ATTACH 'host=192.168.7.201 port=5432 dbname=app user=analytics password=***'
+ATTACH 'host=postgres.example.internal port=5432 dbname=app user=analytics password=***'
     AS pg (TYPE postgres);
 
 -- run analytics against live Postgres data from DuckDB
