@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overdraft Fee Calculator & Refund Helper | devhandbook.io</title>
+    <meta name="description" content="Add up your overdraft and NSF fees, see which ones you can realistically get refunded, and get the exact script to ask your bank. Free, private, instant — nothing leaves your browser.">
+    <meta name="keywords" content="overdraft fee calculator, NSF fee refund, how to get overdraft fees waived, bank fee refund, overdraft fees refund, bank fee reimbursement">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devhandbook.io/overdraft-fee-calculator/">
+    <meta property="og:title" content="Overdraft Fee Calculator & Refund Helper — devhandbook.io">
+    <meta property="og:description" content="See which overdraft and NSF fees you can get refunded — and the exact words to ask your bank.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devhandbook.io/overdraft-fee-calculator/">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <style>
+        :root {
+            --bg: #fbfbfd;
+            --surface: rgba(255,255,255,0.78);
+            --surface-mid: rgba(255,255,255,0.6);
+            --text: #1d1d1f;
+            --text-2: #6e6e73;
+            --accent: #0071e3;
+            --accent-hover: #0077ed;
+            --accent-green: #34c759;
+            --accent-orange: #ff9500;
+            --accent-red: #ff3b30;
+            --border: rgba(0,0,0,0.07);
+            --shadow: 0 2px 16px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04);
+            --r-card: 20px;
+            --r-pill: 980px;
+            --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        html.dark {
+            --bg: #000;
+            --surface: rgba(28,28,30,0.78);
+            --surface-mid: rgba(44,44,46,0.6);
+            --text: #f5f5f7;
+            --text-2: #98989d;
+            --border: rgba(255,255,255,0.08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+        }
+        .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--text-2); text-decoration: none; font-size: 14px;
+            margin: 24px 0 8px; transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent); }
+
+        .header { text-align: center; padding: 40px 0 32px; }
+        .header .eyebrow {
+            display: inline-block; font-size: 13px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent);
+            background: rgba(0,113,227,0.08); padding: 6px 14px; border-radius: 20px; margin-bottom: 16px;
+        }
+        .header h1 {
+            font-size: 44px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px;
+        }
+        .header p { font-size: 19px; color: var(--text-2); max-width: 520px; margin: 0 auto; }
+
+        .result-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border); border-radius: var(--r-card);
+            padding: 32px; margin-bottom: 24px; box-shadow: var(--shadow); text-align: center;
+        }
+        .result-label {
+            font-size: 14px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--text-2); margin-bottom: 8px;
+        }
+        .result-value { font-size: 56px; font-weight: 700; letter-spacing: -0.02em; color: var(--accent); line-height: 1.1; }
+        .verdict-badge {
+            display: inline-block; margin-top: 14px; padding: 10px 24px;
+            border-radius: 30px; font-size: 18px; font-weight: 700; letter-spacing: 0.01em;
+        }
+        .verdict-badge.high { background: rgba(52,199,89,0.15); color: #1a7f37; }
+        .verdict-badge.medium { background: rgba(255,149,0,0.15); color: #b26a00; }
+        .verdict-badge.low { background: rgba(255,59,48,0.15); color: #c62828; }
+        html.dark .verdict-badge.high { color: #34c759; }
+        html.dark .verdict-badge.medium { color: #ff9500; }
+        html.dark .verdict-badge.low { color: #ff453a; }
+        .result-breakdown {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+            margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);
+        }
+        .breakdown-value { font-size: 24px; font-weight: 700; color: var(--text); }
+        .breakdown-label { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+
+        .section {
+            background: var(--surface);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border); border-radius: var(--r-card);
+            padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow);
+        }
+        .section-title { font-size: 17px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .section-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+        .input-group { margin-bottom: 16px; }
+        .input-group:last-child { margin-bottom: 0; }
+        .input-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+        .input-hint { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+        input[type="number"], select {
+            width: 100%; padding: 12px 16px; font-size: 16px; font-family: var(--font);
+            background: var(--surface-mid); border: 1px solid var(--border);
+            border-radius: 12px; color: var(--text); outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .toggle-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0; border-bottom: 1px solid var(--border);
+        }
+        .toggle-row:last-child { border-bottom: none; }
+        .toggle-info { flex: 1; }
+        .toggle-label { font-size: 14px; font-weight: 500; display: block; }
+        .toggle-hint { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+        .toggle-switch {
+            position: relative; width: 48px; height: 28px; background: var(--border);
+            border-radius: 14px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; margin-left: 12px;
+        }
+        .toggle-switch.active { background: var(--accent); }
+        .toggle-switch::after {
+            content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px;
+            background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .toggle-switch.active::after { transform: translateX(20px); }
+
+        .script-box {
+            background: var(--surface-mid); border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px; margin-top: 8px;
+        }
+        .script-step { margin-bottom: 16px; }
+        .script-step:last-child { margin-bottom: 0; }
+        .script-step .step-num {
+            display: inline-block; width: 24px; height: 24px; border-radius: 50%;
+            background: var(--accent); color: white; text-align: center; line-height: 24px;
+            font-size: 13px; font-weight: 700; margin-right: 8px;
+        }
+        .script-quote {
+            font-style: italic; color: var(--text-2); padding-left: 32px; margin-top: 6px; font-size: 15px;
+        }
+
+        .email-capture {
+            background: var(--surface); border: 1px dashed var(--border);
+            border-radius: var(--r-card); padding: 32px; margin: 8px 0 16px;
+            text-align: center; box-shadow: var(--shadow);
+        }
+        .email-capture h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+        .email-capture p { color: var(--text-2); font-size: 14px; margin-bottom: 18px; }
+        .email-form { display: flex; gap: 10px; max-width: 460px; margin: 0 auto; }
+        .email-input {
+            flex: 1; padding: 13px 18px; border: 1px solid var(--border); border-radius: 50px;
+            font-size: 15px; outline: none; background: var(--surface-mid); color: var(--text);
+        }
+        .email-input:focus { border-color: var(--accent); }
+        .email-submit {
+            padding: 13px 26px; background: var(--accent); color: white; border: none;
+            border-radius: 50px; font-size: 15px; font-weight: 600; cursor: pointer; white-space: nowrap;
+        }
+        .email-submit:hover { background: var(--accent-hover); }
+        .success-message { display: none; background: rgba(52,199,89,0.15); color: #1a7f37; padding: 14px; border-radius: 10px; margin-top: 14px; font-weight: 500; font-size: 14px; }
+        html.dark .success-message { color: #34c759; }
+
+        .disclaimer {
+            background: var(--surface-mid); border-radius: 14px; padding: 18px 20px;
+            font-size: 13px; color: var(--text-2); margin-bottom: 24px;
+        }
+        .footer { text-align: center; padding: 20px 0 60px; color: var(--text-2); font-size: 13px; }
+        .footer a { color: var(--accent); text-decoration: none; }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 34px; }
+            .result-value { font-size: 44px; }
+            .result-breakdown { grid-template-columns: 1fr; }
+            .input-row { grid-template-columns: 1fr; }
+            .email-form { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to devhandbook.io</a>
+
+        <div class="header">
+            <span class="eyebrow">Built by a personal banker</span>
+            <h1>Overdraft Fee Calculator &amp; Refund Helper</h1>
+            <p>Add up what you've been charged, see which fees you can realistically get back, and get the exact words to ask.</p>
+        </div>
+
+        <!-- Result -->
+        <div class="result-card">
+            <div class="result-label">Estimated fees (12 months)</div>
+            <div class="result-value" id="totalFees">$0</div>
+            <div class="verdict-badge medium" id="verdictBadge">Refundability: —</div>
+            <div class="result-breakdown">
+                <div class="breakdown-item">
+                    <div class="breakdown-value" id="refundableAmt">$0</div>
+                    <div class="breakdown-label">Realistically refundable</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-value" id="feeCount">0</div>
+                    <div class="breakdown-label">Fees counted</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-value" id="perFee">$35</div>
+                    <div class="breakdown-label">Per fee</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inputs -->
+        <div class="section">
+            <div class="section-title">
+                <div class="section-icon" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">💸</div>
+                Your fees
+            </div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label class="input-label">Overdraft / NSF fees (last 12 mo)</label>
+                    <input type="number" id="feeCountInput" value="2" min="0" max="50" step="1">
+                    <div class="input-hint">Count every overdraft and NSF charge</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Typical fee amount ($)</label>
+                    <input type="number" id="feeAmount" value="35" min="0" max="200" step="1">
+                    <div class="input-hint">Most banks charge $30–$35</div>
+                </div>
+            </div>
+            <div class="input-group" style="margin-top:16px;">
+                <label class="input-label">How long have you been a customer?</label>
+                <select id="tenure">
+                    <option value="0">Less than 1 year</option>
+                    <option value="1">1–2 years</option>
+                    <option value="2">3–4 years</option>
+                    <option value="3" selected>5+ years</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">
+                <div class="section-icon" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">🧾</div>
+                Your situation
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">First overdraft ever?</span>
+                    <span class="toggle-hint">Banks almost always waive a genuine first-time fee</span>
+                </div>
+                <div class="toggle-switch" id="firstTimeToggle" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">Clean history (6+ months)</span>
+                    <span class="toggle-hint">No overdrafts or negative balances in the last 6 months</span>
+                </div>
+                <div class="toggle-switch" id="cleanToggle" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <span class="toggle-label">Fee charged in the last 30 days</span>
+                    <span class="toggle-hint">Recent fees are easiest to get reversed</span>
+                </div>
+                <div class="toggle-switch active" id="recentToggle" onclick="toggleSwitch(this)"></div>
+            </div>
+        </div>
+
+        <!-- Refund script -->
+        <div class="section">
+            <div class="section-title">
+                <div class="section-icon" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">📞</div>
+                What to say
+            </div>
+            <div class="script-box" id="scriptBox">
+                <div class="script-step">
+                    <span class="step-num">1</span> Call your bank's customer service line (or use in-app chat).
+                </div>
+                <div class="script-step">
+                    <span class="step-num">2</span> Ask for the fee to be reversed as a one-time courtesy.
+                </div>
+                <div class="script-quote" id="scriptQuote">"Hi, I noticed an overdraft fee on my account. I've been a customer for several years and I'd really appreciate it if you could reverse it as a one-time courtesy."</div>
+            </div>
+        </div>
+
+        <!-- Email capture -->
+        <div class="email-capture">
+            <h2>Want the full refund playbook?</h2>
+            <p>Get the complete bank-fee refund guide — every fee type, the exact script for each, and what to say when they say no. Free.</p>
+            <form class="email-form" id="notifyForm">
+                <input type="email" class="email-input" placeholder="you@email.com" required>
+                <button type="submit" class="email-submit">Send me the guide</button>
+            </form>
+            <div class="success-message" id="successMsg">✅ You're on the list — the refund playbook is on its way.</div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>Heads up:</strong> this is a free educational tool, not financial or legal advice. The "refundability" estimate is a general heuristic based on how banks typically handle fee-waiver requests — it is not a guarantee any specific bank will reverse a fee. No data leaves your device; everything runs in your browser.
+        </div>
+
+        <div class="footer">
+            <p>Built by <a href="https://devhandbook.io">devhandbook.io</a> · 100% private · No data leaves your browser</p>
+        </div>
+    </div>
+
+    <script>
+        const WAITLIST_URL = 'https://finance-waitlist.bryanmoon19.workers.dev';
+
+        const state = {
+            feeCount: 2,
+            feeAmount: 35,
+            tenure: 3,        // 0 <1y, 1 =1-2y, 2 =3-4y, 3 =5+
+            firstTime: false,
+            clean: false,
+            recent: true
+        };
+
+        const els = {
+            feeCountInput: document.getElementById('feeCountInput'),
+            feeAmount: document.getElementById('feeAmount'),
+            tenure: document.getElementById('tenure'),
+            totalFees: document.getElementById('totalFees'),
+            refundableAmt: document.getElementById('refundableAmt'),
+            feeCount: document.getElementById('feeCount'),
+            perFee: document.getElementById('perFee'),
+            verdictBadge: document.getElementById('verdictBadge'),
+            scriptQuote: document.getElementById('scriptQuote')
+        };
+
+        function fmtCurrency(n) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+        }
+
+        function calculate() {
+            const total = state.feeCount * state.feeAmount;
+
+            // Score heuristic
+            let score = 0;
+            if (state.firstTime) score += 40;
+            if (state.clean) score += 25;
+            if (state.tenure === 3) score += 15;
+            else if (state.tenure === 2) score += 10;
+            if (state.recent) score += 5;
+
+            if (state.feeCount === 1) score += 15;
+            else if (state.feeCount <= 3) score += 5;
+            else if (state.feeCount >= 4) score -= 10;
+
+            let tier, refundPct, quote;
+            if (score >= 60) {
+                tier = 'high';
+                refundPct = 0.8;
+                quote = "\u201CHi, I noticed an overdraft fee on my account and I\u2019d really appreciate it if you could reverse it as a one-time courtesy. I\u2019ve been a loyal customer and this isn\u2019t a pattern for me.\u201D";
+            } else if (score >= 30) {
+                tier = 'medium';
+                refundPct = 0.5;
+                quote = "\u201CHi, I\u2019d like to ask about an overdraft fee on my account. If there\u2019s any way to get this waived \u2014 even partially \u2014 I\u2019d really appreciate it. I\u2019d hate for a fee to be the reason I have to move my accounts.\u201D";
+            } else {
+                tier = 'low';
+                refundPct = 0.2;
+                quote = "\u201CHi, I understand I had several overdraft fees recently. I\u2019ve had some temporary hardship, and I\u2019d like to ask if you can reverse even one of them as a goodwill gesture. Is there a manager or a hardship team I could speak with?\u201D";
+            }
+
+            const refundable = Math.round(total * refundPct);
+
+            els.totalFees.textContent = fmtCurrency(total);
+            els.refundableAmt.textContent = fmtCurrency(refundable);
+            els.feeCount.textContent = state.feeCount;
+            els.perFee.textContent = '$' + state.feeAmount;
+            els.scriptQuote.textContent = quote;
+
+            els.verdictBadge.className = 'verdict-badge ' + tier;
+            const labels = { high: 'Refundability: High', medium: 'Refundability: Medium', low: 'Refundability: Low' };
+            els.verdictBadge.textContent = labels[tier];
+        }
+
+        function toggleSwitch(el) {
+            el.classList.toggle('active');
+            const on = el.classList.contains('active');
+            if (el.id === 'firstTimeToggle') state.firstTime = on;
+            else if (el.id === 'cleanToggle') state.clean = on;
+            else if (el.id === 'recentToggle') state.recent = on;
+            calculate();
+        }
+
+        els.feeCountInput.addEventListener('input', (e) => { state.feeCount = Math.max(0, parseInt(e.target.value) || 0); calculate(); });
+        els.feeAmount.addEventListener('input', (e) => { state.feeAmount = Math.max(0, parseInt(e.target.value) || 0); calculate(); });
+        els.tenure.addEventListener('change', (e) => { state.tenure = parseInt(e.target.value); calculate(); });
+
+        document.getElementById('notifyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const input = this.querySelector('.email-input');
+            const email = input.value.trim();
+            const btn = this.querySelector('.email-submit');
+            const success = document.getElementById('successMsg');
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+                input.style.borderColor = '#ef4444';
+                input.focus();
+                return;
+            }
+            input.style.borderColor = '';
+            btn.disabled = true;
+            btn.textContent = 'Sending…';
+
+            try {
+                const res = await fetch(WAITLIST_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, source: 'overdraft-fee-calculator' }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok) {
+                    success.textContent = '✅ You\u2019re on the list \u2014 the refund playbook is on its way.';
+                    success.style.display = 'block';
+                    input.value = '';
+                } else {
+                    throw new Error(data.error || 'Signup failed');
+                }
+            } catch (err) {
+                success.textContent = '⚠️ Something went wrong. Please try again.';
+                success.style.color = '#ef4444';
+                success.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Send me the guide';
+            }
+        });
+
+        calculate();
+    </script>
+</body>
+</html>
