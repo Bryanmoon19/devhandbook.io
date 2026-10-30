@@ -35,6 +35,8 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("ai-agent-cost-calculator");
   eleventyConfig.addPassthroughCopy("cursorexit");
   eleventyConfig.addPassthroughCopy("overdraft-fee-calculator");
+  eleventyConfig.addPassthroughCopy("skill-linter");
+  eleventyConfig.addPassthroughCopy("local-llm-runtime-picker");
   eleventyConfig.addPassthroughCopy("gear");
   eleventyConfig.addPassthroughCopy("og-images");
 

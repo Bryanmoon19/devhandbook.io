@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local LLM Runtime Picker | Ollama, llama.cpp, LM Studio, vLLM — Which Should You Use?</title>
+    <meta name="description" content="Answer three questions and get the right local LLM runtime for your hardware and use case — Ollama, llama.cpp, LM Studio, vLLM, Lemonade, or Jan. Free, private, instant.">
+    <meta name="keywords" content="local llm runtime, ollama alternative, llama.cpp vs ollama, lm studio vs ollama, vllm, lemonade amd, best local llm, run llm locally, local llm server">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Local LLM Runtime Picker — Which Should You Use?">
+    <meta property="og:description" content="Ollama, llama.cpp, LM Studio, vLLM, Lemonade, or Jan — get the right runtime for your hardware and use case.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/local-llm-runtime-picker/">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: { primary: '#0071e3', 'primary-dark': '#0077ed' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .fade-in { animation: fadeIn 0.25s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .opt { cursor: pointer; transition: all .15s ease; }
+        .opt:hover { border-color: #0071e3 !important; }
+        .opt.selected { border-color: #0071e3 !important; background: rgba(0,113,227,0.06) !important; }
+        html.dark .opt.selected { background: rgba(0,113,227,0.18) !important; }
+        .bar { height: 6px; border-radius: 3px; background: #e5e5ea; overflow: hidden; }
+        html.dark .bar { background: #3a3a3c; }
+        .bar-fill { height: 100%; border-radius: 3px; background: #0071e3; transition: width .4s ease; }
+        .rank-1 { border-left: 3px solid #34c759; }
+        .rank-2 { border-left: 3px solid #0071e3; }
+        .rank-other { border-left: 3px solid rgba(0,0,0,0.1); }
+        html.dark .rank-other { border-left-color: rgba(255,255,255,0.12); }
+    </style>
+</head>
+<body class="bg-white dark:bg-black text-gray-900 dark:text-gray-100 antialiased">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        <a href="/" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1.5 mb-8">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to devhandbook.io
+        </a>
+
+        <header class="text-center mb-10">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 rounded-full mb-4">Free dev tool</span>
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-3">Local LLM Runtime Picker</h1>
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">Ollama, llama.cpp, LM Studio, vLLM, Lemonade, or Jan — answer three questions and get the right runtime for your hardware and use case.</p>
+        </header>
+
+        <!-- Inputs -->
+        <div class="space-y-6 mb-8">
+            <!-- Hardware -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">1. What hardware are you running on?</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="hwGroup">
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-hw="apple">🍏 Apple Silicon (M-series)</div>
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-hw="nvidia">🎮 NVIDIA GPU (CUDA)</div>
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-hw="amd">🔴 AMD GPU (ROCm)</div>
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-hw="cpu">🧠 CPU only / low-power box</div>
+                </div>
+            </div>
+
+            <!-- Use case -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">2. What's your primary use case?</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="useGroup">
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-use="chat">💬 Chat / assistant</div>
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-use="coding">⌨️ Coding (IDE integration)</div>
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-use="serving">🌐 API serving (OpenAI-compatible)</div>
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-use="batch">⚡ Max tokens/sec / batch</div>
+                </div>
+            </div>
+
+            <!-- Priority -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">3. What matters most to you?</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="prioGroup">
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-prio="ease">🛟 Ease of use</div>
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-prio="perf">🚀 Max performance</div>
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-prio="privacy">🔒 Privacy / fully offline</div>
+                    <div class="opt border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium" data-prio="control">🛠️ Max control / tinkering</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result" class="hidden space-y-3 mb-8"></div>
+
+        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-5 text-sm text-gray-500 dark:text-gray-400 mb-8">
+            <strong class="text-gray-700 dark:text-gray-200">How this works.</strong> The picker scores six runtimes against your three answers using a simple weighted matrix. It's a starting heuristic, not gospel — your exact GPU, model size, and tolerance for setup friction will shift the answer. For a deep dive, see the comparison table at the bottom.
+        </div>
+
+        <!-- Comparison table -->
+        <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 mb-8 overflow-x-auto">
+            <h2 class="text-lg font-semibold mb-4">Runtime comparison (2026 landscape)</h2>
+            <table class="w-full text-sm min-w-[640px]">
+                <thead>
+                    <tr class="text-left text-gray-400 text-xs uppercase tracking-wider border-b border-black/10 dark:border-white/10">
+                        <th class="py-2 pr-3 font-semibold">Runtime</th>
+                        <th class="py-2 pr-3 font-semibold">Best for</th>
+                        <th class="py-2 pr-3 font-semibold">Weak at</th>
+                        <th class="py-2 font-semibold">Vibe</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-black/5 dark:divide-white/5">
+                    <tr><td class="py-3 pr-3 font-semibold">Ollama</td><td class="py-3 pr-3">Default for most people; huge model library</td><td class="py-3 pr-3">AMD/ROCm lag; less control; not max throughput</td><td class="py-3">Batteries-included</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">LM Studio</td><td class="py-3 pr-3">GUI, easy model download, good Apple Metal</td><td class="py-3 pr-3">Not for high-throughput serving</td><td class="py-3">Point-and-click</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">llama.cpp</td><td class="py-3 pr-3">Runs on anything (CPU/NPU/edge); max control</td><td class="py-3 pr-3">CLI friction; no batteries included</td><td class="py-3">The engine underneath</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">vLLM</td><td class="py-3 pr-3">Production serving, high throughput, NVIDIA</td><td class="py-3 pr-3">Setup complexity; weak Apple support</td><td class="py-3">Server-grade</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Lemonade</td><td class="py-3 pr-3">AMD GPUs/NPUs (official ROCm server)</td><td class="py-3 pr-3">NVIDIA/Apple not the target</td><td class="py-3">AMD's answer</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Jan</td><td class="py-3 pr-3">Local-first GUI, fully offline, no cloud</td><td class="py-3 pr-3">Younger ecosystem; fewer models</td><td class="py-3">Privacy-first</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="text-center text-xs text-gray-400 pb-10">
+            <p>Built by <a href="/" class="text-primary hover:underline">devhandbook.io</a> · 100% private · nothing leaves your browser</p>
+        </footer>
+    </div>
+
+    <script>
+        const RUNTIMES = [
+            { id: 'ollama',  name: 'Ollama',  icon: '🐙', blurb: 'The batteries-included default. One command installs it, one command pulls a model, and it exposes an OpenAI-compatible API out of the box. Best all-rounder for most people.', best: 'Most people starting out; chat + coding + light serving on NVIDIA or Apple Silicon.', caveat: 'ROCm/AMD support is second-class, and it won\'t hit vLLM-level throughput for serious serving.', hw: { apple: 8, nvidia: 9, amd: 4, cpu: 7 }, use: { chat: 9, coding: 7, serving: 8, batch: 5 }, prio: { ease: 10, perf: 6, privacy: 8, control: 5 } },
+            { id: 'lmstudio', name: 'LM Studio', icon: '🖥️', blurb: 'A clean GUI with a built-in model browser and local server. Excellent Apple Metal support and the least intimidating way to run a local model.', best: 'Non-CLI users; Apple Silicon; quick experiments without touching a terminal.', caveat: 'Not built for high-throughput production serving or heavy batch jobs.', hw: { apple: 9, nvidia: 8, amd: 7, cpu: 7 }, use: { chat: 9, coding: 7, serving: 7, batch: 4 }, prio: { ease: 9, perf: 5, privacy: 9, control: 6 } },
+            { id: 'llamacpp', name: 'llama.cpp', icon: '⚙️', blurb: 'The C/C++ engine that powers Ollama, LM Studio, and Jan. Runs on virtually anything — CPU, NVIDIA, AMD (ROCm/Vulkan), Apple Metal, even NPUs and edge devices. Maximum control, maximum compatibility.', best: 'Squeezing old/odd hardware; CPU-only and edge devices; people who want every knob.', caveat: 'You assemble the experience yourself — no model registry, no one-command setup.', hw: { apple: 8, nvidia: 8, amd: 7, cpu: 9 }, use: { chat: 7, coding: 5, serving: 7, batch: 8 }, prio: { ease: 4, perf: 8, privacy: 10, control: 10 } },
+            { id: 'vllm', name: 'vLLM', icon: '🚀', blurb: 'The production-grade serving engine (PagedAttention, continuous batching, high throughput). The standard for exposing a fast OpenAI-compatible endpoint to many concurrent requests.', best: 'Serving models to apps/users; multi-GPU; NVIDIA-first; max tokens/sec under load.', caveat: 'Real setup friction and weak Apple support — overkill for a personal chat assistant.', hw: { apple: 2, nvidia: 10, amd: 6, cpu: 3 }, use: { chat: 6, coding: 4, serving: 10, batch: 10 }, prio: { ease: 3, perf: 10, privacy: 9, control: 8 } },
+            { id: 'lemonade', name: 'Lemonade', icon: '🔴', blurb: 'AMD\'s official local LLM server, purpose-built for ROCm GPUs and (newer) NPUs. The cleanest path to good local inference on AMD hardware.', best: 'AMD GPUs/NPUs where Ollama\'s ROCm support falls short.', caveat: 'NVIDIA and Apple aren\'t the target — you\'d choose something else there.', hw: { apple: 3, nvidia: 3, amd: 10, cpu: 4 }, use: { chat: 7, coding: 4, serving: 7, batch: 6 }, prio: { ease: 6, perf: 8, privacy: 9, control: 6 } },
+            { id: 'jan', name: 'Jan', icon: '🟢', blurb: 'A local-first, privacy-first desktop app — a genuinely open Ollama alternative with a clean UI and no cloud dependency.', best: 'People who want a polished GUI and zero cloud telemetry; a drop-in Ollama replacement.', caveat: 'Younger ecosystem and a smaller model library than Ollama.', hw: { apple: 7, nvidia: 7, amd: 5, cpu: 6 }, use: { chat: 8, coding: 5, serving: 6, batch: 4 }, prio: { ease: 8, perf: 4, privacy: 10, control: 6 } },
+        ];
+
+        const state = { hw: null, use: null, prio: null };
+
+        function setupGroup(groupId, key) {
+            const group = document.getElementById(groupId);
+            group.querySelectorAll('.opt').forEach(el => {
+                el.addEventListener('click', () => {
+                    group.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+                    el.classList.add('selected');
+                    state[key] = el.dataset[key];
+                    render();
+                });
+            });
+        }
+        setupGroup('hwGroup', 'hw');
+        setupGroup('useGroup', 'use');
+        setupGroup('prioGroup', 'prio');
+
+        function render() {
+            const result = document.getElementById('result');
+            if (!state.hw || !state.use || !state.prio) {
+                result.classList.add('hidden');
+                return;
+            }
+
+            const scored = RUNTIMES.map(r => {
+                // Weights: hardware 40%, use case 35%, priority 25%
+                const hwScore = r.hw[state.hw];
+                const useScore = r.use[state.use];
+                const prioScore = r.prio[state.prio];
+                const total = hwScore * 0.4 + useScore * 0.35 + prioScore * 0.25;
+                return { r, total: Math.round(total * 10) / 10 };
+            }).sort((a, b) => b.total - a.total);
+
+            const top = scored[0].r;
+            const runner = scored[1].r;
+            const max = scored[0].total;
+
+            result.innerHTML = `
+                <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-6 fade-in">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Top pick</div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-4xl">${top.icon}</span>
+                        <span class="text-3xl font-bold tracking-tight">${top.name}</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-3">${top.blurb}</p>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1"><span class="font-semibold text-green-500">Best for:</span> ${top.best}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold text-orange-500">Watch out:</span> ${top.caveat}</div>
+                </div>
+                <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">All six, ranked for your setup</div>
+                    ${scored.map((s, i) => {
+                        const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : 'rank-other';
+                        const pct = Math.round((s.total / max) * 100);
+                        return `<div class="${rankClass} bg-white dark:bg-neutral-900 border border-black/5 dark:border-white/5 rounded-xl p-3 mb-2">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="font-semibold text-sm">${s.r.icon} ${s.r.name} ${i === 0 ? '<span class="text-xs text-green-500 font-bold ml-1">✓ recommended</span>' : ''}</span>
+                                <span class="text-xs font-mono text-gray-400">${s.total.toFixed(1)}</span>
+                            </div>
+                            <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4 text-sm text-gray-600 dark:text-gray-300 fade-in">
+                    <strong class="text-gray-800 dark:text-gray-100">Runner-up worth knowing:</strong> ${runner.icon} <strong>${runner.name}</strong> is a strong alternative here — ${runner.best.toLowerCase()}.
+                </div>
+            `;
+            result.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

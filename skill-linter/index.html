@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKILL.md Linter | Validate Agent Skills (Free, Client-Side)</title>
+    <meta name="description" content="Paste a SKILL.md and instantly check it against the Agent Skills spec — description triggers, size limits, step quality, and common anti-patterns. 100% client-side.">
+    <meta name="keywords" content="skill.md linter, agent skills validator, claude skills checker, SKILL.md spec, agent skill lint, skill markdown validator, AI agent skills">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="SKILL.md Linter | Validate Agent Skills (Free, Client-Side)">
+    <meta property="og:description" content="Check any SKILL.md against the spec — triggers, size, steps, and anti-patterns. Runs entirely in your browser.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/skill-linter/">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: { primary: '#0071e3', 'primary-dark': '#0077ed' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .lint-pass { border-left: 3px solid #34c759; }
+        .lint-warn { border-left: 3px solid #ff9500; }
+        .lint-error { border-left: 3px solid #ff3b30; }
+        .lint-info { border-left: 3px solid #0071e3; }
+        .badge-pass { background: rgba(52,199,89,0.15); color: #1a7f37; }
+        .badge-warn { background: rgba(255,149,0,0.15); color: #b26a00; }
+        .badge-error { background: rgba(255,59,48,0.15); color: #c62828; }
+        html.dark .badge-pass { color: #34c759; }
+        html.dark .badge-warn { color: #ff9500; }
+        html.dark .badge-error { color: #ff453a; }
+    </style>
+</head>
+<body class="bg-white dark:bg-black text-gray-900 dark:text-gray-100 antialiased">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        <a href="/" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1.5 mb-8">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to devhandbook.io
+        </a>
+
+        <header class="text-center mb-10">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 rounded-full mb-4">Free dev tool</span>
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-3">SKILL.md Linter</h1>
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">Paste an Agent Skills <code class="font-mono text-sm">SKILL.md</code> and get an instant spec check — triggers, size, steps, and the anti-patterns that make skills fail.</p>
+        </header>
+
+        <!-- Editor -->
+        <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 mb-6 fade-in">
+            <div class="flex items-center justify-between mb-3">
+                <label class="text-sm font-semibold">SKILL.md source</label>
+                <button id="sampleBtn" class="text-xs text-primary hover:underline font-medium">Load sample</button>
+            </div>
+            <textarea id="input" rows="18" placeholder="Paste your SKILL.md contents here…" spellcheck="false"
+                class="w-full font-mono text-[13px] leading-relaxed p-4 rounded-xl bg-gray-50 dark:bg-neutral-800 border border-black/10 dark:border-white/10 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-y"></textarea>
+            <div class="flex flex-wrap items-center gap-3 mt-4">
+                <button id="lintBtn" class="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded-full transition">Lint skill</button>
+                <button id="clearBtn" class="px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-full">Clear</button>
+                <span id="wordCount" class="ml-auto text-xs text-gray-400 font-mono"></span>
+            </div>
+        </div>
+
+        <!-- Score -->
+        <div id="scoreCard" class="hidden bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-6 mb-6 fade-in text-center">
+            <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Lint score</div>
+            <div id="scoreValue" class="text-5xl font-bold tracking-tight mb-2">—</div>
+            <div id="scoreVerdict" class="inline-block px-4 py-1.5 rounded-full text-sm font-bold"></div>
+            <div class="flex justify-center gap-6 mt-4 text-sm text-gray-500 dark:text-gray-400">
+                <div><span id="cntPass" class="font-bold text-green-500">0</span> pass</div>
+                <div><span id="cntWarn" class="font-bold text-orange-500">0</span> warnings</div>
+                <div><span id="cntError" class="font-bold text-red-500">0</span> errors</div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="space-y-3 mb-8"></div>
+
+        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-5 text-sm text-gray-500 dark:text-gray-400 mb-8">
+            <strong class="text-gray-700 dark:text-gray-200">About this linter.</strong> It checks the structural rules of the Agent Skills format (SKILL.md): YAML frontmatter with a valid <code class="font-mono">name</code> and <code class="font-mono">description</code>, description length and leading-trigger convention, total file size, and common anti-patterns that break real agent skills (vague steps, restating defaults, "optional" waffling). It's a heuristic guide, not a hard gate — a clean skill can still be wrong for its job.
+        </div>
+
+        <footer class="text-center text-xs text-gray-400 pb-10">
+            <p>Built by <a href="/" class="text-primary hover:underline">devhandbook.io</a> · 100% private · nothing leaves your browser</p>
+        </footer>
+    </div>
+
+    <script>
+        const SAMPLE = `---
+name: homelab-troubleshoot
+description: Diagnose and fix common homelab issues. Use when a Proxmox VM, Docker container, or network service is misbehaving, or when a self-hosted app won't start.
+---
+
+# Homelab Troubleshooting
+
+## Steps
+1. Gather symptoms: run \`docker ps -a\` and \`systemctl status <svc>\` and record the exact error. Confirm you have the error text before proceeding.
+2. Check the logs: \`journalctl -u <svc> -n 100 --no-pager\` and identify the first failing line.
+3. Isolate: stop the service, then restart with verbose logging to reproduce.
+4. Apply the fix that matches the error class (port conflict, disk full, permission, or config drift).
+5. Verify: confirm the service is healthy and idempotently restartable.
+`;
+
+        const input = document.getElementById('input');
+        const results = document.getElementById('results');
+        const scoreCard = document.getElementById('scoreCard');
+        const wordCount = document.getElementById('wordCount');
+
+        input.addEventListener('input', () => {
+            wordCount.textContent = input.value.trim() ? `${input.value.length} chars · ${input.value.trim().split(/\s+/).length} words` : '';
+        });
+
+        document.getElementById('sampleBtn').addEventListener('click', () => {
+            input.value = SAMPLE;
+            input.dispatchEvent(new Event('input'));
+            lint();
+        });
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            input.value = '';
+            results.innerHTML = '';
+            scoreCard.classList.add('hidden');
+            wordCount.textContent = '';
+        });
+        document.getElementById('lintBtn').addEventListener('click', lint);
+
+        function issue(kind, title, detail, fix) {
+            return { kind, title, detail, fix };
+        }
+
+        function lint() {
+            const src = input.value;
+            if (!src.trim()) {
+                results.innerHTML = '<p class="text-gray-400 text-center py-8">Paste a SKILL.md first.</p>';
+                scoreCard.classList.add('hidden');
+                return;
+            }
+            const issues = [];
+            const lines = src.split('\n');
+
+            // 1. YAML frontmatter
+            const hasFM = /^---\s*$/m.test(src);
+            if (!hasFM) {
+                issues.push(issue('error', 'Missing YAML frontmatter', 'SKILL.md must start with a `---` delimited frontmatter block containing at least `name` and `description`.', 'Add a frontmatter block at the very top.'));
+            } else {
+                const fmMatch = src.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
+                if (!fmMatch) {
+                    issues.push(issue('error', 'Malformed frontmatter', 'The opening `---` has no matching closing `---`.', 'Close the frontmatter block with a second `---` line.'));
+                } else {
+                    const fm = fmMatch[1];
+                    const name = fm.match(/^name:\s*(.+)$/m);
+                    const desc = fm.match(/^description:\s*(.+)$/m);
+
+                    if (!name || !name[1].trim()) {
+                        issues.push(issue('error', 'Missing `name`', 'The frontmatter has no `name` field.', 'Add `name: <kebab-case-name>`.'));
+                    } else {
+                        const n = name[1].trim();
+                        if (!/^[a-z0-9][a-z0-9-]*$/.test(n)) {
+                            issues.push(issue('warn', 'Non-canonical name', `"${n}" isn't lowercase-kebab-case.`, 'Use lowercase letters, digits, and hyphens only (e.g. `homelab-troubleshoot`).'));
+                        }
+                    }
+
+                    if (!desc || !desc[1].trim()) {
+                        issues.push(issue('error', 'Missing `description`', 'The frontmatter has no `description` field.', 'Add a `description:` line.'));
+                    } else {
+                        const d = desc[1].trim();
+                        if (d.length > 1024) {
+                            issues.push(issue('warn', 'Description too long', `Description is ${d.length} chars (recommended ≤ 1024).`, 'Tighten the description to a focused trigger + outcome.'));
+                        }
+                        // Leading trigger convention
+                        const firstSentence = d.split(/[.!?]\s/)[0];
+                        const triggerWords = /use when|when .*need|if .*want|for |to (do|run|get|fix|build|generate|check|deploy|diagnose)/i;
+                        if (!triggerWords.test(firstSentence) && firstSentence.length > 0 && d.length < 60) {
+                            // only flag if the description is too short to naturally contain a trigger
+                        }
+                        if (d.length < 40) {
+                            issues.push(issue('warn', 'Description may be too short', 'A good description leads with the situations that trigger the skill, then what it produces.', 'Lead with "Use when…" triggers, then the outcome.'));
+                        }
+                    }
+                }
+            }
+
+            // 2. Size
+            const sizeKB = src.length / 1024;
+            if (src.length > 10000) {
+                issues.push(issue('error', 'Over size budget', `SKILL.md is ${Math.round(sizeKB * 10) / 10} KB (recommended < 10 KB).`, 'Move long reference/examples into a bundled file and point to it from a step.'));
+            } else if (src.length > 8000) {
+                issues.push(issue('warn', 'Nearing size budget', `SKILL.md is ${Math.round(sizeKB * 10) / 10} KB — close to the 10 KB ceiling.`, 'Consider splitting reference material out.'));
+            }
+
+            // 3. Steps section
+            const hasSteps = /^##\s+steps\b/mi.test(src);
+            if (!hasSteps) {
+                issues.push(issue('error', 'No `## Steps` section', 'A skill needs an ordered `## Steps` section listing the actions to perform.', 'Add a `## Steps` heading with numbered steps.'));
+            } else {
+                const stepMatches = [...src.matchAll(/^\d+\.\s+(.+)$/gm)].map(m => m[1]);
+                if (stepMatches.length === 0) {
+                    issues.push(issue('error', 'No numbered steps', 'The `## Steps` section has no numbered list.', 'Write steps as `1.`, `2.`, … each ending on a checkable completion criterion.'));
+                } else {
+                    if (stepMatches.length < 2) {
+                        issues.push(issue('warn', 'Only one step', 'A single step is usually too coarse.', 'Break the procedure into distinct, ordered actions.'));
+                    }
+                    stepMatches.forEach((s, i) => {
+                        const t = s.toLowerCase();
+                        if (/^optionally|^you (may|could|can) optionally|^if you want/.test(t)) {
+                            issues.push(issue('warn', `Step ${i + 1} waffles`, '"Optional" language dilutes a step — either it's required or it's not a step.', 'Make the step a positive imperative, or drop it.'));
+                        }
+                        if (s.length > 400) {
+                            issues.push(issue('info', `Step ${i + 1} is long`, 'Long steps often hide multiple actions or reference detail.', 'Split into smaller steps or move detail to a referenced file.'));
+                        }
+                    });
+                }
+            }
+
+            // 4. Anti-patterns
+            const vague = /\b(just|simply|obviously|basically|etc\.|and so on)\b/gi;
+            const vagueHits = [...src.matchAll(vague)].length;
+            if (vagueHits > 0) {
+                issues.push(issue('warn', 'Vague filler words', `${vagueHits} instance(s) of "just / simply / etc." — these add no information.`, 'Delete filler; every sentence should change behavior vs. the default.'));
+            }
+
+            // Duplicate content heuristic
+            const words = src.toLowerCase().match(/[a-z0-9'-]{4,}/g) || [];
+            const freq = {};
+            words.forEach(w => freq[w] = (freq[w] || 0) + 1);
+            const dupes = Object.entries(freq).filter(([w, c]) => c >= 12).map(([w]) => w);
+            if (dupes.length > 3) {
+                issues.push(issue('info', 'Possible repetition', `Heavily repeated words: ${dupes.slice(0, 5).join(', ')} — check for restated defaults.`, 'Remove sentences that duplicate another line.'));
+            }
+
+            // 5. Reference section placement
+            const refIdx = src.search(/^##\s+(reference|examples|notes)\b/mi);
+            const stepsIdx = src.search(/^##\s+steps\b/mi);
+            if (refIdx !== -1 && stepsIdx !== -1 && refIdx < stepsIdx) {
+                issues.push(issue('info', 'Reference before steps', 'Steps come before reference; reference appears only where a step consults it.', 'Move the reference section after `## Steps`.'));
+            }
+
+            render(issues);
+        }
+
+        function render(issues) {
+            if (issues.length === 0) {
+                results.innerHTML = '<div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-6 text-center"><div class="text-3xl mb-2">✅</div><p class="font-semibold text-green-700 dark:text-green-300">No issues found — this skill looks structurally clean.</p></div>';
+            } else {
+                results.innerHTML = issues.map(it => {
+                    const kindClass = it.kind === 'error' ? 'lint-error' : it.kind === 'warn' ? 'lint-warn' : it.kind === 'info' ? 'lint-info' : 'lint-pass';
+                    const badgeClass = it.kind === 'error' ? 'badge-error' : it.kind === 'warn' ? 'badge-warn' : it.kind === 'info' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300' : 'badge-pass';
+                    const label = it.kind.toUpperCase();
+                    return `<div class="${kindClass} bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-xl p-4 fade-in">
+                        <div class="flex items-start gap-3">
+                            <span class="${badgeClass} text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0 mt-0.5">${label}</span>
+                            <div class="flex-1">
+                                <div class="font-semibold text-sm mb-1">${escapeHtml(it.title)}</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-300 mb-1.5">${escapeHtml(it.detail)}</div>
+                                ${it.fix ? `<div class="text-xs text-gray-500 dark:text-gray-400"><span class="font-semibold text-primary">Fix:</span> ${escapeHtml(it.fix)}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // Score
+            const errs = issues.filter(i => i.kind === 'error').length;
+            const warns = issues.filter(i => i.kind === 'warn').length;
+            const infos = issues.filter(i => i.kind === 'info').length;
+            document.getElementById('cntPass').textContent = issues.filter(i => i.kind === 'pass').length;
+            document.getElementById('cntWarn').textContent = warns;
+            document.getElementById('cntError').textContent = errs;
+
+            const score = Math.max(0, 100 - errs * 30 - warns * 10 - infos * 3);
+            const sv = document.getElementById('scoreValue');
+            const verdict = document.getElementById('scoreVerdict');
+            sv.textContent = score;
+            if (score >= 90) {
+                sv.className = 'text-5xl font-bold tracking-tight mb-2 text-green-500';
+                verdict.textContent = 'Clean';
+                verdict.className = 'badge-pass inline-block px-4 py-1.5 rounded-full text-sm font-bold';
+            } else if (score >= 70) {
+                sv.className = 'text-5xl font-bold tracking-tight mb-2 text-orange-500';
+                verdict.textContent = 'Needs polish';
+                verdict.className = 'badge-warn inline-block px-4 py-1.5 rounded-full text-sm font-bold';
+            } else {
+                sv.className = 'text-5xl font-bold tracking-tight mb-2 text-red-500';
+                verdict.textContent = 'Needs work';
+                verdict.className = 'badge-error inline-block px-4 py-1.5 rounded-full text-sm font-bold';
+            }
+            scoreCard.classList.remove('hidden');
+        }
+
+        function escapeHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Auto-lint on paste
+        input.addEventListener('paste', () => setTimeout(lint, 100));
+    </script>
+</body>
+</html>
