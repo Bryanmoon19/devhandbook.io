@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU VRAM Calculator — Which Local LLM Actually Fits Your Card?</title>
+    <meta name="description" content="Pick your GPU and a model, and see which quantization levels actually fit in VRAM — plus an estimated tokens/sec for each. Free, private, instant.">
+    <meta name="keywords" content="gpu vram calculator, llm vram requirements, quantized model size, gguf quantization sizes, run 70b locally, local llm gpu, vram fit, tokens per second estimate">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="GPU VRAM Calculator — Which Local LLM Fits Your Card?">
+    <meta property="og:description" content="Pick a GPU and model, see which quantizations fit in VRAM and your estimated tokens/sec.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/gpu-vram-calculator/">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: { primary: '#0071e3', 'primary-dark': '#0077ed' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .fade-in { animation: fadeIn 0.25s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .opt { cursor: pointer; transition: all .15s ease; }
+        .opt:hover { border-color: #0071e3 !important; }
+        .opt.selected { border-color: #0071e3 !important; background: rgba(0,113,227,0.06) !important; }
+        html.dark .opt.selected { background: rgba(0,113,227,0.18) !important; }
+        .bar { height: 6px; border-radius: 3px; background: #e5e5ea; overflow: hidden; }
+        html.dark .bar { background: #3a3a3c; }
+        .bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+        .fits { color: #34c759; }
+        .tight { color: #ff9500; }
+        .nofit { color: #ff3b30; }
+    </style>
+</head>
+<body class="bg-white dark:bg-black text-gray-900 dark:text-gray-100 antialiased">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        <a href="/" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1.5 mb-8">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to devhandbook.io
+        </a>
+
+        <header class="text-center mb-10">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 rounded-full mb-4">Free dev tool</span>
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-3">GPU VRAM Calculator</h1>
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">Which quantized model actually fits in your card — and how fast will it run? Pick your GPU and a model to find out.</p>
+        </header>
+
+        <!-- Step 1: GPU -->
+        <div class="space-y-6 mb-8">
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">1. What are you running on?</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="gpuGroup"></div>
+                <div class="mt-4 flex items-center gap-3 text-sm">
+                    <span class="text-gray-500">Not listed? Custom:</span>
+                    <input type="number" id="customVram" placeholder="VRAM GB" min="4" max="512" class="w-28 border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-lg px-3 py-2 text-sm font-mono" />
+                    <input type="number" id="customBw" placeholder="Bandwidth GB/s" min="50" max="4000" class="w-36 border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-lg px-3 py-2 text-sm font-mono" />
+                    <button id="customGo" class="text-primary font-semibold hover:underline">Use</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Model -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">2. Which model?</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="modelGroup"></div>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result" class="hidden space-y-3 mb-8"></div>
+
+        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-5 text-sm text-gray-500 dark:text-gray-400 mb-8">
+            <strong class="text-gray-700 dark:text-gray-200">How this works.</strong> Each quantization level has a known size in bytes-per-parameter (GGUF): FP16 ≈ 2.0, Q8 ≈ 1.06, Q6 ≈ 0.82, Q5 ≈ 0.71, Q4 ≈ 0.61, Q3 ≈ 0.49, Q2 ≈ 0.37. We multiply that by the model's parameter count, reserve ~2&nbsp;GB for OS/display/context on a discrete GPU, and check fit against your VRAM. Tokens/sec is a memory-bandwidth heuristic (generation is bandwidth-bound): <code>t/s ≈ bandwidth ÷ model size in VRAM</code>. These are <em>estimates</em>, not guarantees — actual numbers shift with context length, batch size, and drivers.
+        </div>
+
+        <!-- Reference table -->
+        <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 mb-8 overflow-x-auto">
+            <h2 class="text-lg font-semibold mb-4">Quantization size reference (bytes per parameter)</h2>
+            <table class="w-full text-sm min-w-[560px]">
+                <thead>
+                    <tr class="text-left text-gray-400 text-xs uppercase tracking-wider border-b border-black/10 dark:border-white/10">
+                        <th class="py-2 pr-3 font-semibold">Quant</th>
+                        <th class="py-2 pr-3 font-semibold">Bytes/param</th>
+                        <th class="py-2 pr-3 font-semibold">70B model ≈</th>
+                        <th class="py-2 font-semibold">Quality vs FP16</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-black/5 dark:divide-white/5">
+                    <tr><td class="py-3 pr-3 font-semibold">FP16 / BF16</td><td class="py-3 pr-3 font-mono">2.00</td><td class="py-3 pr-3">~140 GB</td><td class="py-3">Reference (lossless)</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Q8_0</td><td class="py-3 pr-3 font-mono">1.06</td><td class="py-3 pr-3">~74 GB</td><td class="py-3">Near-lossless</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Q6_K</td><td class="py-3 pr-3 font-mono">0.82</td><td class="py-3 pr-3">~57 GB</td><td class="py-3">Excellent</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Q5_K_M</td><td class="py-3 pr-3 font-mono">0.71</td><td class="py-3 pr-3">~50 GB</td><td class="py-3">Very good</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Q4_K_M</td><td class="py-3 pr-3 font-mono">0.61</td><td class="py-3 pr-3">~43 GB</td><td class="py-3">Good — the sweet spot</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Q3_K_M</td><td class="py-3 pr-3 font-mono">0.49</td><td class="py-3 pr-3">~34 GB</td><td class="py-3">Noticeable degradation</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Q2_K</td><td class="py-3 pr-3 font-mono">0.37</td><td class="py-3 pr-3">~26 GB</td><td class="py-3">Significant loss — last resort</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="text-center text-xs text-gray-400 pb-10">
+            <p>Built by <a href="/" class="text-primary hover:underline">devhandbook.io</a> · 100% private · nothing leaves your browser</p>
+        </footer>
+    </div>
+
+    <script>
+        // GPUs: name, VRAM GB, memory bandwidth GB/s, type (discrete | unified)
+        const GPUS = [
+            { id:'4090', name:'RTX 4090', vram:24, bw:1008, type:'discrete' },
+            { id:'4080s', name:'RTX 4080 Super', vram:16, bw:736, type:'discrete' },
+            { id:'4080', name:'RTX 4080', vram:16, bw:717, type:'discrete' },
+            { id:'4070tis', name:'RTX 4070 Ti Super', vram:16, bw:672, type:'discrete' },
+            { id:'4070', name:'RTX 4070', vram:12, bw:504, type:'discrete' },
+            { id:'4060ti', name:'RTX 4060 Ti 16GB', vram:16, bw:288, type:'discrete' },
+            { id:'3090', name:'RTX 3090', vram:24, bw:936, type:'discrete' },
+            { id:'3080', name:'RTX 3080', vram:10, bw:760, type:'discrete' },
+            { id:'3060', name:'RTX 3060 12GB', vram:12, bw:360, type:'discrete' },
+            { id:'7900xtx', name:'RX 7900 XTX', vram:24, bw:960, type:'discrete' },
+            { id:'7900xt', name:'RX 7900 XT', vram:20, bw:800, type:'discrete' },
+            { id:'m4max', name:'M4 Max (128GB)', vram:128, bw:546, type:'unified' },
+            { id:'m3max', name:'M3 Max (128GB)', vram:128, bw:400, type:'unified' },
+            { id:'m2ultra', name:'M2 Ultra (192GB)', vram:192, bw:800, type:'unified' },
+            { id:'m2max', name:'M2 Max (96GB)', vram:96, bw:400, type:'unified' },
+            { id:'m1max', name:'M1 Max (64GB)', vram:64, bw:400, type:'unified' },
+            { id:'m4pro', name:'M4 Pro (48GB)', vram:48, bw:273, type:'unified' },
+            { id:'cpu', name:'CPU only (system RAM)', vram:32, bw:51, type:'cpu' },
+        ];
+
+        // Models: name, parameters (billions), type (dense | moe)
+        const MODELS = [
+            { id:'phi4', name:'Phi-4', params:14, type:'dense' },
+            { id:'mistral7b', name:'Mistral 7B', params:7, type:'dense' },
+            { id:'llama8b', name:'Llama 3.1 8B', params:8, type:'dense' },
+            { id:'qwen14b', name:'Qwen 2.5 14B', params:14, type:'dense' },
+            { id:'gemma27b', name:'Gemma 2 27B', params:27, type:'dense' },
+            { id:'qwen32b', name:'Qwen 2.5 32B', params:32, type:'dense' },
+            { id:'llama70b', name:'Llama 3.3 70B', params:70, type:'dense' },
+            { id:'qwen72b', name:'Qwen 2.5 72B', params:72, type:'dense' },
+            { id:'mistrallarge', name:'Mistral Large (123B)', params:123, type:'dense' },
+            { id:'llama405b', name:'Llama 405B', params:405, type:'dense' },
+            { id:'deepseek', name:'DeepSeek-V3/R1 (671B MoE)', params:671, type:'moe' },
+        ];
+
+        // Quant levels: bytes per param (GGUF estimates)
+        const QUANTS = [
+            { id:'fp16', name:'FP16 / BF16', bpp:2.00 },
+            { id:'q8', name:'Q8_0', bpp:1.06 },
+            { id:'q6', name:'Q6_K', bpp:0.82 },
+            { id:'q5', name:'Q5_K_M', bpp:0.71 },
+            { id:'q4', name:'Q4_K_M', bpp:0.61 },
+            { id:'q3', name:'Q3_K_M', bpp:0.49 },
+            { id:'q2', name:'Q2_K', bpp:0.37 },
+        ];
+
+        const state = { gpu:null, model:null, custom:null };
+
+        function setupOpts(groupId, items, key, labelFn) {
+            const group = document.getElementById(groupId);
+            group.innerHTML = items.map(it =>
+                `<div class="opt border border-black/10 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs font-medium text-center" data-id="${it.id}">${labelFn(it)}</div>`
+            ).join('');
+            group.querySelectorAll('.opt').forEach(el => {
+                el.addEventListener('click', () => {
+                    group.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+                    el.classList.add('selected');
+                    state[key] = items.find(i => i.id === el.dataset.id);
+                    if (key === 'gpu') state.custom = null;
+                    render();
+                });
+            });
+        }
+
+        setupOpts('gpuGroup', GPUS, 'gpu', g => g.name);
+        setupOpts('modelGroup', MODELS, 'model', m => m.name);
+
+        document.getElementById('customGo').addEventListener('click', () => {
+            const vram = parseFloat(document.getElementById('customVram').value);
+            const bw = parseFloat(document.getElementById('customBw').value);
+            if (!vram || !bw || vram < 4 || bw < 50) { alert('Enter valid VRAM (≥4 GB) and bandwidth (≥50 GB/s).'); return; }
+            document.querySelectorAll('#gpuGroup .opt').forEach(o => o.classList.remove('selected'));
+            state.gpu = { id:'custom', name:`Custom (${vram} GB)`, vram, bw, type:'discrete' };
+            state.custom = { vram, bw };
+            render();
+        });
+
+        function usableVram(gpu) {
+            if (gpu.type === 'unified') {
+                // macOS reserves a chunk of unified memory for the OS; model can't use it all.
+                return gpu.vram * 0.7;
+            }
+            if (gpu.type === 'cpu') {
+                return gpu.vram * 0.8; // system RAM: leave some for the OS.
+            }
+            return gpu.vram - 2; // discrete: 2 GB for OS/display/context.
+        }
+
+        function render() {
+            const result = document.getElementById('result');
+            if (!state.gpu || !state.model) {
+                result.classList.add('hidden');
+                return;
+            }
+            const gpu = state.gpu;
+            const model = state.model;
+            const avail = usableVram(gpu);
+
+            // For MoE, active params are ~13% of total at inference, but full weights must be resident.
+            // We size by TOTAL params (all experts must be in VRAM), but note the active-param speed benefit.
+            const modelGB = p => (model.params * p.bpp);
+
+            const rows = QUANTS.map(q => {
+                const need = model.params * q.bpp;
+                const fits = need <= avail;
+                const tight = !fits && need <= avail + 2; // within 2GB of fitting
+                const tps = need > 0 ? gpu.bw / need : 0;
+                return { q, need, fits, tight, tps };
+            });
+
+            const bestFitting = rows.filter(r => r.fits);
+            const best = bestFitting.length ? bestFitting[bestFitting.length - 1] : null;
+
+            const tpsLabel = t => t >= 100 ? Math.round(t) : t >= 10 ? t.toFixed(0) : t.toFixed(1);
+
+            result.innerHTML = `
+                <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-6 fade-in">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Your setup</div>
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span class="text-xl font-bold">${gpu.name}</span>
+                        <span class="text-gray-400">·</span>
+                        <span class="text-xl font-bold">${model.name}</span>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Usable memory: <strong class="text-gray-700 dark:text-gray-200">${avail.toFixed(1)} GB</strong> (${gpu.type === 'unified' ? 'unified, macOS reserves ~30%' : gpu.type === 'cpu' ? 'system RAM, ~80% usable' : `${gpu.vram} GB minus ~2 GB overhead`}) · Bandwidth: <strong class="text-gray-700 dark:text-gray-200">${gpu.bw} GB/s</strong></p>
+                    ${best
+                        ? `<div class="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-xl p-4 text-sm mb-4"><strong class="text-green-700 dark:text-green-300">Best fit: ${best.q.name}</strong> — ~${best.need.toFixed(1)} GB, leaving ${(avail - best.need).toFixed(1)} GB headroom. Estimated <strong>${tpsLabel(best.tps)} tokens/sec</strong>.</div>`
+                        : `<div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl p-4 text-sm mb-4"><strong class="text-red-700 dark:text-red-300">Doesn't fit at any quant.</strong> Even Q2_K needs ~${modelGB(QUANTS[QUANTS.length-1].bpp).toFixed(1)} GB — more than your ${avail.toFixed(1)} GB usable. Try a smaller model or CPU offload.</div>`}
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Fit by quantization</div>
+                    ${rows.map((r, i) => {
+                        const cls = r.fits ? 'fits' : (r.tight ? 'tight' : 'nofit');
+                        const pct = Math.min(100, (r.need / avail) * 100);
+                        const status = r.fits ? '✓ fits' : (r.tight ? '~ borderline' : '✗ too big');
+                        return `<div class="mb-2">
+                            <div class="flex items-center justify-between mb-1 text-sm">
+                                <span class="font-semibold">${r.q.name}</span>
+                                <span class="font-mono text-xs text-gray-400">~${r.need.toFixed(1)} GB · <span class="${cls} font-semibold">${status}</span>${r.fits ? ' · ' + tpsLabel(r.tps) + ' t/s' : ''}</span>
+                            </div>
+                            <div class="bar"><div class="bar-fill" style="width:${pct}%; background:${r.fits ? '#34c759' : r.tight ? '#ff9500' : '#ff3b30'}"></div></div>
+                        </div>`;
+                    }).join('')}
+                    ${model.type === 'moe'
+                        ? `<p class="text-xs text-gray-400 mt-3">Note: ${model.name} is a Mixture-of-Experts — all ${model.params}B parameters must be resident in VRAM, but only ~13% are active per token, so real-world speed is faster than the bandwidth math above suggests.</p>`
+                        : ''}
+                </div>
+            `;
+            result.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

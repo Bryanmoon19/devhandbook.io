@@ -37,6 +37,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("overdraft-fee-calculator");
   eleventyConfig.addPassthroughCopy("skill-linter");
   eleventyConfig.addPassthroughCopy("local-llm-runtime-picker");
+  eleventyConfig.addPassthroughCopy("gpu-vram-calculator");
   eleventyConfig.addPassthroughCopy("gear");
   eleventyConfig.addPassthroughCopy("og-images");
 
