@@ -174,7 +174,7 @@ A few months ago I wrote that MCP is your new attack surface, and the fix was to
 
 Give your AI eyes on your homelab — not the keys. Every tool an HTTP health probe. No tokens, no writes, no SSH. The worst it can do is tell you something's down, and honestly, that's the most useful thing it can do anyway.
 
-The server is called `homelab-mcp`, it's on [GitHub](https://github.com/bryanmoon19), and it's ~200 lines you can read before you run it — which, given my last post, is exactly the point.
+The server is called `homelab-mcp` and it's ~200 lines you can read before you run it — which, given my last post, is exactly the point. I'm keeping the repo local-only for now: it names my actual hosts and addresses, and shipping a copy full of someone else's LAN topology helps nobody. What you need to rebuild it is all here — the config format, the probe, and the health classification. Wiring those three tool definitions into an MCP SDK is the short part; getting the read-only boundary right is the real work.
 
 ---
 
