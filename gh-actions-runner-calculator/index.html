@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Actions Runner Cost Calculator — Self-Hosted vs Hosted Payback</title>
+    <meta name="description" content="Enter your monthly CI minutes and see how fast a self-hosted GitHub Actions runner pays for itself — with a security warning on public-repo runners. Free, private, instant.">
+    <meta name="keywords" content="github actions runner cost, self hosted runner, github runner pricing, ci cd minutes, github actions minutes cost, self-hosted github runner payback, act runner, forgejo runner, gitea runner">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="GitHub Actions Runner Cost Calculator — Self-Hosted vs Hosted Payback">
+    <meta property="og:description" content="How fast does a self-hosted GitHub Actions runner pay for itself? Compare hosted minutes vs a $400 mini-PC runner.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/gh-actions-runner-calculator/">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: { primary: '#0071e3', 'primary-dark': '#0077ed' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .fade-in { animation: fadeIn 0.25s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .opt { cursor: pointer; transition: all .15s ease; }
+        .opt:hover { border-color: #0071e3 !important; }
+        .opt.selected { border-color: #0071e3 !important; background: rgba(0,113,227,0.06) !important; }
+        html.dark .opt.selected { background: rgba(0,113,227,0.18) !important; }
+        .bar { height: 6px; border-radius: 3px; background: #e5e5ea; overflow: hidden; }
+        html.dark .bar { background: #3a3a3c; }
+        .bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+    </style>
+</head>
+<body class="bg-white dark:bg-black text-gray-900 dark:text-gray-100 antialiased">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        <a href="/" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1.5 mb-8">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to devhandbook.io
+        </a>
+
+        <header class="text-center mb-10">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 rounded-full mb-4">Free dev tool</span>
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-3">GitHub Actions Runner Cost Calculator</h1>
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">How fast does a self-hosted runner pay for itself? Enter your monthly CI minutes and find out.</p>
+        </header>
+
+        <div class="space-y-6 mb-8">
+            <!-- Step 1: Plan tier -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">1. What's your GitHub plan?</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="planGroup"></div>
+            </div>
+
+            <!-- Step 2: Usage -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">2. How many CI minutes per month?</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="usageGroup"></div>
+                <div class="mt-4 flex items-center gap-3 text-sm">
+                    <span class="text-gray-500">Not listed? Custom:</span>
+                    <input type="number" id="customMinutes" placeholder="minutes / month" min="0" max="1000000" class="w-40 border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-lg px-3 py-2 text-sm font-mono" />
+                    <button id="customGo" class="text-primary font-semibold hover:underline">Use</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Runner hardware -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">3. What self-hosted runner hardware?</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="hardwareGroup"></div>
+                <div class="mt-4 flex items-center gap-3 text-sm">
+                    <span class="text-gray-500">Custom setup cost:</span>
+                    <input type="number" id="customCost" placeholder="$ upfront" min="0" max="100000" class="w-32 border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-lg px-3 py-2 text-sm font-mono" />
+                    <button id="customCostGo" class="text-primary font-semibold hover:underline">Use</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result" class="hidden space-y-3 mb-8"></div>
+
+        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-5 text-sm text-gray-500 dark:text-gray-400 mb-8">
+            <strong class="text-gray-700 dark:text-gray-200">How this works.</strong> We compare your hosted-minute spend against the upfront + electricity cost of a self-hosted runner. Hosted rates: Free = 2,000 min/mo (public) or 500 min/mo (private) included, then overage billed per-minute. Paid tiers: Team $4/user/mo + $0.008/min, Enterprise $21/user/mo + $0.016/min. Self-hosted runners are <em>free</em> on public repos and don't consume your minute allowance — but you pay hardware + power (assumed ~8&nbsp;W idle / 60&nbsp;W load, $0.15/kWh). Estimates only — real numbers shift with build duration, parallel jobs, and electricity rates.
+        </div>
+
+        <!-- Security warning -->
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 mb-8">
+            <h2 class="text-base font-semibold mb-2 text-amber-800 dark:text-amber-200">⚠️ Security warning — read before you self-host</h2>
+            <p class="text-sm text-amber-700 dark:text-amber-300">On <strong>public repositories</strong>, a self-hosted runner is a supply-chain risk: any contributor can open a PR that executes arbitrary code on <em>your</em> machine, potentially exfiltrating secrets or pivoting to your LAN. GitHub explicitly warns against self-hosted runners on public repos. Mitigations: run the runner in an isolated VM/container, never reuse it for anything else, give it zero secrets, and require manual approval before forks can trigger workflows. For private repos this risk largely disappears — it's your own code.</p>
+        </div>
+
+        <!-- Reference table -->
+        <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 mb-8 overflow-x-auto">
+            <h2 class="text-lg font-semibold mb-4">GitHub Actions hosted pricing reference (2026)</h2>
+            <table class="w-full text-sm min-w-[560px]">
+                <thead>
+                    <tr class="text-left text-gray-400 text-xs uppercase tracking-wider border-b border-black/10 dark:border-white/10">
+                        <th class="py-2 pr-3 font-semibold">Plan</th>
+                        <th class="py-2 pr-3 font-semibold">Included minutes</th>
+                        <th class="py-2 pr-3 font-semibold">Overage / min</th>
+                        <th class="py-2 font-semibold">Best for</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-black/5 dark:divide-white/5">
+                    <tr><td class="py-3 pr-3 font-semibold">Free (public repo)</td><td class="py-3 pr-3 font-mono">2,000</td><td class="py-3 pr-3 font-mono">—</td><td class="py-3">Hobby OSS</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Free (private repo)</td><td class="py-3 pr-3 font-mono">500</td><td class="py-3 pr-3 font-mono">—</td><td class="py-3">Personal side projects</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Team</td><td class="py-3 pr-3 font-mono">3,000</td><td class="py-3 pr-3 font-mono">$0.008</td><td class="py-3">Small teams</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Enterprise</td><td class="py-3 pr-3 font-mono">50,000</td><td class="py-3 pr-3 font-mono">$0.016</td><td class="py-3">Large orgs</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">Self-hosted runner</td><td class="py-3 pr-3 font-mono">∞ (no allowance)</td><td class="py-3 pr-3 font-mono">$0</td><td class="py-3">Hardware + power only</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="text-center text-xs text-gray-400 pb-10">
+            <p>Built by <a href="/" class="text-primary hover:underline">devhandbook.io</a> · 100% private · nothing leaves your browser</p>
+        </footer>
+    </div>
+
+    <script>
+        const PLANS = [
+            { id:'free-public', name:'Free — public repo', included:2000, rate:0, perUser:0 },
+            { id:'free-private', name:'Free — private repo', included:500, rate:0, perUser:0 },
+            { id:'team', name:'Team', included:3000, rate:0.008, perUser:4 },
+            { id:'enterprise', name:'Enterprise', included:50000, rate:0.016, perUser:21 },
+        ];
+
+        // Common usage presets in minutes/month
+        const USAGES = [
+            { id:'light', name:'Light (500)', minutes:500 },
+            { id:'freecap', name:'Free cap (2,000)', minutes:2000 },
+            { id:'teamcap', name:'Team cap (3,000)', minutes:3000 },
+            { id:'heavy', name:'Heavy (10,000)', minutes:10000 },
+            { id:'veryheavy', name:'Very heavy (50,000)', minutes:50000 },
+            { id:'extreme', name:'Extreme (200,000)', minutes:200000 },
+        ];
+
+        // Self-hosted runner hardware: name, upfront cost, watts (load), vCPUs
+        const HARDWARE = [
+            { id:'pi5', name:'Raspberry Pi 5 (8GB)', cost:80, watts:12, note:'ARM only — some Actions won\'t run' },
+            { id:'n100', name:'N100 mini-PC', cost:180, watts:15, note:'The budget sweet spot' },
+            { id:'used-mini', name:'Used mini-PC (i5)', cost:250, watts:25, note:'Typical homelab pick' },
+            { id:'m4mini', name:'Mac mini M4', cost:599, watts:40, note:'Fast, macOS jobs' },
+            { id:'used-desktop', name:'Used desktop (Ryzen 5)', cost:400, watts:65, note:'Most compute per $' },
+            { id:'dedicated', name:'Dedicated build (Ryzen 7)', cost:900, watts:120, note:'Parallel-heavy teams' },
+        ];
+
+        const ELECTRICITY_PER_KWH = 0.15; // $/kWh
+
+        const state = { plan:null, usage:null, hardware:null };
+
+        function setupOpts(groupId, items, key, labelFn) {
+            const group = document.getElementById(groupId);
+            group.innerHTML = items.map(it =>
+                `<div class="opt border border-black/10 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs font-medium text-center" data-id="${it.id}">${labelFn(it)}</div>`
+            ).join('');
+            group.querySelectorAll('.opt').forEach(el => {
+                el.addEventListener('click', () => {
+                    group.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+                    el.classList.add('selected');
+                    state[key] = items.find(i => i.id === el.dataset.id);
+                    render();
+                });
+            });
+        }
+
+        setupOpts('planGroup', PLANS, 'plan', p => p.name);
+        setupOpts('usageGroup', USAGES, 'usage', u => u.name);
+        setupOpts('hardwareGroup', HARDWARE, 'hardware', h => h.name);
+
+        document.getElementById('customGo').addEventListener('click', () => {
+            const m = parseFloat(document.getElementById('customMinutes').value);
+            if (!m || m < 0) { alert('Enter valid minutes per month.'); return; }
+            document.querySelectorAll('#usageGroup .opt').forEach(o => o.classList.remove('selected'));
+            state.usage = { id:'custom', name:`Custom (${m.toLocaleString()} min)`, minutes:m };
+            render();
+        });
+
+        document.getElementById('customCostGo').addEventListener('click', () => {
+            const c = parseFloat(document.getElementById('customCost').value);
+            if (!c || c < 0) { alert('Enter a valid upfront cost.'); return; }
+            document.querySelectorAll('#hardwareGroup .opt').forEach(o => o.classList.remove('selected'));
+            state.hardware = { id:'custom', name:`Custom ($${c.toLocaleString()})`, cost:c, watts:60, note:'' };
+            render();
+        });
+
+        function monthlyHostedCost(plan, minutes) {
+            const over = Math.max(0, minutes - plan.included);
+            return over * plan.rate;
+        }
+
+        function monthlyPowerCost(hardware) {
+            // Assume 60% load, 40% idle across the month; average watts = 0.6*load + 0.4*idle(~10W)
+            const idleWatts = 10;
+            const avgWatts = 0.6 * hardware.watts + 0.4 * idleWatts;
+            const kwhPerMonth = (avgWatts / 1000) * 24 * 30.44;
+            return kwhPerMonth * ELECTRICITY_PER_KWH;
+        }
+
+        function render() {
+            const result = document.getElementById('result');
+            if (!state.plan || !state.usage || !state.hardware) {
+                result.classList.add('hidden');
+                return;
+            }
+            const plan = state.plan, usage = state.usage, hw = state.hardware;
+
+            const hosted = monthlyHostedCost(plan, usage.minutes);
+            const power = monthlyPowerCost(hw);
+            const totalMonthlySelf = power; // hardware is upfront, so monthly = power only
+            const monthlySavings = hosted - totalMonthlySelf;
+
+            let verdict, verdictCls;
+            if (hosted === 0) {
+                verdict = `You're already within your included ${plan.included.toLocaleString()} minutes — no overage, nothing to save yet.`;
+                verdictCls = 'bg-gray-50 dark:bg-neutral-800/50 border-black/10 dark:border-white/10';
+            } else if (monthlySavings <= 0) {
+                verdict = `Self-hosting would cost you <strong>$${(-monthlySavings).toFixed(2)}/mo more</strong> than hosted. Keep paying GitHub.`;
+                verdictCls = 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800';
+            } else {
+                const months = hw.cost / monthlySavings;
+                const monthsLabel = months < 1
+                    ? `${(months * 30).toFixed(0)} days`
+                    : months < 24
+                        ? `${months.toFixed(1)} months`
+                        : `${(months / 12).toFixed(1)} years`;
+                verdict = `A self-hosted runner pays for itself in <strong>~${monthsLabel}</strong> — you save <strong>$${monthlySavings.toFixed(2)}/mo</strong>.`;
+                verdictCls = months < 24 ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800';
+            }
+
+            const roiPct = hw.cost > 0 && monthlySavings > 0 ? (monthlySavings * 12 / hw.cost * 100).toFixed(0) : null;
+
+            result.innerHTML = `
+                <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-6 fade-in">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Your setup</div>
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span class="text-xl font-bold">${plan.name}</span>
+                        <span class="text-gray-400">·</span>
+                        <span class="text-xl font-bold">${usage.minutes.toLocaleString()} min/mo</span>
+                        <span class="text-gray-400">·</span>
+                        <span class="text-xl font-bold">${hw.name}</span>
+                    </div>
+
+                    <div class="${verdictCls} rounded-xl p-4 text-sm mb-4 border">${verdict}</div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4 text-sm">
+                        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-3">
+                            <div class="text-xs text-gray-400 uppercase tracking-wider">Hosted / mo</div>
+                            <div class="text-xl font-bold font-mono">$${hosted.toFixed(2)}</div>
+                            <div class="text-xs text-gray-400 mt-1">${usage.minutes.toLocaleString()} min, ${plan.included.toLocaleString()} included @ $${plan.rate}/min</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-3">
+                            <div class="text-xs text-gray-400 uppercase tracking-wider">Self-hosted power / mo</div>
+                            <div class="text-xl font-bold font-mono">$${totalMonthlySelf.toFixed(2)}</div>
+                            <div class="text-xs text-gray-400 mt-1">~${hw.watts}W load @ $${ELECTRICITY_PER_KWH.toFixed(2)}/kWh</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-3">
+                            <div class="text-xs text-gray-400 uppercase tracking-wider">Upfront hardware</div>
+                            <div class="text-xl font-bold font-mono">$${hw.cost.toFixed(0)}</div>
+                            ${roiPct ? `<div class="text-xs text-gray-400 mt-1">~${roiPct}% annual ROI</div>` : ''}
+                        </div>
+                    </div>
+
+                    ${hw.note ? `<p class="text-xs text-gray-400 mb-3">Note: ${hw.note}.</p>` : ''}
+                    <p class="text-xs text-gray-400">Assumes the runner is used enough to keep it busy — if it sits idle most of the month, hosted may still win. On the Free plan there's no per-minute overage billing: workflows simply stop past your included minutes, so self-hosting is the only way to get unlimited CI on a public repo. On Team/Enterprise, every overage minute is billed, which is what drives the payback math above.</p>
+                </div>
+            `;
+            result.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
