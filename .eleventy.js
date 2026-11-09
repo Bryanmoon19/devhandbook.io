@@ -7,6 +7,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("_redirects");
   // sitemap.xml is now generated dynamically via sitemap.njk — not a passthrough
   eleventyConfig.addPassthroughCopy("apple-redesign.css");
+  eleventyConfig.addPassthroughCopy("404.html");
 
   // Pass through tool directories (plain HTML tools)
   eleventyConfig.addPassthroughCopy("json-formatter");
