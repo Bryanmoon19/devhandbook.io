@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU vGPU Split Calculator — SR-IOV VRAM Per VM</title>
+    <meta name="description" content="You bought one GeForce card but three VMs want it. Split it with SR-IOV vGPU — pick your card and VM count, and see how much VRAM each virtual machine gets, plus which vGPU profile fits.">
+    <meta name="keywords" content="sriov vgpu, geforce vgpu, split gpu across vms, vgpu profile calculator, vram per vm, sriov consumer gpu, nvidia vgpu, proxmox vgpu, rtx a6000 vgpu">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="GPU vGPU Split Calculator — SR-IOV VRAM Per VM">
+    <meta property="og:description" content="Pick a GeForce card and VM count, see which vGPU profiles fit and how much VRAM each VM gets with SR-IOV.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/gpu-vgpu-split-calculator/">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: { primary: '#0071e3', 'primary-dark': '#0077ed' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .fade-in { animation: fadeIn 0.25s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .opt { cursor: pointer; transition: all .15s ease; }
+        .opt:hover { border-color: #0071e3 !important; }
+        .opt.selected { border-color: #0071e3 !important; background: rgba(0,113,227,0.06) !important; }
+        html.dark .opt.selected { background: rgba(0,113,227,0.18) !important; }
+        .bar { height: 6px; border-radius: 3px; background: #e5e5ea; overflow: hidden; }
+        html.dark .bar { background: #3a3a3c; }
+        .bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+        .fits { color: #34c759; }
+        .tight { color: #ff9500; }
+        .nofit { color: #ff3b30; }
+    </style>
+</head>
+<body class="bg-white dark:bg-black text-gray-900 dark:text-gray-100 antialiased">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        <a href="/" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1.5 mb-8">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to devhandbook.io
+        </a>
+
+        <header class="text-center mb-10">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 rounded-full mb-4">Free dev tool</span>
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-3">GPU vGPU Split Calculator</h1>
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">One GPU, several VMs. Split it with SR-IOV vGPU — pick your GeForce card and how many VMs want it, and see how much VRAM each gets.</p>
+        </header>
+
+        <!-- Step 1: GPU -->
+        <div class="space-y-6 mb-8">
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">1. Which GeForce card?</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="gpuGroup"></div>
+                <div class="mt-4 flex items-center gap-3 text-sm">
+                    <span class="text-gray-500">Not listed? Custom:</span>
+                    <input type="number" id="customVram" placeholder="VRAM GB" min="4" max="96" class="w-28 border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-lg px-3 py-2 text-sm font-mono" />
+                    <button id="customGo" class="text-primary font-semibold hover:underline">Use</button>
+                </div>
+            </div>
+
+            <!-- Step 2: VM count -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in">
+                <label class="block text-sm font-semibold mb-3">2. How many VMs / LXCs want the GPU?</label>
+                <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="vmGroup"></div>
+                <p class="text-xs text-gray-400 mt-3" id="vfNote"></p>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result" class="hidden space-y-3 mb-8"></div>
+
+        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-5 text-sm text-gray-500 dark:text-gray-400 mb-8">
+            <strong class="text-gray-700 dark:text-gray-200">How this works.</strong> NVIDIA's vGPU (SR-IOV) splits a physical GPU into fixed-size <em>profiles</em>, each 1&nbsp;GB granularity (the "Q" series — 1Q = 1&nbsp;GB, 8Q = 8&nbsp;GB, and so on). Each VM gets one virtual function (VF). The combined VRAM of all running vGPUs must fit in physical VRAM, with headroom left for the host driver. Consumer cards are presented as their professional sibling (Ampere → RTX A6000, Ada → RTX 6000 Ada), so the profile table can technically offer sizes larger than your card — we cap to physical VRAM here. This is an <em>estimate</em>: real limits depend on driver version and your host's IOMMU/BAR setup.
+        </div>
+
+        <!-- Reference table -->
+        <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 mb-8 overflow-x-auto">
+            <h2 class="text-lg font-semibold mb-4">vGPU profile reference (VRAM per VM)</h2>
+            <table class="w-full text-sm min-w-[560px]">
+                <thead>
+                    <tr class="text-left text-gray-400 text-xs uppercase tracking-wider border-b border-black/10 dark:border-white/10">
+                        <th class="py-2 pr-3 font-semibold">Profile</th>
+                        <th class="py-2 pr-3 font-semibold">VRAM</th>
+                        <th class="py-2 font-semibold">Good for</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-black/5 dark:divide-white/5">
+                    <tr><td class="py-3 pr-3 font-semibold">1Q</td><td class="py-3 pr-3 font-mono">1 GB</td><td class="py-3">Tiny models, display only</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">2Q</td><td class="py-3 pr-3 font-mono">2 GB</td><td class="py-3">~1–3B LLM, light transcoding</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">4Q</td><td class="py-3 pr-3 font-mono">4 GB</td><td class="py-3">~7B LLM (Q4), small models</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">8Q</td><td class="py-3 pr-3 font-mono">8 GB</td><td class="py-3">~7B (FP16) / 13B (Q4)</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">12Q</td><td class="py-3 pr-3 font-mono">12 GB</td><td class="py-3">~13B comfortably</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">16Q</td><td class="py-3 pr-3 font-mono">16 GB</td><td class="py-3">~20–34B (Q4)</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">24Q</td><td class="py-3 pr-3 font-mono">24 GB</td><td class="py-3">~34B (FP16) / 70B (Q4)</td></tr>
+                    <tr><td class="py-3 pr-3 font-semibold">48Q</td><td class="py-3 pr-3 font-mono">48 GB</td><td class="py-3">~70B (FP16) — datacenter A6000 only</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="text-center text-xs text-gray-400 pb-10">
+            <p>Built by <a href="/" class="text-primary hover:underline">devhandbook.io</a> · 100% private · nothing leaves your browser</p>
+        </footer>
+    </div>
+
+    <script>
+        // GPUs: id, name, VRAM GB, generation (Ampere | Ada), max VFs
+        const GPUS = [
+            { id:'4090', name:'RTX 4090', vram:24, gen:'Ada', maxVf:4 },
+            { id:'4080s', name:'RTX 4080 Super', vram:16, gen:'Ada', maxVf:4 },
+            { id:'4080', name:'RTX 4080', vram:16, gen:'Ada', maxVf:4 },
+            { id:'4070tis', name:'RTX 4070 Ti Super', vram:16, gen:'Ada', maxVf:4 },
+            { id:'4070', name:'RTX 4070', vram:12, gen:'Ada', maxVf:4 },
+            { id:'4060ti16', name:'RTX 4060 Ti 16GB', vram:16, gen:'Ada', maxVf:4 },
+            { id:'3090ti', name:'RTX 3090 Ti', vram:24, gen:'Ampere', maxVf:16 },
+            { id:'3090', name:'RTX 3090', vram:24, gen:'Ampere', maxVf:16 },
+            { id:'3080ti', name:'RTX 3080 Ti', vram:12, gen:'Ampere', maxVf:16 },
+            { id:'3080', name:'RTX 3080', vram:10, gen:'Ampere', maxVf:16 },
+            { id:'3070', name:'RTX 3070', vram:8, gen:'Ampere', maxVf:16 },
+            { id:'3060', name:'RTX 3060 12GB', vram:12, gen:'Ampere', maxVf:16 },
+        ];
+
+        // vGPU profiles: name, VRAM GB (Q series)
+        const PROFILES = [
+            { q:1,  name:'1Q',  vram:1 },
+            { q:2,  name:'2Q',  vram:2 },
+            { q:4,  name:'4Q',  vram:4 },
+            { q:8,  name:'8Q',  vram:8 },
+            { q:12, name:'12Q', vram:12 },
+            { q:16, name:'16Q', vram:16 },
+            { q:24, name:'24Q', vram:24 },
+            { q:48, name:'48Q', vram:48 },
+        ];
+
+        const state = { gpu:null, vms:null, custom:null };
+
+        function setupOpts(groupId, items, key, labelFn) {
+            const group = document.getElementById(groupId);
+            group.innerHTML = items.map(it =>
+                `<div class="opt border border-black/10 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs font-medium text-center" data-id="${it.id}">${labelFn(it)}</div>`
+            ).join('');
+            group.querySelectorAll('.opt').forEach(el => {
+                el.addEventListener('click', () => {
+                    group.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+                    el.classList.add('selected');
+                    state[key] = items.find(i => i.id === el.dataset.id);
+                    if (key === 'gpu') state.custom = null;
+                    render();
+                });
+            });
+        }
+
+        setupOpts('gpuGroup', GPUS, 'gpu', g => g.name);
+
+        // VM count options 1-8
+        const VMOPTS = [1,2,3,4,5,6,7,8].map(n => ({ id:String(n), n }));
+        setupOpts('vmGroup', VMOPTS, 'vms', v => v.n + ' VM' + (v.n > 1 ? 's' : ''));
+
+        document.getElementById('customGo').addEventListener('click', () => {
+            const vram = parseFloat(document.getElementById('customVram').value);
+            if (!vram || vram < 4 || vram > 96) { alert('Enter valid VRAM (4–96 GB).'); return; }
+            document.querySelectorAll('#gpuGroup .opt').forEach(o => o.classList.remove('selected'));
+            state.gpu = { id:'custom', name:`Custom (${vram} GB)`, vram, gen:'Ampere', maxVf:16 };
+            state.custom = { vram };
+            render();
+        });
+
+        function hostOverhead(gpu) {
+            // Host driver + display console need a small reserved chunk.
+            return 1; // ~1 GB reserved for the host.
+        }
+
+        function render() {
+            const result = document.getElementById('result');
+            const vfNote = document.getElementById('vfNote');
+
+            if (!state.gpu) {
+                result.classList.add('hidden');
+                vfNote.textContent = '';
+                return;
+            }
+            const gpu = state.gpu;
+            vfNote.textContent = gpu.gen + ' card — ' + (gpu.gen === 'Ampere' ? 'up to 16 VFs supported' : '4 VFs (patched driver limit)') + '. Presented as its professional sibling for vGPU licensing.';
+
+            if (!state.vms) {
+                result.classList.add('hidden');
+                return;
+            }
+            const vms = state.vms.n;
+            const avail = gpu.vram - hostOverhead(gpu);
+
+            // Largest profile that fits per-VM
+            const perVm = avail / vms;
+            const fittingProfiles = PROFILES.filter(p => p.vram <= perVm);
+            const chosen = fittingProfiles.length ? fittingProfiles[fittingProfiles.length - 1] : null;
+
+            // VF limit check
+            const overVfLimit = vms > gpu.maxVf;
+
+            // Total used vs avail
+            const totalUsed = chosen ? chosen.vram * vms : 0;
+            const headroom = chosen ? avail - totalUsed : 0;
+            const pct = chosen ? Math.min(100, (totalUsed / avail) * 100) : 0;
+
+            const perVmLabel = perVm >= 10 ? perVm.toFixed(0) : perVm.toFixed(1);
+
+            let statusBlock;
+            if (overVfLimit) {
+                statusBlock = `<div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl p-4 text-sm mb-4"><strong class="text-red-700 dark:text-red-300">Too many VMs.</strong> This ${gpu.gen} card supports a maximum of <strong>${gpu.maxVf} VFs</strong>. You asked for ${vms}. Reduce the VM count or use full GPU passthrough (which locks the card to one VM).</div>`;
+            } else if (!chosen) {
+                statusBlock = `<div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl p-4 text-sm mb-4"><strong class="text-red-700 dark:text-red-300">Doesn't split cleanly.</strong> With ${vms} VMs you'd get ~${perVmLabel} GB each — under the smallest 1Q profile (1 GB usable). This card is too small for that many concurrent vGPUs. Fewer VMs, or use time-sharing.</div>`;
+            } else {
+                statusBlock = `<div class="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-xl p-4 text-sm mb-4"><strong class="text-green-700 dark:text-green-300">Best fit: ${vms} × ${chosen.name} (${chosen.vram} GB each)</strong> — ${totalUsed} GB total of ${avail} GB usable, ${headroom.toFixed(1)} GB headroom for the host. Each VM gets a ${chosen.name} vGPU.</div>`;
+            }
+
+            result.innerHTML = `
+                <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-6 fade-in">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Your setup</div>
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span class="text-xl font-bold">${gpu.name}</span>
+                        <span class="text-gray-400">·</span>
+                        <span class="text-xl font-bold">${vms} VM${vms > 1 ? 's' : ''}</span>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Usable VRAM: <strong class="text-gray-700 dark:text-gray-200">${avail} GB</strong> (${gpu.vram} GB minus ~${hostOverhead(gpu)} GB host overhead) · ${gpu.gen} generation · max <strong class="text-gray-700 dark:text-gray-200">${gpu.maxVf} VFs</strong></p>
+                    ${statusBlock}
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Split preview</div>
+                    <div class="mb-2">
+                        <div class="flex items-center justify-between mb-1 text-sm">
+                            <span class="font-semibold">${vms} × ${chosen ? chosen.name : '—'}</span>
+                            <span class="font-mono text-xs text-gray-400">${totalUsed} GB of ${avail} GB</span>
+                        </div>
+                        <div class="bar"><div class="bar-fill" style="width:${pct}%; background:${chosen ? '#34c759' : '#ff3b30'}"></div></div>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
+                        ${Array.from({length: vms}).map((_, i) => `
+                            <div class="border border-black/10 dark:border-white/10 rounded-xl p-3 text-center">
+                                <div class="text-xs text-gray-400 mb-1">VM ${i+1}</div>
+                                <div class="font-mono font-semibold">${chosen ? chosen.name : '—'}</div>
+                                <div class="text-xs text-gray-400">${chosen ? chosen.vram + ' GB' : ''}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <p class="text-xs text-gray-400 mt-4">⚠️ SR-IOV vGPU on consumer GeForce cards requires a patched driver stack (e.g. the <em>geforce-sriov</em> toolkit) plus NVIDIA's vGPU host driver from your own entitlement. It does <strong>not</strong> work out of the box with stock drivers, and Blackwell GPUs are unsupported. Use at your own risk.</p>
+                </div>
+            `;
+            result.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -23,5 +23,6 @@
   { "slug": "skill-linter", "lastmod": "2026-10-28" },
   { "slug": "local-llm-runtime-picker", "lastmod": "2026-10-29" },
   { "slug": "gpu-vram-calculator", "lastmod": "2026-10-30" },
-  { "slug": "gh-actions-runner-calculator", "lastmod": "2026-11-08" }
+  { "slug": "gh-actions-runner-calculator", "lastmod": "2026-11-08" },
+  { "slug": "gpu-vgpu-split-calculator", "lastmod": "2026-11-10" }
 ]
