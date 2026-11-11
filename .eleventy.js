@@ -41,6 +41,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("gpu-vram-calculator");
   eleventyConfig.addPassthroughCopy("gh-actions-runner-calculator");
   eleventyConfig.addPassthroughCopy("gpu-vgpu-split-calculator");
+  eleventyConfig.addPassthroughCopy("net-worth-calculator");
   eleventyConfig.addPassthroughCopy("gear");
   eleventyConfig.addPassthroughCopy("og-images");
 

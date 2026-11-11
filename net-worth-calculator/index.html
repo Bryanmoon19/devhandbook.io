@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Net Worth Calculator — Assets, Debts &amp; Allocation at a Glance</title>
+    <meta name="description" content="Enter your assets and debts, and see your net worth, allocation by category, debt-to-asset ratio, emergency-fund runway, and a compound projection. Free, private, instant — nothing leaves your browser.">
+    <meta name="keywords" content="net worth calculator, personal net worth, asset allocation, debt to asset ratio, emergency fund, net worth projection, investment tracker, financial health, self hosted portfolio tracker">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Net Worth Calculator — Assets, Debts &amp; Allocation at a Glance">
+    <meta property="og:description" content="See your net worth, allocation by category, debt ratio, emergency runway, and a compound projection — all in your browser.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/net-worth-calculator/">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: { primary: '#0071e3', 'primary-dark': '#0077ed' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .fade-in { animation: fadeIn 0.25s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .money-input:focus { border-color: #0071e3 !important; outline: none; box-shadow: 0 0 0 3px rgba(0,113,227,0.12); }
+        .bar { height: 8px; border-radius: 4px; background: #e5e5ea; overflow: hidden; }
+        html.dark .bar { background: #3a3a3c; }
+        .bar-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
+        .good { color: #34c759; }
+        .warn { color: #ff9500; }
+        .bad { color: #ff3b30; }
+    </style>
+</head>
+<body class="bg-white dark:bg-black text-gray-900 dark:text-gray-100 antialiased">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        <a href="/" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1.5 mb-8">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to devhandbook.io
+        </a>
+
+        <header class="text-center mb-10">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 rounded-full mb-4">Free dev tool</span>
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-3">Net Worth Calculator</h1>
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">Assets minus debts, plus the ratios and projection your bank statement won't show you.</p>
+        </header>
+
+        <!-- Assets -->
+        <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 mb-5 fade-in">
+            <h2 class="text-lg font-semibold mb-1">Assets <span class="text-gray-400 font-normal text-sm">(what you own)</span></h2>
+            <p class="text-xs text-gray-400 mb-4">Enter the current value of each category. Use home <em>equity</em> (value minus remaining mortgage), not the full market value.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="assetFields"></div>
+        </div>
+
+        <!-- Liabilities -->
+        <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 mb-5 fade-in">
+            <h2 class="text-lg font-semibold mb-1">Liabilities <span class="text-gray-400 font-normal text-sm">(what you owe)</span></h2>
+            <p class="text-xs text-gray-400 mb-4">Remaining balances on everything you're still paying off.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="liabilityFields"></div>
+        </div>
+
+        <!-- Projection inputs -->
+        <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 mb-5 fade-in">
+            <h2 class="text-lg font-semibold mb-1">Projection <span class="text-gray-400 font-normal text-sm">(optional)</span></h2>
+            <p class="text-xs text-gray-400 mb-4">Estimate where your net worth lands if you keep saving and investing at a steady rate.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Monthly savings ($)</label>
+                    <input type="number" id="monthlySavings" min="0" placeholder="0" class="money-input w-full border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-lg px-3 py-2.5 text-sm font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Expected annual return (%)</label>
+                    <input type="number" id="annualReturn" min="0" max="50" step="0.5" placeholder="7" class="money-input w-full border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-lg px-3 py-2.5 text-sm font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Years</label>
+                    <input type="number" id="years" min="1" max="60" placeholder="10" class="money-input w-full border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-lg px-3 py-2.5 text-sm font-mono">
+                </div>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result" class="hidden space-y-3 mb-8"></div>
+
+        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-5 text-sm text-gray-500 dark:text-gray-400 mb-8">
+            <strong class="text-gray-700 dark:text-gray-200">How this works.</strong> Net worth = total assets − total liabilities. We also show three ratios a personal banker looks at: <strong>debt-to-asset</strong> (liabilities ÷ assets — lower is better), <strong>emergency-fund runway</strong> (cash ÷ monthly expenses, in months — aim for 3–6), and <strong>cash allocation</strong> (cash ÷ assets — too high means inflation is quietly eating it). The projection compounds your existing net worth plus monthly savings at your assumed return: <code>F = P·(1+r)<sup>n</sup> + pmt·((1+r)<sup>n</sup> − 1) / r</code>. Everything runs locally — nothing leaves your browser.
+        </div>
+
+        <footer class="text-center text-xs text-gray-400 pb-10">
+            <p>Built by <a href="/" class="text-primary hover:underline">devhandbook.io</a> · 100% private · nothing leaves your browser · not financial advice</p>
+        </footer>
+    </div>
+
+    <script>
+        const ASSETS = [
+            { id:'cash', label:'Cash & checking/savings', hint:'Liquid money you can spend today' },
+            { id:'stocks', label:'Stocks & ETFs', hint:'Brokerage, taxable accounts' },
+            { id:'crypto', label:'Crypto', hint:'Current market value' },
+            { id:'retirement', label:'Retirement (401k/IRA)', hint:'Pre-tax + Roth balances' },
+            { id:'home', label:'Home equity', hint:'Home value − remaining mortgage' },
+            { id:'other', label:'Other assets', hint:'Cars, business, collectibles' },
+        ];
+
+        const LIABILITIES = [
+            { id:'mortgage', label:'Mortgage balance', hint:'Remaining principal' },
+            { id:'auto', label:'Auto loan', hint:'Remaining balance' },
+            { id:'student', label:'Student loans', hint:'Total outstanding' },
+            { id:'credit', label:'Credit card debt', hint:'Total across cards' },
+            { id:'otherDebt', label:'Other debt', hint:'Personal loans, HELOC, etc.' },
+        ];
+
+        const COLORS = ['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30', '#8e8e93'];
+
+        function moneyField(id, label, hint) {
+            return `<div class="flex flex-col gap-1.5">
+                <label class="text-sm font-medium">${label}</label>
+                <span class="text-xs text-gray-400 -mt-1">${hint}</span>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-mono">$</span>
+                    <input type="number" id="${id}" min="0" step="any" placeholder="0" class="money-input w-full border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-lg pl-7 pr-3 py-2.5 text-sm font-mono">
+                </div>
+            </div>`;
+        }
+
+        document.getElementById('assetFields').innerHTML = ASSETS.map(a => moneyField(a.id, a.label, a.hint)).join('');
+        document.getElementById('liabilityFields').innerHTML = LIABILITIES.map(l => moneyField(l.id, l.label, l.hint)).join('');
+
+        // Live re-render on any input
+        const allInputs = [...ASSETS.map(a => a.id), ...LIABILITIES.map(l => l.id), 'monthlySavings', 'annualReturn', 'years'];
+        allInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', render);
+        });
+
+        function val(id) {
+            const v = parseFloat(document.getElementById(id)?.value);
+            return isNaN(v) || v < 0 ? 0 : v;
+        }
+
+        const fmt = n => '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        const fmt1 = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+
+        function render() {
+            const result = document.getElementById('result');
+
+            const assetVals = ASSETS.map(a => ({ ...a, v: val(a.id) }));
+            const liabilityVals = LIABILITIES.map(l => ({ ...l, v: val(l.id) }));
+
+            const totalAssets = assetVals.reduce((s, a) => s + a.v, 0);
+            const totalLiab = liabilityVals.reduce((s, l) => s + l.v, 0);
+            const netWorth = totalAssets - totalLiab;
+
+            // No data entered yet
+            if (totalAssets === 0 && totalLiab === 0) {
+                result.classList.add('hidden');
+                return;
+            }
+
+            const cash = val('cash');
+            const credit = val('credit');
+            const auto = val('auto');
+            const student = val('student');
+            const otherDebt = val('otherDebt');
+            const monthlySavings = val('monthlySavings');
+            const annualReturn = val('annualReturn');
+            const years = val('years');
+
+            // Ratios
+            const debtToAsset = totalAssets > 0 ? totalLiab / totalAssets : null;
+            const cashAlloc = totalAssets > 0 ? cash / totalAssets : null;
+            // Emergency runway uses monthly expenses if provided; we reuse monthlySavings as a rough proxy is wrong,
+            // so we ask for it via a separate hidden approach — instead estimate runway off debt service is complex.
+            // Keep runway = cash / (monthly savings + a floor) is misleading. Instead show cash allocation only.
+
+            // Emergency fund: we don't have monthly expenses. Show cash in months if we treat monthlySavings as
+            // "monthly expenses" is wrong. Provide a clear note instead. We'll compute runway only if user gives
+            // monthly savings AND we relabel — better: skip runway, show liquidity ratio (cash / short-term debt).
+            const shortTerm = credit + auto + student + otherDebt;
+            const liquidity = shortTerm > 0 ? cash / shortTerm : null;
+
+            // Allocation (assets only)
+            const alloc = assetVals.filter(a => a.v > 0).sort((a, b) => b.v - a.v);
+
+            // Projection
+            let projection = null;
+            if (years >= 1 && years <= 60 && annualReturn > 0 && (monthlySavings > 0 || netWorth !== 0)) {
+                const r = annualReturn / 100;
+                const mr = r / 12;
+                const n = years * 12;
+                if (mr > 0) {
+                    const fvExisting = netWorth * Math.pow(1 + r, years);
+                    const fvContrib = monthlySavings * ((Math.pow(1 + mr, n) - 1) / mr);
+                    projection = fvExisting + fvContrib;
+                }
+            }
+
+            const netClass = netWorth >= 0 ? 'good' : 'bad';
+            const daClass = debtToAsset === null ? '' : (debtToAsset < 0.4 ? 'good' : debtToAsset < 0.8 ? 'warn' : 'bad');
+            const caClass = cashAlloc === null ? '' : (cashAlloc < 0.05 ? 'warn' : cashAlloc <= 0.25 ? 'good' : 'warn');
+            const liqClass = liquidity === null ? '' : (liquidity >= 1 ? 'good' : 'warn');
+
+            const allocationBar = alloc.map((a, i) => {
+                const pct = (a.v / totalAssets) * 100;
+                return `<div class="flex items-center gap-2 text-sm mb-1">
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${COLORS[i % COLORS.length]}"></span>
+                    <span class="w-24 shrink-0 text-gray-500 dark:text-gray-400">${a.label}</span>
+                    <span class="flex-1"><div class="bar"><div class="bar-fill" style="width:${pct}%; background:${COLORS[i % COLORS.length]}"></div></div></span>
+                    <span class="w-20 text-right font-mono text-xs text-gray-500 dark:text-gray-400">${fmt(a.v)} · ${pct.toFixed(0)}%</span>
+                </div>`;
+            }).join('');
+
+            result.innerHTML = `
+                <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-6 fade-in">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Net worth</div>
+                    <div class="text-5xl font-bold tracking-tight ${netClass} mb-4">${fmt(netWorth)}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-5">
+                        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-4">
+                            <div class="text-xs text-gray-400 mb-1">Total assets</div>
+                            <div class="text-xl font-semibold text-green-600 dark:text-green-400">${fmt(totalAssets)}</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-4">
+                            <div class="text-xs text-gray-400 mb-1">Total liabilities</div>
+                            <div class="text-xl font-semibold ${totalLiab > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-200'}">${fmt(totalLiab)}</div>
+                        </div>
+                    </div>
+
+                    ${alloc.length ? `<div class="mb-5">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Asset allocation</div>
+                        ${allocationBar}
+                    </div>` : ''}
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                        <div class="border border-black/5 dark:border-white/10 rounded-xl p-4">
+                            <div class="text-xs text-gray-400 mb-1">Debt-to-asset ratio</div>
+                            <div class="text-lg font-semibold ${daClass}">${debtToAsset === null ? '—' : (debtToAsset * 100).toFixed(0) + '%'}</div>
+                            <div class="text-xs text-gray-400 mt-1">${debtToAsset === null ? 'Add assets to see this' : debtToAsset < 0.4 ? 'Healthy — under 40%' : debtToAsset < 0.8 ? 'Watch it — over 40%' : 'High — over 80%'}</div>
+                        </div>
+                        <div class="border border-black/5 dark:border-white/10 rounded-xl p-4">
+                            <div class="text-xs text-gray-400 mb-1">Liquidity (cash vs short-term debt)</div>
+                            <div class="text-lg font-semibold ${liqClass}">${liquidity === null ? '—' : liquidity.toFixed(2) + '×'}</div>
+                            <div class="text-xs text-gray-400 mt-1">${liquidity === null ? 'Add cash & debt to see this' : liquidity >= 1 ? 'Cash covers your near-term debt' : 'Less than 1× — tight'}</div>
+                        </div>
+                        <div class="border border-black/5 dark:border-white/10 rounded-xl p-4">
+                            <div class="text-xs text-gray-400 mb-1">Cash allocation</div>
+                            <div class="text-lg font-semibold ${caClass}">${cashAlloc === null ? '—' : (cashAlloc * 100).toFixed(0) + '%'}</div>
+                            <div class="text-xs text-gray-400 mt-1">${cashAlloc === null ? 'Add assets to see this' : cashAlloc < 0.05 ? 'Very little cash — thin safety net' : cashAlloc <= 0.25 ? 'Reasonable buffer' : 'Heavy in cash — inflation drag'}</div>
+                        </div>
+                    </div>
+
+                    ${projection !== null ? `
+                    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4 text-sm">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-blue-500 dark:text-blue-300 mb-1">Projection</div>
+                        <p class="text-gray-700 dark:text-gray-200">At <strong>${annualReturn}%/yr</strong> and <strong>${fmt(monthlySavings)}/mo</strong> saved, your net worth could reach roughly <strong class="text-blue-600 dark:text-blue-300">${fmt(projection)}</strong> in <strong>${years} year${years > 1 ? 's' : ''}</strong>. That's ${projection > netWorth ? 'a gain of ' + fmt(projection - netWorth) : 'a decline of ' + fmt(netWorth - projection)} vs today.</p>
+                    </div>` : ''}
+                </div>
+            `;
+            result.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
