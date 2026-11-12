@@ -25,5 +25,6 @@
   { "slug": "gpu-vram-calculator", "lastmod": "2026-10-30" },
   { "slug": "gh-actions-runner-calculator", "lastmod": "2026-11-08" },
   { "slug": "gpu-vgpu-split-calculator", "lastmod": "2026-11-10" },
-  { "slug": "net-worth-calculator", "lastmod": "2026-11-11" }
+  { "slug": "net-worth-calculator", "lastmod": "2026-11-11" },
+  { "slug": "homelab-diagram-generator", "lastmod": "2026-11-12" }
 ]

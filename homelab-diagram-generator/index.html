@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homelab Diagram Generator — YAML to SVG Network Diagram</title>
+    <meta name="description" content="Draw a clean, r/homelab-style network diagram straight from a simple text inventory you keep in git. Auto-layouts your router, switch, NAS, Proxmox and clients into an SVG you can export or share. Free, private, instant — nothing leaves your browser.">
+    <meta name="keywords" content="homelab diagram, network diagram generator, diagram as code, yaml to svg, network topology, homelab diagram tool, self hosted network map, r homelab diagram">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Homelab Diagram Generator — YAML to SVG Network Diagram">
+    <meta property="og:description" content="Turn a plain-text inventory of your homelab into a clean SVG network diagram. Auto-layout, dark mode, PNG export.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/homelab-diagram-generator/">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: { primary: '#0071e3', 'primary-dark': '#0077ed' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .fade-in { animation: fadeIn 0.25s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        textarea:focus { border-color: #0071e3 !important; outline: none; box-shadow: 0 0 0 3px rgba(0,113,227,0.12); }
+        .diagram-svg text { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif; }
+        .diagram-svg .node rect { transition: fill .2s ease; }
+        .diagram-svg .edge { stroke-width: 1.5; }
+        .diagram-svg .edge.arrow { marker-end: url(#arrowhead); }
+        .diagram-svg.dark .edge { stroke: #555; }
+    </style>
+</head>
+<body class="bg-white dark:bg-black text-gray-900 dark:text-gray-100 antialiased">
+    <div class="max-w-5xl mx-auto px-6 py-8">
+        <a href="/" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1.5 mb-8">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to devhandbook.io
+        </a>
+
+        <header class="text-center mb-10">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 rounded-full mb-4">Free dev tool</span>
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-3">Homelab Diagram Generator</h1>
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">Describe your network in plain text, get a clean SVG diagram you can export, share, or keep in git.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Input -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-lg font-semibold">Inventory</h2>
+                    <button id="loadSample" class="text-xs font-semibold text-primary hover:underline">Load sample</button>
+                </div>
+                <textarea id="inventory" spellcheck="false" class="w-full flex-1 min-h-[420px] font-mono text-xs leading-relaxed border border-black/10 dark:border-white/10 dark:bg-neutral-800 rounded-xl px-3 py-3 resize-y"></textarea>
+                <div class="text-xs text-gray-400 mt-3 leading-relaxed">
+                    <strong class="text-gray-500 dark:text-gray-300">Syntax:</strong>
+                    nodes as <code class="font-mono">name: Label (type)</code>, links as <code class="font-mono">a &rarr; b</code>.
+                    Type is optional &mdash; it's guessed from the name (router, switch, nas, proxmox, camera, ap, &hellip;).
+                </div>
+            </div>
+
+            <!-- Output -->
+            <div class="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-2xl shadow-sm p-5 fade-in flex flex-col">
+                <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                    <h2 class="text-lg font-semibold">Diagram</h2>
+                    <div class="flex gap-2">
+                        <button id="exportSvg" class="text-xs font-semibold text-primary border border-primary/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg px-3 py-1.5">SVG</button>
+                        <button id="exportPng" class="text-xs font-semibold text-primary border border-primary/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg px-3 py-1.5">PNG</button>
+                    </div>
+                </div>
+                <div id="diagramWrap" class="flex-1 min-h-[420px] bg-gray-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 rounded-xl overflow-auto flex items-center justify-center p-4">
+                    <div id="diagram" class="diagram-svg"></div>
+                </div>
+                <div id="legend" class="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-gray-500 dark:text-gray-400 mt-3"></div>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 dark:bg-neutral-800/50 rounded-xl p-5 text-sm text-gray-500 dark:text-gray-400 mb-8">
+            <strong class="text-gray-700 dark:text-gray-200">How this works.</strong> Each line either declares a node (<code class="font-mono">name: Label</code>) or a connection (<code class="font-mono">a &rarr; b</code>). Nodes are auto-laid-out in layers &mdash; internet/edge at the top, gateway, then core switching, services, and clients at the bottom &mdash; so you don't hand-position anything. Colors and icons are assigned by device type. Everything runs locally in your browser; your inventory never leaves the page.
+        </div>
+
+        <footer class="text-center text-xs text-gray-400 pb-10">
+            <p>Built by <a href="/" class="text-primary hover:underline">devhandbook.io</a> · 100% private · nothing leaves your browser</p>
+        </footer>
+    </div>
+
+    <script>
+        const SAMPLE = `# Internet & edge
+isp: Fiber ONT (modem)
+firewall: OPNsense (firewall)
+
+# Core
+router: EdgeRouter (router)
+switch: Core Switch (switch)
+
+# Services
+proxmox1: Proxmox 1 (proxmox)
+proxmox2: Proxmox 2 (proxmox)
+nas: UNAS NAS (nas)
+pi: Pi-hole (server)
+
+# Clients
+ap: UniFi AP (ap)
+office: Desktop (client)
+laptop: MacBook (client)
+camera: Doorbell Cam (camera)
+tv: Living Room TV (iot)
+
+# Links
+isp -> firewall
+firewall -> router
+router -> switch
+switch -> proxmox1
+switch -> proxmox2
+switch -> nas
+switch -> pi
+switch -> ap
+ap -> office
+ap -> laptop
+ap -> camera
+ap -> tv
+`;
+
+        // Node type -> { layer, label, color }
+        const TYPES = {
+            modem:     { layer: 0, label: 'Edge',   color: '#8e8e93' },
+            cloud:     { layer: 0, label: 'Edge',   color: '#8e8e93' },
+            wan:       { layer: 0, label: 'Edge',   color: '#8e8e93' },
+            firewall:  { layer: 1, label: 'Gateway', color: '#ff9500' },
+            router:    { layer: 1, label: 'Gateway', color: '#ff9500' },
+            gateway:   { layer: 1, label: 'Gateway', color: '#ff9500' },
+            switch:    { layer: 2, label: 'Core',   color: '#0071e3' },
+            bridge:    { layer: 2, label: 'Core',   color: '#0071e3' },
+            nas:       { layer: 3, label: 'Services', color: '#af52de' },
+            server:    { layer: 3, label: 'Services', color: '#af52de' },
+            proxmox:   { layer: 3, label: 'Services', color: '#af52de' },
+            vm:        { layer: 3, label: 'Services', color: '#af52de' },
+            container: { layer: 3, label: 'Services', color: '#af52de' },
+            service:   { layer: 3, label: 'Services', color: '#af52de' },
+            pi:        { layer: 3, label: 'Services', color: '#af52de' },
+            ap:        { layer: 4, label: 'Access',  color: '#34c759' },
+            client:    { layer: 4, label: 'Access',  color: '#34c759' },
+            pc:        { layer: 4, label: 'Access',  color: '#34c759' },
+            phone:     { layer: 4, label: 'Access',  color: '#34c759' },
+            laptop:    { layer: 4, label: 'Access',  color: '#34c759' },
+            desktop:   { layer: 4, label: 'Access',  color: '#34c759' },
+            camera:    { layer: 4, label: 'Access',  color: '#34c759' },
+            iot:       { layer: 4, label: 'Access',  color: '#34c759' },
+            printer:   { layer: 4, label: 'Access',  color: '#34c759' },
+            tv:        { layer: 4, label: 'Access',  color: '#34c759' },
+        };
+
+        // Keyword -> type guessing (lowercase substring match on name + label)
+        const KEYWORDS = [
+            ['modem', 'modem'], ['ont', 'modem'], ['isp', 'modem'], ['fiber', 'modem'],
+            ['firewall', 'firewall'], ['opnsense', 'firewall'], ['pfsense', 'firewall'], ['fw', 'firewall'],
+            ['router', 'router'], ['edgerouter', 'router'], ['gateway', 'router'],
+            ['switch', 'switch'], ['unifi', 'ap'], ['ap', 'ap'],
+            ['nas', 'nas'], ['proxmox', 'proxmox'], ['pve', 'proxmox'], ['server', 'server'], ['pi', 'server'],
+            ['vm', 'vm'], ['lxc', 'container'], ['container', 'container'], ['docker', 'container'],
+            ['camera', 'camera'], ['cam', 'camera'], ['doorbell', 'camera'],
+            ['phone', 'phone'], ['laptop', 'laptop'], ['desktop', 'desktop'], ['pc', 'pc'], ['mac', 'laptop'],
+            ['tv', 'tv'], ['printer', 'printer'], ['iot', 'iot'], ['sensor', 'iot'], ['plug', 'iot'],
+            ['cloud', 'cloud'], ['client', 'client'], ['workstation', 'client'],
+        ];
+
+        function guessType(id, label) {
+            const hay = (id + ' ' + label).toLowerCase();
+            for (const [kw, t] of KEYWORDS) {
+                if (hay.includes(kw)) return t;
+            }
+            return 'client';
+        }
+
+        function parse(text) {
+            const nodes = new Map(); // id -> { id, label, type }
+            const edges = [];        // [fromId, toId]
+
+            for (let raw of text.split('\n')) {
+                let line = raw.replace(/^\s+|\s+$/g, '');
+                if (!line || line.startsWith('#')) continue;
+                // arrow forms: a -> b, a --> b, a —> b
+                const arrow = line.match(/^(.*?)\s*(?:->|-->|—>|→|--)\s*(.*)$/);
+                if (arrow) {
+                    edges.push([arrow[1].trim(), arrow[2].trim()]);
+                    continue;
+                }
+                // node form: id: Label (type)
+                const node = line.match(/^([A-Za-z0-9_.\-]+)\s*:\s*(.+)$/);
+                if (node) {
+                    const id = node[1].trim();
+                    let label = node[2].trim();
+                    let type = null;
+                    const typeMatch = label.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+                    if (typeMatch) {
+                        label = typeMatch[1].trim();
+                        type = typeMatch[2].trim().toLowerCase();
+                    }
+                    if (!type) type = guessType(id, label);
+                    if (!TYPES[type]) type = 'client';
+                    nodes.set(id, { id, label: label || id, type });
+                }
+            }
+
+            // Ensure edge endpoints exist as nodes (bare id references)
+            for (const [a, b] of edges) {
+                for (const id of [a, b]) {
+                    if (!nodes.has(id)) {
+                        nodes.set(id, { id, label: id, type: guessType(id, id) });
+                    }
+                }
+            }
+
+            return { nodes: [...nodes.values()], edges };
+        }
+
+        function layout(nodes, edges) {
+            // Group by layer
+            const layers = new Map();
+            for (const n of nodes) {
+                const layer = TYPES[n.type].layer;
+                if (!layers.has(layer)) layers.set(layer, []);
+                layers.get(layer).push(n);
+            }
+            const layerKeys = [...layers.keys()].sort((a, b) => a - b);
+
+            const NODE_W = 140, NODE_H = 56;
+            const GAP_X = 36, GAP_Y = 90;
+            const LAYER_PAD = 20;
+
+            // Position each node
+            const pos = new Map();
+            let maxWidth = 0;
+            layerKeys.forEach((lk, li) => {
+                const items = layers.get(lk);
+                const totalW = items.length * NODE_W + (items.length - 1) * GAP_X;
+                const startX = LAYER_PAD + (maxWidth - totalW) / 2;
+                const y = LAYER_PAD + li * (NODE_H + GAP_Y);
+                items.forEach((n, i) => {
+                    const x = startX + i * (NODE_W + GAP_X);
+                    pos.set(n.id, { x, y, n });
+                });
+                maxWidth = Math.max(maxWidth, totalW);
+            });
+
+            const svgW = maxWidth + LAYER_PAD * 2;
+            const svgH = LAYER_PAD + layerKeys.length * (NODE_H + GAP_Y) - GAP_Y + LAYER_PAD;
+
+            return { pos, svgW, svgH, layers: layerKeys.map(k => layers.get(k)) };
+        }
+
+        const ICONS = {
+            modem: 'M3 8h18v8H3z M7 8v8 M12 8v8 M17 8v8',
+            firewall: 'M4 4h16v16H4z M4 8h16 M8 4v16 M12 12h4',
+            router: 'M4 12a8 8 0 0 1 16 0 M7 12a5 5 0 0 1 10 0 M10 12a2 2 0 0 1 4 0',
+            switch: 'M4 6h16v12H4z M8 9h8 M8 12h8 M8 15h8',
+            nas: 'M4 5h16v14H4z M8 8h8 M8 12h8 M8 16h4',
+            server: 'M4 4h16v16H4z M4 9h16 M4 14h16',
+            proxmox: 'M4 4h16v16H4z M4 9h16 M4 14h16 M9 4v5 M9 14v6',
+            vm: 'M4 4h16v16H4z M4 9h16 M4 14h16',
+            container: 'M4 6h16v12H4z M4 10h16 M4 14h16',
+            service: 'M4 4h16v16H4z M4 9h16',
+            pi: 'M4 4h16v16H4z M8 8h8v8H8z',
+            ap: 'M12 3a9 9 0 0 1 9 9 M12 7a5 5 0 0 1 5 5 M12 11a1 1 0 0 1 1 1 M12 14v7 M9 21h6',
+            client: 'M4 5h16v14H4z M4 19h16 M7 9h10 M7 12h6',
+            pc: 'M4 5h16v14H4z M4 19h16 M7 9h10',
+            phone: 'M8 3h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z M11 18h2',
+            laptop: 'M4 5h16v10H4z M2 18h20',
+            desktop: 'M4 5h16v14H4z M4 19h16 M9 22h6 M12 19v3',
+            camera: 'M4 8h4l2-3h4l2 3h4v10H4z M12 12a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
+            iot: 'M4 12a8 8 0 0 1 16 0 M8 12a4 4 0 0 1 8 0 M12 10v4 M10 12h4',
+            printer: 'M7 8V4h10v4 M7 16H4V9h16v7h-3 M7 13h10v8H7z',
+            tv: 'M3 6h18v12H3z M9 21h6',
+            cloud: 'M7 18a4 4 0 0 1-.5-8A5 5 0 0 1 16 8a4 4 0 0 1 1 8z',
+        };
+
+        function iconFor(type) {
+            return ICONS[type] || ICONS.client;
+        }
+
+        function renderDiagram(text) {
+            const { nodes, edges } = parse(text);
+            const { pos, svgW, svgH, layers } = layout(nodes, edges);
+            const isDark = document.documentElement.classList.contains('dark');
+
+            const NODE_W = 140, NODE_H = 56;
+            const textColor = isDark ? '#e5e5e7' : '#1d1d1f';
+            const subColor = isDark ? '#98989d' : '#6e6e73';
+            const nodeFill = isDark ? '#2c2c2e' : '#ffffff';
+            const nodeStroke = isDark ? '#48484a' : '#d2d2d7';
+            const edgeColor = isDark ? '#5a5a5e' : '#c7c7cc';
+
+            let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" class="diagram-svg${isDark ? ' dark' : ''}">
+<defs>
+<marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="${edgeColor}"/></marker>
+</defs>
+<rect x="0" y="0" width="${svgW}" height="${svgH}" fill="none"/>
+`;
+
+            // Draw edges first (behind nodes)
+            for (const [a, b] of edges) {
+                const pa = pos.get(a), pb = pos.get(b);
+                if (!pa || !pb) continue;
+                const x1 = pa.x + NODE_W / 2, y1 = pa.y + NODE_H;
+                const x2 = pb.x + NODE_W / 2, y2 = pb.y;
+                const cy = (y1 + y2) / 2;
+                const d = `M ${x1} ${y1} C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`;
+                svg += `<path class="edge arrow" d="${d}" fill="none" stroke="${edgeColor}"/>\n`;
+            }
+
+            // Draw nodes
+            for (const n of nodes) {
+                const p = pos.get(n.id);
+                const color = TYPES[n.type].color;
+                const cx = p.x + NODE_W / 2;
+                const cy = p.y + NODE_H / 2;
+                const icon = iconFor(n.type);
+                svg += `<g class="node">
+<rect x="${p.x}" y="${p.y}" width="${NODE_W}" height="${NODE_H}" rx="12" fill="${nodeFill}" stroke="${color}" stroke-width="1.5"/>
+<rect x="${p.x + 6}" y="${p.y + 8}" width="26" height="26" rx="7" fill="${color}22"/>
+<g transform="translate(${p.x + 6}, ${p.y + 8})"><g transform="translate(6,6) scale(0.55)"><path d="${icon}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+<text x="${p.x + 40}" y="${p.y + 26}" font-size="11" font-weight="600" fill="${textColor}">${escapeXml(n.label)}</text>
+<text x="${p.x + 40}" y="${p.y + 42}" font-size="9" fill="${subColor}">${escapeXml(TYPES[n.type].label)}</text>
+</g>\n`;
+            }
+
+            svg += `</svg>`;
+            document.getElementById('diagram').innerHTML = svg;
+
+            // Legend
+            const seen = new Set();
+            const legendItems = [];
+            for (const n of nodes) {
+                const t = TYPES[n.type];
+                if (seen.has(t.label)) continue;
+                seen.add(t.label);
+                legendItems.push(`<span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:${t.color}"></span>${t.label}</span>`);
+            }
+            document.getElementById('legend').innerHTML = legendItems.join('');
+        }
+
+        function escapeXml(s) {
+            return s.replace(/[<>&'"]/g, c => ({ '<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;' }[c]));
+        }
+
+        function download(filename, blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportSvg() {
+            const svg = document.querySelector('#diagram svg');
+            if (!svg) return;
+            const clone = svg.outerHTML;
+            const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + clone], { type: 'image/svg+xml' });
+            download('homelab-diagram.svg', blob);
+        }
+
+        function exportPng() {
+            const svg = document.querySelector('#diagram svg');
+            if (!svg) return;
+            const w = parseInt(svg.getAttribute('width')) || 800;
+            const h = parseInt(svg.getAttribute('height')) || 600;
+            const scale = 2;
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const img = new Image();
+            const blob = new Blob([svgData], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = w * scale;
+                canvas.height = h * scale;
+                const ctx = canvas.getContext('2d');
+                ctx.scale(scale, scale);
+                ctx.drawImage(img, 0, 0, w, h);
+                URL.revokeObjectURL(url);
+                canvas.toBlob(b => download('homelab-diagram.png', b), 'image/png');
+            };
+            img.src = url;
+        }
+
+        // Wire up
+        const ta = document.getElementById('inventory');
+        let debounce;
+        ta.addEventListener('input', () => {
+            clearTimeout(debounce);
+            debounce = setTimeout(() => renderDiagram(ta.value), 200);
+        });
+
+        document.getElementById('loadSample').addEventListener('click', () => {
+            ta.value = SAMPLE;
+            renderDiagram(ta.value);
+        });
+
+        document.getElementById('exportSvg').addEventListener('click', exportSvg);
+        document.getElementById('exportPng').addEventListener('click', exportPng);
+
+        // Load sample on first visit
+        ta.value = SAMPLE;
+        renderDiagram(ta.value);
+    </script>
+</body>
+</html>
