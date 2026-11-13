@@ -111,7 +111,7 @@ Then configure your Hermes agent to point at the Memory OS API.
 
 ### total-agent-memory — Claude Code & Codex Specialized
 
-[total-agent-memory](https://github.com/total-agent-memory) (⭐63) is a newer entrant focused specifically on Claude Code and Codex CLI. It's smaller than MemOS but punches above its weight on benchmarks — LongMemEval R@5 of 97.45% is seriously impressive.
+[total-agent-memory](https://github.com/vbcherepanov/total-agent-memory) (⭐63) is a newer entrant focused specifically on Claude Code and Codex CLI. It's smaller than MemOS but punches above its weight on benchmarks — LongMemEval R@5 of 97.45% is seriously impressive.
 
 The approach: it watches your agent sessions, auto-extracts a knowledge graph, and stores everything with multi-representation embeddings. There's even a 3D WebGL visualization of your knowledge graph, which is mostly a party trick but genuinely useful for understanding what your agent has learned about your codebase.
 
@@ -269,7 +269,7 @@ Pick the option that matches your setup and try it today:
 
 - **Any agent, any platform:** [OptMem](https://github.com/VictorTaelin/OptMem) — 30 seconds, zero dependencies
 - **OpenClaw users:** LCM is already running — try `lcm_grep` to search your history
-- **Claude Code / Codex CLI:** [total-agent-memory](https://github.com/total-agent-memory) — 15 minutes, excellent benchmarks
+- **Claude Code / Codex CLI:** [total-agent-memory](https://github.com/vbcherepanov/total-agent-memory) — 15 minutes, excellent benchmarks
 - **Hermes Agent:** [Memory OS](https://github.com/ClaudioDrews/memory-os) — purpose-built, trust scoring
 - **Teams / production:** [MemOS](https://github.com/MemTensor/MemOS) — the full platform
 
