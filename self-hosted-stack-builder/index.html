@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Hosted App Finder — Replace Google Photos, Dropbox, Slack & More</title>
+    <meta name="description" content="Search 60+ self-hosted apps by category or by the SaaS you want to ditch. Find the open-source alternative to Google Photos, Dropbox, LastPass, Slack, Google Analytics, Trello and more.">
+    <meta name="keywords" content="self-hosted apps, self hosted alternatives, replace google photos, dropbox alternative, slack alternative, open source apps, homelab, selfhosted directory">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Self-Hosted App Finder — Which App Replaces Your SaaS?">
+    <meta property="og:description" content="Search 60+ self-hosted apps by category or the SaaS you want to replace. Free, private, instant.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://devhandbook.io/self-hosted-stack-builder/">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQXTZYP8H4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BQXTZYP8H4');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['SF Mono', 'Fira Code', 'JetBrains Mono', 'monospace'],
+                    },
+                    colors: { primary: '#0071e3', 'primary-dark': '#0077ed' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../apple-redesign.css">
+    <style>
+        .fade-in { animation: fadeIn 0.2s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .chip { cursor: pointer; transition: all .15s ease; user-select: none; }
+        .chip:hover { border-color: #0071e3 !important; }
+        .chip.active { border-color: #0071e3 !important; background: rgba(0,113,227,0.08) !important; color: #0071e3 !important; }
+        html.dark .chip.active { background: rgba(0,113,227,0.2) !important; color: #3395ff !important; }
+        .app-card { transition: all .15s ease; }
+        .app-card:hover { border-color: #0071e3 !important; transform: translateY(-1px); }
+        .cat-tag { font-size: 11px; letter-spacing: .02em; }
+    </style>
+</head>
+<body class="bg-white dark:bg-black text-gray-900 dark:text-gray-100 antialiased">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        <a href="/" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1.5 mb-8">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to devhandbook.io
+        </a>
+
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-3">Self-Hosted App Finder</h1>
+            <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-base">Search <span class="font-semibold text-gray-700 dark:text-gray-200" id="appCount">60</span> self-hosted apps by category — or type the SaaS you want to quit (e.g. "Google Photos", "Dropbox", "Slack") and see what replaces it. All free, open-source, and yours to run on your own hardware.</p>
+        </header>
+
+        <!-- Search -->
+        <div class="max-w-xl mx-auto mb-5">
+            <input id="search" type="search" placeholder="Search apps or a SaaS to replace… (e.g. 'photos', 'Dropbox', 'Slack')"
+                class="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-3.5 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+        </div>
+
+        <!-- Category chips -->
+        <div id="chips" class="flex flex-wrap justify-center gap-2 mb-8"></div>
+
+        <!-- Results -->
+        <div id="results" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <div id="empty" class="hidden text-center text-gray-500 py-12">
+            <p class="text-lg font-medium">No matches.</p>
+            <p class="text-sm mt-1">Try a broader term, or a category instead.</p>
+        </div>
+
+        <footer class="text-center text-xs text-gray-400 mt-12 leading-relaxed">
+            <p>Descriptions are short summaries — verify details on the project's own site before deploying.</p>
+            <p>Nothing here leaves your browser. All data is served locally; no tracking beyond page analytics.</p>
+        </footer>
+    </div>
+
+    <script>
+    // Each entry: name, category, replaces (SaaS it substitutes for), desc (one factual line), url.
+    const APPS = [
+        // Media
+        {name:"Jellyfin", cat:"Media", rep:"Plex · Netflix", desc:"Free media server for movies, TV, and music with apps for every device.", url:"https://jellyfin.org"},
+        {name:"Navidrome", cat:"Media", rep:"Spotify", desc:"Lightweight music streaming server with a Subsonic-compatible API.", url:"https://www.navidrome.org"},
+        {name:"Audiobookshelf", cat:"Media", rep:"Audible", desc:"Self-hosted audiobook and podcast server with mobile apps.", url:"https://www.audiobookshelf.org"},
+        {name:"Jellyseerr", cat:"Media", rep:"Request management", desc:"Media request & discovery front-end for Jellyfin/Sonarr/Radarr.", url:"https://github.com/Fallenbagel/jellyseerr"},
+        {name:"Sonarr", cat:"Media", rep:"—", desc:"Automated TV series downloader and organizer.", url:"https://sonarr.tv"},
+        {name:"Radarr", cat:"Media", rep:"—", desc:"Automated movie downloader and organizer.", url:"https://radarr.video"},
+        {name:"Lidarr", cat:"Media", rep:"—", desc:"Automated music downloader and organizer.", url:"https://lidarr.audio"},
+        {name:"qBittorrent", cat:"Media", rep:"uTorrent", desc:"Open-source BitTorrent client with a web UI, ideal behind a VPN.", url:"https://www.qbittorrent.org"},
+
+        // Photos
+        {name:"Immich", cat:"Photos", rep:"Google Photos", desc:"High-performance self-hosted photo & video backup with ML search.", url:"https://immich.app"},
+        {name:"PhotoPrism", cat:"Photos", rep:"Google Photos", desc:"AI-powered photo manager with face and content recognition.", url:"https://photoprism.app"},
+        {name:"LibrePhotos", cat:"Photos", rep:"Google Photos", desc:"Self-hosted photo gallery with facial recognition and albums.", url:"https://github.com/LibrePhotos/librephotos"},
+
+        // Files & Cloud
+        {name:"Nextcloud", cat:"Files & Cloud", rep:"Dropbox · Google Drive", desc:"Full self-hosted cloud: files, calendar, contacts, and office apps.", url:"https://nextcloud.com"},
+        {name:"Seafile", cat:"Files & Cloud", rep:"Dropbox", desc:"Fast file-sync and sharing server with strong versioning.", url:"https://www.seafile.com"},
+        {name:"FileBrowser", cat:"Files & Cloud", rep:"—", desc:"Lightweight web file manager for a directory or volume.", url:"https://filebrowser.org"},
+
+        // Notes & Knowledge
+        {name:"Trilium", cat:"Notes & Knowledge", rep:"Notion · Evernote", desc:"Hierarchical note-taking app with rich text and scripting.", url:"https://github.com/zadam/trilium"},
+        {name:"Joplin", cat:"Notes & Knowledge", rep:"Evernote", desc:"Markdown notes with E2E encryption and mobile apps.", url:"https://joplinapp.org"},
+        {name:"Outline", cat:"Notes & Knowledge", rep:"Notion", desc:"Team wiki and knowledge base with a clean, fast editor.", url:"https://www.getoutline.com"},
+        {name:"BookStack", cat:"Notes & Knowledge", rep:"Confluence", desc:"Simple self-hosted documentation platform organized into books.", url:"https://www.bookstackapp.com"},
+        {name:"Wiki.js", cat:"Notes & Knowledge", rep:"Confluence", desc:"Modern wiki engine with a markdown editor and many backends.", url:"https://js.wiki"},
+
+        // Passwords
+        {name:"Vaultwarden", cat:"Passwords", rep:"LastPass · 1Password", desc:"Lightweight Bitwarden-compatible password manager server.", url:"https://github.com/dani-garcia/vaultwarden"},
+        {name:"Passbolt", cat:"Passwords", rep:"1Password (teams)", desc:"Open-source password manager designed for teams.", url:"https://www.passbolt.com"},
+
+        // Home Automation
+        {name:"Home Assistant", cat:"Home Automation", rep:"SmartThings · Hubitat", desc:"Local-first home automation hub for thousands of devices.", url:"https://www.home-assistant.io"},
+        {name:"Node-RED", cat:"Home Automation", rep:"IFTTT", desc:"Flow-based visual programming for wiring automations together.", url:"https://nodered.org"},
+
+        // Monitoring
+        {name:"Grafana", cat:"Monitoring", rep:"Datadog (dashboards)", desc:"Dashboards and observability for metrics, logs, and traces.", url:"https://grafana.com"},
+        {name:"Prometheus", cat:"Monitoring", rep:"Datadog (metrics)", desc:"Time-series metrics collection with a powerful query language.", url:"https://prometheus.io"},
+        {name:"Uptime Kuma", cat:"Monitoring", rep:"UptimeRobot · Pingdom", desc:"Self-hosted uptime monitoring with status pages and alerts.", url:"https://uptime.kuma.pet"},
+        {name:"Netdata", cat:"Monitoring", rep:"Datadog (infra)", desc:"Real-time infrastructure monitoring with automatic dashboards.", url:"https://www.netdata.cloud"},
+        {name:"Glances", cat:"Monitoring", rep:"—", desc:"Cross-platform system monitoring in a single terminal/web view.", url:"https://github.com/nicolargo/glances"},
+
+        // Ad Blocking & DNS
+        {name:"Pi-hole", cat:"Ad Blocking & DNS", rep:"Ad blocking", desc:"Network-wide ad and tracker blocking via a local DNS sinkhole.", url:"https://pi-hole.net"},
+        {name:"AdGuard Home", cat:"Ad Blocking & DNS", rep:"Ad blocking", desc:"Network ad blocker and DNS server with a polished web UI.", url:"https://adguard-dns.io"},
+        {name:"Technitium DNS", cat:"Ad Blocking & DNS", rep:"—", desc:"Full-featured self-hosted DNS server with ad-block lists.", url:"https://technitium.com/dns/"},
+
+        // Reverse Proxy
+        {name:"Nginx Proxy Manager", cat:"Reverse Proxy", rep:"—", desc:"Easy GUI for Nginx reverse proxy with Let's Encrypt SSL.", url:"https://nginxproxymanager.com"},
+        {name:"Traefik", cat:"Reverse Proxy", rep:"—", desc:"Cloud-native reverse proxy with automatic service discovery.", url:"https://traefik.io"},
+        {name:"Caddy", cat:"Reverse Proxy", rep:"—", desc:"Fast reverse proxy with automatic HTTPS by default.", url:"https://caddyserver.com"},
+
+        // Backup
+        {name:"Duplicati", cat:"Backup", rep:"Backblaze (client)", desc:"Encrypted backups to cloud or local storage with a web UI.", url:"https://www.duplicati.com"},
+        {name:"BorgBackup", cat:"Backup", rep:"—", desc:"Deduplicating backup tool with strong encryption and compression.", url:"https://www.borgbackup.org"},
+        {name:"Restic", cat:"Backup", rep:"—", desc:"Fast, secure backup program supporting many storage backends.", url:"https://restic.net"},
+
+        // Analytics
+        {name:"Plausible", cat:"Analytics", rep:"Google Analytics", desc:"Lightweight, privacy-friendly web analytics (open-source core).", url:"https://plausible.io"},
+        {name:"Umami", cat:"Analytics", rep:"Google Analytics", desc:"Simple, self-hosted privacy analytics with a clean dashboard.", url:"https://umami.is"},
+        {name:"Matomo", cat:"Analytics", rep:"Google Analytics", desc:"Full-featured open-source analytics with GDPR tools.", url:"https://matomo.org"},
+
+        // Bookmarks
+        {name:"Linkding", cat:"Bookmarks", rep:"Pocket", desc:"Minimal self-hosted bookmark manager with tagging.", url:"https://github.com/sissbruecker/linkding"},
+        {name:"Wallabag", cat:"Bookmarks", rep:"Pocket · Instapaper", desc:"Save and read articles later with offline text extraction.", url:"https://wallabag.org"},
+        {name:"Hoarder", cat:"Bookmarks", rep:"Pocket · Raindrop", desc:"Bookmark everything — links, images, notes — with AI tagging.", url:"https://hoarder.app"},
+        {name:"Linkwarden", cat:"Bookmarks", rep:"Pocket · Raindrop", desc:"Collaborative bookmark manager with archiving and screenshots.", url:"https://linkwarden.app"},
+
+        // RSS
+        {name:"FreshRSS", cat:"RSS", rep:"Feedly · Inoreader", desc:"Self-hosted RSS aggregator with a lightweight, fast UI.", url:"https://freshrss.org"},
+        {name:"Miniflux", cat:"RSS", rep:"Feedly", desc:"Minimalist RSS reader focused on speed and simplicity.", url:"https://miniflux.app"},
+
+        // Git
+        {name:"Gitea", cat:"Git", rep:"GitHub", desc:"Lightweight self-hosted Git service with issues and CI.", url:"https://about.gitea.com"},
+        {name:"Forgejo", cat:"Git", rep:"GitHub", desc:"Community-driven Gitea fork, soft fork of the Git forge.", url:"https://forgejo.org"},
+        {name:"GitLab", cat:"Git", rep:"GitHub · GitHub Actions", desc:"Full DevOps platform: Git, CI/CD, and project management.", url:"https://about.gitlab.com"},
+
+        // Automation
+        {name:"n8n", cat:"Automation", rep:"Zapier · Make", desc:"Workflow automation with 400+ integrations and a node editor.", url:"https://n8n.io"},
+        {name:"Windmill", cat:"Automation", rep:"Zapier (devs)", desc:"Turn scripts into internal tools, workflows, and UIs.", url:"https://www.windmill.dev"},
+
+        // AI / LLM
+        {name:"Ollama", cat:"AI / LLM", rep:"—", desc:"Run local LLMs (Llama, Mistral, etc.) with one command.", url:"https://ollama.com"},
+        {name:"Open WebUI", cat:"AI / LLM", rep:"ChatGPT", desc:"User-friendly local web interface for Ollama and OpenAI APIs.", url:"https://openwebui.com"},
+        {name:"LocalAI", cat:"AI / LLM", rep:"OpenAI API", desc:"Drop-in OpenAI-compatible API for local models.", url:"https://localai.io"},
+        {name:"AnythingLLM", cat:"AI / LLM", rep:"ChatGPT (RAG)", desc:"All-in-one local chat with document and RAG support.", url:"https://anythingllm.com"},
+
+        // Email
+        {name:"Mailcow", cat:"Email", rep:"Gmail (self-hosted)", desc:"Complete self-hosted mail server suite with a web UI.", url:"https://mailcow.email"},
+        {name:"Stalwart", cat:"Email", rep:"Gmail (self-hosted)", desc:"Modern all-in-one mail server written in Rust.", url:"https://stalw.art"},
+
+        // Communication
+        {name:"Mattermost", cat:"Communication", rep:"Slack", desc:"Self-hosted team chat with threads and integrations.", url:"https://mattermost.com"},
+        {name:"Rocket.Chat", cat:"Communication", rep:"Slack", desc:"Open-source team chat and collaboration platform.", url:"https://www.rocket.chat"},
+        {name:"Matrix (Synapse)", cat:"Communication", rep:"Slack · WhatsApp", desc:"Decentralized chat protocol with a self-hosted homeserver.", url:"https://matrix.org"},
+        {name:"Zulip", cat:"Communication", rep:"Slack", desc:"Threaded team chat designed for high-volume discussion.", url:"https://zulip.com"},
+
+        // Project Management
+        {name:"Vikunja", cat:"Project Management", rep:"Trello · Todoist", desc:"Self-hosted to-do list and kanban boards.", url:"https://vikunja.io"},
+        {name:"Plane", cat:"Project Management", rep:"Jira · Linear", desc:"Open-source project management for software teams.", url:"https://plane.so"},
+        {name:"OpenProject", cat:"Project Management", rep:"Jira · Asana", desc:"Project management with Gantt charts, agile, and time tracking.", url:"https://www.openproject.org"},
+
+        // CRM
+        {name:"Monica", cat:"CRM", rep:"—", desc:"Personal relationship manager for tracking contacts and life.", url:"https://www.monicahq.com"},
+        {name:"Twenty", cat:"CRM", rep:"Salesforce", desc:"Modern open-source CRM for teams.", url:"https://twenty.com"},
+
+        // Finance
+        {name:"Firefly III", cat:"Finance", rep:"Mint · YNAB", desc:"Self-hosted personal finance manager with budgeting.", url:"https://www.firefly-iii.org"},
+        {name:"Actual Budget", cat:"Finance", rep:"YNAB · Mint", desc:"Local-first budgeting app with envelope-style budgeting.", url:"https://actualbudget.org"},
+        {name:"Ghostfolio", cat:"Finance", rep:"portfolio trackers", desc:"Self-hosted wealth and portfolio tracker.", url:"https://ghostfol.io"},
+
+        // Docker Management
+        {name:"Portainer", cat:"Docker Management", rep:"—", desc:"GUI for managing Docker containers, stacks, and images.", url:"https://www.portainer.io"},
+        {name:"Dockge", cat:"Docker Management", rep:"—", desc:"Lightweight compose-file manager with a friendly UI.", url:"https://dockge.kuma.pet"},
+
+        // Download Manager
+        {name:"aria2", cat:"Download Manager", rep:"—", desc:"Lightweight multi-protocol download utility (HTTP, BitTorrent, FTP).", url:"https://aria2.github.io"},
+        {name:"Gopeed", cat:"Download Manager", rep:"IDM", desc:"Cross-platform download manager written in Go.", url:"https://gopeed.com"},
+
+        // Paste & Snippets
+        {name:"PrivateBin", cat:"Paste & Snippets", rep:"Pastebin", desc:"Minimal encrypted paste bin with zero-knowledge storage.", url:"https://privatebin.info"},
+        {name:"MicroBin", cat:"Paste & Snippets", rep:"Pastebin", desc:"Tiny self-hosted paste bin and URL shortener.", url:"https://github.com/szabodanika/microbin"},
+
+        // Dashboard
+        {name:"Homepage", cat:"Dashboard", rep:"—", desc:"Modern, fast self-hosted service dashboard.", url:"https://gethomepage.dev"},
+        {name:"Dashy", cat:"Dashboard", rep:"—", desc:"Configurable dashboard for your self-hosted services.", url:"https://dashy.to"},
+        {name:"Homarr", cat:"Dashboard", rep:"—", desc:"Sleek dashboard with integrations and drag-and-drop.", url:"https://homarr.dev"},
+
+        // URL Shortener
+        {name:"Shlink", cat:"URL Shortener", rep:"Bitly", desc:"Self-hosted URL shortener with a full API.", url:"https://shlink.io"},
+        {name:"YOURLS", cat:"URL Shortener", rep:"Bitly", desc:"Your own URL shortener, plain PHP.", url:"https://yourls.org"},
+
+        // Security
+        {name:"Authelia", cat:"Security", rep:"Okta (SSO)", desc:"SSO and 2FA portal for your self-hosted services.", url:"https://www.authelia.com"},
+        {name:"Authentik", cat:"Security", rep:"Okta · Auth0", desc:"Flexible identity provider with SSO, MFA, and flows.", url:"https://goauthentik.io"}
+    ];
+
+    const CATS = [...new Set(APPS.map(a => a.cat))];
+
+    const chipsEl = document.getElementById('chips');
+    const resultsEl = document.getElementById('results');
+    const emptyEl = document.getElementById('empty');
+    const searchEl = document.getElementById('search');
+    const countEl = document.getElementById('appCount');
+
+    let activeCat = null;
+
+    function renderChips() {
+        chipsEl.innerHTML = '';
+        // "All" chip
+        const all = chipBtn('All', null, !activeCat);
+        chipsEl.appendChild(all);
+        CATS.forEach(c => chipsEl.appendChild(chipBtn(c, c, activeCat === c)));
+    }
+
+    function chipBtn(label, cat, active) {
+        const b = document.createElement('button');
+        b.className = 'chip px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm ' + (active ? 'active' : '');
+        b.textContent = label;
+        b.onclick = () => { activeCat = cat; renderChips(); render(); };
+        return b;
+    }
+
+    function matches(app, q) {
+        if (!q) return true;
+        const hay = (app.name + ' ' + app.cat + ' ' + app.rep + ' ' + app.desc).toLowerCase();
+        return q.toLowerCase().split(/\s+/).every(t => hay.includes(t));
+    }
+
+    function render() {
+        const q = searchEl.value.trim();
+        const filtered = APPS.filter(a =>
+            (!activeCat || a.cat === activeCat) && matches(a, q)
+        );
+        countEl.textContent = APPS.length;
+        resultsEl.innerHTML = '';
+        emptyEl.classList.toggle('hidden', filtered.length > 0);
+
+        filtered.forEach(a => {
+            const card = document.createElement('a');
+            card.href = a.url;
+            card.target = '_blank';
+            card.rel = 'noopener noreferrer';
+            card.className = 'app-card fade-in block border border-gray-200 dark:border-gray-800 rounded-2xl p-4';
+            card.innerHTML = `
+                <div class="flex items-start justify-between gap-2 mb-1">
+                    <span class="font-semibold text-[15px]">${a.name}</span>
+                    <span class="cat-tag text-gray-400 dark:text-gray-500 shrink-0 mt-0.5">${a.cat}</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">${a.desc}</p>
+                ${a.rep && a.rep !== '—' ? `<div class="text-xs"><span class="text-gray-400">Replaces:</span> <span class="text-primary font-medium">${a.rep}</span></div>` : ''}
+                <div class="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    ${a.url.replace('https://','')}
+                </div>
+            `;
+            resultsEl.appendChild(card);
+        });
+    }
+
+    searchEl.addEventListener('input', render);
+    renderChips();
+    render();
+    </script>
+</body>
+</html>

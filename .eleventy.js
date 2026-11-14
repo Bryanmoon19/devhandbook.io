@@ -43,6 +43,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("gpu-vgpu-split-calculator");
   eleventyConfig.addPassthroughCopy("net-worth-calculator");
   eleventyConfig.addPassthroughCopy("homelab-diagram-generator");
+  eleventyConfig.addPassthroughCopy("self-hosted-stack-builder");
   eleventyConfig.addPassthroughCopy("gear");
   eleventyConfig.addPassthroughCopy("og-images");
 
