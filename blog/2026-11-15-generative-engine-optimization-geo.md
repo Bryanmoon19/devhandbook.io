@@ -73,7 +73,63 @@ Here's the stack I'm actually running (or standing up) on this site, because —
 - **AI referral tracking** — browser tracking that recognizes AI-search referrers and ties them to landing pages, goals, and conversions — so you can see not just "did they cite us" but "did that citation actually convert."
 - **Crawler evidence** — request volume, trends, and risk signals, kept separate from the "did it lead to a citation" question so you don't over-claim.
 
-It runs as a normal self-hosted app (the quick-start and deployment docs are in English; the deeper reference guides are currently Simplified Chinese — worth knowing before you dive in). For most of you, the docker-compose route is the on-ramp.
+It runs as a normal self-hosted app (the quick-start and deployment docs are in English; the deeper reference guides are currently Simplified Chinese — worth knowing before you dive in). For most of you, the docker-compose route is the on-ramp. The project ships a `docker-compose.liekan.yml` that defines five services — the Next.js app, a log worker, an analytics worker, Redis (as the analytics cache), and PostgreSQL. I've condensed it to the essentials so you can see the shape of it:
+
+```yaml
+services:
+  app:
+    image: liekan:1.2.0
+    build:
+      context: .
+      dockerfile: Dockerfile.liekan
+    ports:
+      - '127.0.0.1:3002:3000'
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      APP_SECRET: ${APP_SECRET:?APP_SECRET required}
+      TWO_FACTOR_ENCRYPTION_KEY: ${TWO_FACTOR_ENCRYPTION_KEY:?TWO_FACTOR_ENCRYPTION_KEY required}
+      DISABLE_TELEMETRY: '1'
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  log-worker:
+    image: liekan:1.2.0
+    command: ['node', 'dist/liekan-worker.mjs']
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      APP_SECRET: ${APP_SECRET:?APP_SECRET required}
+      DISABLE_TELEMETRY: '1'
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  analytics-cache:
+    image: redis:7.4-alpine
+    command: ['redis-server', '--maxmemory', '256mb', '--maxmemory-policy', 'allkeys-lru', '--appendonly', 'no']
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    shm_size: '256mb'
+    ports:
+      - '127.0.0.1:15435:5432'
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-liekan}
+      POSTGRES_USER: ${POSTGRES_USER:-liekan}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+    volumes:
+      - liekan-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  liekan-data:
+  liekan-geography:
+```
+
+In practice you don't hand-wire this — the repo's `sh scripts/liekan-deploy.sh` generates a private `.env` with random secrets, builds the image, runs migrations, imports a sanitized example site so you can explore before wiring in your own, and starts everything (the first-login credentials are `admin` / `liekan`, which you change immediately). The deploy script wants at least **6 GiB of Docker memory** (8 GiB + 2 CPUs recommended) because the image is built from source. Once it's up, you create a website, drop the tracking script on your pages, and optionally wire Cloudflare log ingestion (OAuth-scoped `zone.read logs.read`) so crawl logs flow in automatically.
 
 ### 2. Your own server logs — the zero-dependency baseline
 
