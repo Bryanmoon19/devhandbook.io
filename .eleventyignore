@@ -1,0 +1,2 @@
+# Never build/deploy draft posts — they're unfinished and were leaking to production
+drafts/
